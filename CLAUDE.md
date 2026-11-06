@@ -10,7 +10,7 @@ Instalment affordability check: upload a transactions CSV (or use the sample), e
 - Next.js 16 (App Router, Cache Components on) + React 19 + TypeScript strict (`noUncheckedIndexedAccess`)
 - Tailwind CSS v4 + shadcn/ui (radix-nova preset; `cn` from the `cn` package)
 - Vitest (unit, Node env), StrykerJS (mutation), Playwright (E2E, desktop 1280 + phone 390)
-- npm (no pnpm on this machine), Node ≥ 24, deployed on Vercel via GitHub integration
+- npm (no pnpm on this machine), Node 26 (`.nvmrc`; `nvm use`), deployed on Vercel via GitHub integration
 
 ## Commands
 
