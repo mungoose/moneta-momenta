@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta — landing</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm mm-page {{themeClass}}">
+  <header class="mm-top">
+    <div class="mm-col mm-top__in">
+      <a class="mm-brand" href="Landing.dc.html"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8"></rect><path d="M7 19v-6M11.67 19v-9M16.33 19v-6M21 19v-9" stroke-width="2.2" stroke-linecap="round" fill="none"></path></svg>Moneta</a>
+    </div>
+  </header>
+
+  <main class="mm-col mm-main" style="gap: 48px">
+    <section class="mm-intro" style="gap: 20px">
+      <h1 class="mm-t-display">Check if an instalment plan fits your budget, month by month.</h1>
+      <p class="mm-t-lead mm-muted">Moneta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.</p>
+      <div class="mm-actions" style="margin-top: 8px">
+        <a class="mm-btn mm-btn--primary mm-btn--lg" href="Summary.dc.html">Try with sample data<svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"></path></svg></a>
+        <a class="mm-btn mm-btn--secondary mm-btn--lg" href="Error.dc.html"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13V3.5M6 7.5l4-4 4 4"></path><path d="M3.5 13v2.5a1 1 0 001 1h11a1 1 0 001-1V13"></path></svg>Upload a transactions file</a>
+      </div>
+      <p class="mm-t-small mm-muted">A CSV export from your bank with Date, Amount and Description columns. Your file is read in this browser and isn't stored.</p>
+    </section>
+
+    <section class="mm-card" aria-labelledby="how" style="gap: 20px">
+      <h2 class="mm-t-h2" id="how">How it works</h2>
+      <ol style="list-style: none; display: flex; flex-direction: column; gap: 20px">
+        <li class="mm-calcstep"><span class="mm-calcstep__n" aria-hidden="true">1</span><div class="mm-calcstep__c"><p class="mm-t-h3">Load 3 to 12 months of transactions</p><p class="mm-t-small mm-muted">We find your income, group your spending and spot irregular items like yearly insurance.</p></div></li>
+        <li class="mm-calcstep"><span class="mm-calcstep__n" aria-hidden="true">2</span><div class="mm-calcstep__c"><p class="mm-t-h3">Enter the purchase</p><p class="mm-t-small mm-muted">Price, upfront payment, number of instalments, interest rate and any monthly fee.</p></div></li>
+        <li class="mm-calcstep"><span class="mm-calcstep__n" aria-hidden="true">3</span><div class="mm-calcstep__c"><p class="mm-t-h3">See every month of the plan</p><p class="mm-t-small mm-muted">Each month gets one of three answers, and you can see exactly how we got there.</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 4px">
+            <span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span>
+            <span class="mm-status mm-status--tight"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span>
+            <span class="mm-status mm-status--nofit"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span>
+          </div>
+        </div></li>
+      </ol>
+    </section>
+  </main>
+
+  <footer class="mm-foot">
+    <div class="mm-col">Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":980}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta — result</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm mm-page {{themeClass}}">
+  <header class="mm-top">
+    <div class="mm-col mm-top__in">
+      <a class="mm-brand" href="Landing.dc.html"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8"></rect><path d="M7 19v-6M11.67 19v-9M16.33 19v-6M21 19v-9" stroke-width="2.2" stroke-linecap="round" fill="none"></path></svg>Moneta</a>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span class="mm-pill">Sample data</span>
+        <a class="mm-btn mm-btn--ghost" href="Landing.dc.html">Start over</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mm-col mm-main">
+    <section class="mm-intro">
+      <p class="mm-step">Step 3 of 3 · Result</p>
+      <h1 class="mm-t-h1">€1,890.00 over 12 instalments</h1>
+      <p class="mm-muted mm-num">€290.00 upfront · 9.9% interest a year · €2.50 monthly fee · December 2026 to November 2027</p>
+    </section>
+
+    <section class="mm-verdict mm-verdict--nofit" aria-labelledby="verdict">
+      <div class="mm-verdict__head">
+        <span class="mm-status mm-status--nofit"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span>
+        <h2 class="mm-verdict__title" id="verdict">July 2027 comes up €23.09 short</h2>
+        <p>The plan fits in 10 of 12 months. December is tight because of holiday spending. In July, the yearly car insurance (€420.00) plus the instalment is more than your usual margin.</p>
+      </div>
+      <div class="mm-verdict__body">
+        <dl class="mm-stats">
+          <div class="mm-stat"><dt>Monthly payment<span class="mm-stat__meta">€140.59 repayment + €2.50 fee</span></dt><dd>€143.09</dd></div>
+          <div class="mm-stat"><dt>Months</dt><dd style="font-weight: 500">10 fit · 1 tight · 1 doesn't fit</dd></div>
+          <div class="mm-stat"><dt>Total you pay<span class="mm-stat__meta">€290.00 upfront + 12 × €143.09</span></dt><dd>€2,007.08</dd></div>
+          <div class="mm-stat"><dt>Cost of credit<span class="mm-stat__meta">€87.08 interest + €30.00 fees</span></dt><dd>€117.08</dd></div>
+        </dl>
+      </div>
+      <div class="mm-verdict__foot">
+        <a class="mm-btn mm-btn--secondary" href="Calc.dc.html"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M10 9v4.5"></path><path d="M10 6.5h.01"></path></svg>How we calculated this</a>
+        <a class="mm-btn mm-btn--ghost" href="Purchase.dc.html">Change the purchase</a>
+      </div>
+    </section>
+
+    <div class="mm-callout mm-callout--info">
+      <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M10 9v4.5"></path><path d="M10 6.5h.01"></path></svg>
+      <div class="mm-callout__content">
+        <p class="mm-callout__title">What would change the answer</p>
+        <ul style="list-style: disc; padding-left: 20px; display: flex; flex-direction: column; gap: 6px">
+          <li><strong>18 instalments:</strong> €98.52 a month. July becomes tight with €21.48 left, but credit costs €173.36, which is €56.28 more.</li>
+          <li><strong>€600.00 upfront:</strong> €115.85 a month. July becomes tight with €4.15 left, and credit costs €100.20.</li>
+        </ul>
+      </div>
+    </div>
+
+    <section style="display: flex; flex-direction: column; gap: 16px" aria-labelledby="months">
+      <div class="mm-intro" style="gap: 6px">
+        <h2 class="mm-t-h2" id="months">Month by month</h2>
+        <p class="mm-t-small mm-muted">Your usual margin is €540.00 and the instalment is €143.09 every month. A month fits when €200.00 or more is left over.</p>
+      </div>
+      <div class="mm-tablebox">
+        <table class="mm-months" aria-labelledby="months">
+          <thead><tr><th scope="col">Month</th><th scope="col" class="num">Usual margin</th><th scope="col" class="num">Irregular</th><th scope="col" class="num">Instalment</th><th scope="col" class="num">Left over</th><th scope="col" class="c-status">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="c-month">Dec 2026</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Holiday season</span><span>−€250.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€146.91</td><td class="c-status"><span class="mm-status mm-status--tight"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span></td></tr>
+            <tr><td class="c-month">Jan 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Feb 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Mar 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Home insurance</span><span>−€96.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€300.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Apr 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">May 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Jun 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr class="is-nofit"><td class="c-month">Jul 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Car insurance</span><span>−€420.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num mm-neg"><span class="mm-phone">Left </span>−€23.09</td><td class="c-status"><span class="mm-status mm-status--nofit"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span></td></tr>
+            <tr><td class="c-month">Aug 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Sep 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Oct 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Nov 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="mm-actions">
+      <a class="mm-btn mm-btn--primary" href="Purchase.dc.html">Try different terms</a>
+      <a class="mm-btn mm-btn--secondary" href="Summary.dc.html">Back to your money</a>
+    </div>
+  </main>
+
+  <footer class="mm-foot">
+    <div class="mm-col">Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":2120}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

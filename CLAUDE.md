@@ -25,6 +25,10 @@ npm run build
 
 When reading Stryker output, look only at the `[Survived]` mutants and the score table, not the full log.
 
+## Design
+
+- The visual design is in `design/` (start with `design/README.md`). Build every UI screen from it: `design/moneta.css` defines the tokens and components. Where its placeholder copy or numbers disagree with the code's rules, the code wins; the README lists the known differences.
+
 ## Layout
 
 - `src/lib/`: the pure core (no React, no DOM). `money/`, `import/`, `budget/`, `plan/`, `telemetry.ts`, `constants.ts`, `i18n/`.

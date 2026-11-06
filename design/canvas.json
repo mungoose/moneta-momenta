@@ -1,0 +1,46 @@
+{
+  "v": 3,
+  "createdOnFiles": {"v": 1, "at": "2026-11-06T10:00:00Z"},
+  "title": "Moneta Momenta",
+  "launch": {"view": "canvas"},
+  "pages": [],
+  "boards": {
+    "Main.dc.html": {"x": 0, "y": 0, "w": 1280, "h": 2880, "title": "Tokens"},
+    "Components.dc.html": {"x": 1360, "y": 0, "w": 1280, "h": 3440, "title": "Components"},
+    "Landing.dc.html": {"x": 0, "y": 3800, "w": 1280, "h": 980, "title": "Landing · 1280", "expand": "fill", "is_interactive": true},
+    "Landing-390.dc.html": {"x": 1360, "y": 3800, "w": 390, "h": 1240, "title": "Landing · 390", "is_interactive": true},
+    "Summary.dc.html": {"x": 0, "y": 5160, "w": 1280, "h": 1960, "title": "Data summary · 1280", "expand": "fill", "is_interactive": true},
+    "Summary-390.dc.html": {"x": 1360, "y": 5160, "w": 390, "h": 2300, "title": "Data summary · 390", "is_interactive": true},
+    "Purchase.dc.html": {"x": 0, "y": 7580, "w": 1280, "h": 1300, "title": "Purchase form · 1280", "expand": "fill", "is_interactive": true},
+    "Purchase-390.dc.html": {"x": 1360, "y": 7580, "w": 390, "h": 1560, "title": "Purchase form · 390", "is_interactive": true},
+    "Result.dc.html": {"x": 0, "y": 9260, "w": 1280, "h": 2120, "title": "Result · 1280", "expand": "fill", "is_interactive": true},
+    "Result-390.dc.html": {"x": 1360, "y": 9260, "w": 390, "h": 2560, "title": "Result · 390", "is_interactive": true},
+    "Result-390-dark.dc.html": {"x": 1830, "y": 9260, "w": 390, "h": 2560, "title": "Result · 390 · dark", "is_interactive": true},
+    "Calc.dc.html": {"x": 0, "y": 11940, "w": 1280, "h": 1300, "title": "How we calculated this · 1280", "expand": "fill", "is_interactive": true},
+    "Calc-390.dc.html": {"x": 1360, "y": 11940, "w": 390, "h": 1500, "title": "How we calculated this · 390", "is_interactive": true},
+    "Error.dc.html": {"x": 0, "y": 13560, "w": 1280, "h": 1180, "title": "Error: missing columns · 1280", "expand": "fill", "is_interactive": true},
+    "Error-390.dc.html": {"x": 1360, "y": 13560, "w": 390, "h": 1380, "title": "Error: missing columns · 390", "is_interactive": true}
+  },
+  "order": [
+    "Main.dc.html",
+    "Components.dc.html",
+    "Landing.dc.html",
+    "Landing-390.dc.html",
+    "Summary.dc.html",
+    "Summary-390.dc.html",
+    "Purchase.dc.html",
+    "Purchase-390.dc.html",
+    "Result.dc.html",
+    "Result-390.dc.html",
+    "Result-390-dark.dc.html",
+    "Calc.dc.html",
+    "Calc-390.dc.html",
+    "Error.dc.html",
+    "Error-390.dc.html"
+  ],
+  "notes": {
+    "foundations": {"x": 0, "y": -300, "text": "Foundations — tokens and components", "kind": "title1", "maxW": 2640},
+    "screens": {"x": 0, "y": 3560, "text": "Screens — each at 1280 and 390", "kind": "title1", "maxW": 2220}
+  },
+  "designSystems": []
+}

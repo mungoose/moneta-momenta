@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta components</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm {{themeClass}}" style="width: 1280px; min-height: 3440px; padding: 64px 80px 80px; display: flex; flex-direction: column; gap: 56px">
+
+  <header style="display: flex; flex-direction: column; gap: 12px; max-width: 760px">
+    <p class="mm-step">Moneta Momenta · Components</p>
+    <h1 class="mm-t-display">Components</h1>
+    <p class="mm-t-lead mm-muted">Eight building blocks. Each keeps the same structure at every width; only the month row changes shape, from a table row to a two-line row, below 600 px.</p>
+  </header>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Button</h2>
+      <p class="mm-t-small mm-muted">One primary per screen. 44 px default, 52 px for landing calls to action. Full width under 600 px.</p>
+    </div>
+    <div class="mm-card" style="grid-column: span 9; gap: 20px">
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+        <button type="button" class="mm-btn mm-btn--primary">Check affordability</button>
+        <button type="button" class="mm-btn mm-btn--primary is-hover">Hover</button>
+        <button type="button" class="mm-btn mm-btn--primary is-focus">Focus</button>
+        <button type="button" class="mm-btn mm-btn--primary" disabled="disabled">Disabled</button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+        <button type="button" class="mm-btn mm-btn--secondary"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13V3.5M6 7.5l4-4 4 4"></path><path d="M3.5 13v2.5a1 1 0 001 1h11a1 1 0 001-1V13"></path></svg>Upload a transactions file</button>
+        <button type="button" class="mm-btn mm-btn--secondary is-hover">Hover</button>
+        <button type="button" class="mm-btn mm-btn--ghost"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M10 9v4.5"></path><path d="M10 6.5h.01"></path></svg>How we calculated this</button>
+        <button type="button" class="mm-iconbtn" aria-label="Close"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"></path></svg></button>
+      </div>
+      <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center">
+        <button type="button" class="mm-btn mm-btn--primary mm-btn--lg">Try with sample data<svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"></path></svg></button>
+        <button type="button" class="mm-btn mm-btn--secondary mm-btn--lg">Large secondary</button>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Segmented control</h2>
+      <p class="mm-t-small mm-muted">For 2–4 short, mutually exclusive choices. Options share the width equally, so it narrows without wrapping.</p>
+    </div>
+    <div class="mm-card" style="grid-column: span 9; gap: 24px">
+      <div class="mm-field" style="max-width: 480px">
+        <span class="mm-label" id="cs-period">Period</span>
+        <div class="mm-seg" role="group" aria-labelledby="cs-period">
+          <button type="button" class="mm-seg__opt" aria-pressed="false">3 months</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="false">6 months</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="true">12 months</button>
+        </div>
+      </div>
+      <div class="mm-field" style="max-width: 480px">
+        <span class="mm-label" id="cs-inst">Instalments · keyboard focus on Custom</span>
+        <div class="mm-seg" role="group" aria-labelledby="cs-inst">
+          <button type="button" class="mm-seg__opt" aria-pressed="false">3</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="false">6</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="true">12</button>
+          <button type="button" class="mm-seg__opt is-focus" aria-pressed="false">Custom</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Money input</h2>
+      <p class="mm-t-small mm-muted">Label above, currency or unit as an affix, hint or error below. Error text names the fix.</p>
+    </div>
+    <div class="mm-card" style="grid-column: span 9; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px">
+      <div class="mm-field">
+        <label class="mm-label" for="cm-1">Price</label>
+        <div class="mm-money"><span class="mm-money__affix" aria-hidden="true">€</span><input id="cm-1" class="mm-money__input" inputmode="decimal" value="1,890.00"></div>
+        <p class="mm-hint">Default</p>
+      </div>
+      <div class="mm-field">
+        <label class="mm-label" for="cm-2">Upfront payment</label>
+        <div class="mm-money is-focus"><span class="mm-money__affix" aria-hidden="true">€</span><input id="cm-2" class="mm-money__input" inputmode="decimal" value="290"></div>
+        <p class="mm-hint">Focus</p>
+      </div>
+      <div class="mm-field">
+        <label class="mm-label" for="cm-3">Upfront payment</label>
+        <div class="mm-money is-error"><span class="mm-money__affix" aria-hidden="true">€</span><input id="cm-3" class="mm-money__input" inputmode="decimal" value="2,100.00" aria-invalid="true" aria-describedby="cm-3e"></div>
+        <p class="mm-error" id="cm-3e"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Upfront can't be more than the price (€1,890.00).</p>
+      </div>
+      <div class="mm-field">
+        <label class="mm-label" for="cm-4">Interest rate</label>
+        <div class="mm-money"><input id="cm-4" class="mm-money__input" inputmode="decimal" value="9.9"><span class="mm-money__affix">% per year</span></div>
+        <p class="mm-hint">Unit suffix</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Stat row</h2>
+      <p class="mm-t-small mm-muted">Label left, tabular figure right. Optional meta line under either side. A total row has a strong rule; a hero row has a large figure.</p>
+    </div>
+    <div class="mm-card" style="grid-column: span 9">
+      <dl class="mm-stats">
+        <div class="mm-stat"><dt>Housing &amp; utilities<span class="mm-stat__meta">Rent, energy, water</span></dt><dd>€1,020.00<span class="mm-stat__meta">39% of spending</span></dd></div>
+        <div class="mm-stat"><dt>Groceries &amp; household</dt><dd>€540.00</dd></div>
+        <div class="mm-stat mm-stat--total"><dt>Usual spending</dt><dd>€2,610.00</dd></div>
+      </dl>
+      <dl class="mm-stats" style="border-top: 1px solid var(--mm-border); padding-top: 4px">
+        <div class="mm-stat mm-stat--hero"><dt>Usual monthly margin<span class="mm-stat__meta">Income minus usual spending</span></dt><dd>€540.00</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Month row</h2>
+      <p class="mm-t-small mm-muted">A table row in the 760 px column. Under 600 px it becomes two lines: month and status, then what's different that month and what's left over. Instalment and usual margin are stated once above the table, so they drop from the row.</p>
+    </div>
+    <div style="grid-column: span 9; display: flex; flex-direction: column; gap: 24px">
+      <div class="mm-tablebox">
+        <table class="mm-months">
+          <thead><tr><th scope="col">Month</th><th scope="col" class="num">Usual margin</th><th scope="col" class="num">Irregular</th><th scope="col" class="num">Instalment</th><th scope="col" class="num">Left over</th><th scope="col" class="c-status">Status</th></tr></thead>
+          <tbody>
+            <tr><td class="c-month">Jan 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+            <tr><td class="c-month">Dec 2026</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Holiday season</span><span>−€250.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€146.91</td><td class="c-status"><span class="mm-status mm-status--tight"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span></td></tr>
+            <tr class="is-nofit"><td class="c-month">Jul 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Car insurance</span><span>−€420.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num mm-neg"><span class="mm-phone">Left </span>−€23.09</td><td class="c-status"><span class="mm-status mm-status--nofit"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="display: flex; gap: 24px; align-items: flex-start">
+        <div class="mm {{themeClass}}" style="width: 390px; flex: 0 0 390px; padding: 16px; border: 1px dashed var(--mm-border-strong); border-radius: 12px">
+          <div class="mm-tablebox">
+            <table class="mm-months">
+              <thead><tr><th scope="col">Month</th><th scope="col" class="num">Usual margin</th><th scope="col" class="num">Irregular</th><th scope="col" class="num">Instalment</th><th scope="col" class="num">Left over</th><th scope="col" class="c-status">Status</th></tr></thead>
+              <tbody>
+                <tr><td class="c-month">Jan 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-desk">—</span><span class="mm-phone">No irregular items</span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€396.91</td><td class="c-status"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span></td></tr>
+                <tr><td class="c-month">Dec 2026</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Holiday season</span><span>−€250.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num"><span class="mm-phone">Left </span>€146.91</td><td class="c-status"><span class="mm-status mm-status--tight"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span></td></tr>
+                <tr class="is-nofit"><td class="c-month">Jul 2027</td><td class="c-margin num">€540.00</td><td class="c-irr num"><span class="mm-irr"><span class="mm-irr__name">Car insurance</span><span>−€420.00</span></span></td><td class="c-inst num">−€143.09</td><td class="c-left num mm-neg"><span class="mm-phone">Left </span>−€23.09</td><td class="c-status"><span class="mm-status mm-status--nofit"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <p class="mm-t-small mm-muted" style="max-width: 260px">Same markup at 390 px. The column headers stay in the table for screen readers; they're only visually hidden.</p>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: flex; flex-direction: column; gap: 20px">
+    <div style="display: flex; flex-direction: column; gap: 6px; max-width: 760px">
+      <h2 class="mm-t-h2">Verdict card</h2>
+      <p class="mm-t-small mm-muted">The answer first, in plain words, then the figures that back it up. The tinted head carries the status; the chip on it always has the icon and the label.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start">
+      <section class="mm-verdict mm-verdict--fits" aria-labelledby="cv-1">
+        <div class="mm-verdict__head">
+          <span class="mm-status mm-status--fits"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span>
+          <h3 class="mm-verdict__title" id="cv-1">Every month has room to spare</h3>
+        </div>
+        <div class="mm-verdict__body">
+          <dl class="mm-stats mm-stats--compact">
+            <div class="mm-stat"><dt>Monthly payment</dt><dd>€62.40</dd></div>
+            <div class="mm-stat"><dt>Lowest month</dt><dd>€227.60</dd></div>
+          </dl>
+        </div>
+      </section>
+      <section class="mm-verdict mm-verdict--tight" aria-labelledby="cv-2">
+        <div class="mm-verdict__head">
+          <span class="mm-status mm-status--tight"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span>
+          <h3 class="mm-verdict__title" id="cv-2">It fits, with little left in July</h3>
+        </div>
+        <div class="mm-verdict__body">
+          <dl class="mm-stats mm-stats--compact">
+            <div class="mm-stat"><dt>Monthly payment</dt><dd>€98.52</dd></div>
+            <div class="mm-stat"><dt>Lowest month</dt><dd>€21.48</dd></div>
+          </dl>
+        </div>
+      </section>
+      <section class="mm-verdict mm-verdict--nofit" aria-labelledby="cv-3">
+        <div class="mm-verdict__head">
+          <span class="mm-status mm-status--nofit"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span>
+          <h3 class="mm-verdict__title" id="cv-3">July 2027 comes up €23.09 short</h3>
+        </div>
+        <div class="mm-verdict__body">
+          <dl class="mm-stats mm-stats--compact">
+            <div class="mm-stat"><dt>Monthly payment</dt><dd>€143.09</dd></div>
+            <div class="mm-stat"><dt>Lowest month</dt><dd class="mm-neg">−€23.09</dd></div>
+          </dl>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Callout</h2>
+      <p class="mm-t-small mm-muted">Info, warning and error. Icon, short title, one or two sentences. No dismiss unless the content is optional.</p>
+    </div>
+    <div style="grid-column: span 9; display: flex; flex-direction: column; gap: 16px">
+      <div class="mm-callout mm-callout--info">
+        <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M10 9v4.5"></path><path d="M10 6.5h.01"></path></svg>
+        <div class="mm-callout__content"><p class="mm-callout__title">4 irregular items are handled separately</p><p>Yearly and seasonal costs are placed in the month they're due instead of being averaged.</p></div>
+      </div>
+      <div class="mm-callout mm-callout--warn">
+        <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>
+        <div class="mm-callout__content"><p class="mm-callout__title">3 months of data is a short window</p><p>Yearly bills may not show up. 12 months gives a more reliable picture.</p></div>
+      </div>
+      <div class="mm-callout mm-callout--error">
+        <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>
+        <div class="mm-callout__content"><p class="mm-callout__title">Missing required columns</p><p>We couldn't find an Amount column in transactions-oct-2026.csv.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 32px">
+    <div style="grid-column: span 3; display: flex; flex-direction: column; gap: 6px">
+      <h2 class="mm-t-h2">Drawer</h2>
+      <p class="mm-t-small mm-muted">Slides in from the right over a scrim, 520 px wide; full width on a phone. Title, close button, scrolling body, footer. Focus moves into it and returns on close.</p>
+    </div>
+    <div style="grid-column: span 9; position: relative; height: 440px; border-radius: 12px; overflow: hidden; border: 1px solid var(--mm-border); background: var(--mm-bg)">
+      <div style="padding: 32px; display: flex; flex-direction: column; gap: 12px" aria-hidden="true">
+        <div style="height: 20px; width: 40%; border-radius: 4px; background: var(--mm-surface-2)"></div>
+        <div style="height: 140px; border-radius: 12px; background: var(--mm-surface); border: 1px solid var(--mm-border)"></div>
+        <div style="height: 180px; border-radius: 12px; background: var(--mm-surface); border: 1px solid var(--mm-border)"></div>
+      </div>
+      <div class="mm-scrim"></div>
+      <aside class="mm-drawer" role="dialog" aria-modal="true" aria-labelledby="cd-title" style="width: 400px">
+        <div class="mm-drawer__head"><h3 class="mm-t-h2" id="cd-title">Drawer title</h3><button type="button" class="mm-iconbtn" aria-label="Close"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"></path></svg></button></div>
+        <div class="mm-drawer__body">
+          <p class="mm-muted">Body content scrolls inside the drawer while the head and footer stay put.</p>
+          <div class="mm-formula">€3,150.00 − €2,610.00 = €540.00</div>
+        </div>
+        <div class="mm-drawer__foot"><button type="button" class="mm-btn mm-btn--secondary">Close</button></div>
+      </aside>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":3440}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

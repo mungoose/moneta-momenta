@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta — how we calculated this</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm {{themeClass}}" style="position: relative; height: 100vh; min-height: 640px; overflow: hidden">
+  <div aria-hidden="true">
+    <dc-import name="Result" dark="{{dark}}" hint-size="100%,2000px"></dc-import>
+  </div>
+  <div class="mm-scrim"></div>
+  <aside class="mm-drawer" role="dialog" aria-modal="true" aria-labelledby="calc-title">
+    <div class="mm-drawer__head">
+      <h2 class="mm-t-h2" id="calc-title">How we calculated this</h2>
+      <a class="mm-iconbtn" href="Result.dc.html" aria-label="Close"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M5 5l10 10M15 5L5 15"></path></svg></a>
+    </div>
+    <div class="mm-drawer__body">
+      <p class="mm-muted">Every figure comes from your transactions and the purchase details you entered. Four steps:</p>
+
+      <div class="mm-calcstep">
+        <span class="mm-calcstep__n" aria-hidden="true">1</span>
+        <div class="mm-calcstep__c">
+          <h3 class="mm-t-h3">Your usual margin</h3>
+          <p class="mm-formula">€3,150.00 income − €2,610.00 usual spending = <strong>€540.00</strong></p>
+          <p class="mm-t-small mm-muted">Monthly averages over November 2025 to October 2026, with irregular items left out.</p>
+        </div>
+      </div>
+
+      <div class="mm-calcstep">
+        <span class="mm-calcstep__n" aria-hidden="true">2</span>
+        <div class="mm-calcstep__c">
+          <h3 class="mm-t-h3">Your monthly instalment</h3>
+          <p class="mm-formula">€1,890.00 price − €290.00 upfront = <strong>€1,600.00</strong> to spread</p>
+          <p class="mm-t-small mm-muted">A fixed monthly repayment at 9.9% a year (0.825% a month) over 12 months is €140.59. With the €2.50 fee, that's €143.09 a month.</p>
+          <p class="mm-formula">€1,600.00 × 0.00825 ÷ <span class="mm-nowrap">(1 − 1.00825<sup>−12</sup>)</span> = <span class="mm-nowrap">€140.59</span></p>
+        </div>
+      </div>
+
+      <div class="mm-calcstep">
+        <span class="mm-calcstep__n" aria-hidden="true">3</span>
+        <div class="mm-calcstep__c">
+          <h3 class="mm-t-h3">Irregular items, in the month they're due</h3>
+          <dl class="mm-stats mm-stats--compact">
+            <div class="mm-stat"><dt>December · holiday season</dt><dd>−€250.00</dd></div>
+            <div class="mm-stat"><dt>March · home insurance</dt><dd>−€96.00</dd></div>
+            <div class="mm-stat"><dt>July · car insurance</dt><dd>−€420.00</dd></div>
+          </dl>
+          <p class="mm-t-small mm-muted">The dental bill from August 2026 was a one-off, so it isn't carried forward.</p>
+        </div>
+      </div>
+
+      <div class="mm-calcstep">
+        <span class="mm-calcstep__n" aria-hidden="true">4</span>
+        <div class="mm-calcstep__c">
+          <h3 class="mm-t-h3">What's left each month</h3>
+          <p class="mm-formula">Usual margin − irregular items − instalment = left over</p>
+          <p class="mm-formula">July: €540.00 − €420.00 − €143.09 = <strong class="mm-neg">−€23.09</strong></p>
+          <ul style="list-style: none; display: flex; flex-direction: column; gap: 10px; margin-top: 4px">
+            <li style="display: flex; align-items: center; justify-content: space-between; gap: 12px"><span class="mm-status mm-status--fits"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg>Fits</span><span class="mm-t-small mm-num">€200.00 or more left</span></li>
+            <li style="display: flex; align-items: center; justify-content: space-between; gap: 12px"><span class="mm-status mm-status--tight"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>Tight</span><span class="mm-t-small mm-num">€0.00 to €199.99 left</span></li>
+            <li style="display: flex; align-items: center; justify-content: space-between; gap: 12px"><span class="mm-status mm-status--nofit"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>Doesn't fit</span><span class="mm-t-small mm-num">Less than €0.00 left</span></li>
+          </ul>
+          <p class="mm-t-small mm-muted">The €200.00 cushion is for costs nobody can predict, like a repair or a doctor's bill.</p>
+        </div>
+      </div>
+
+      <div class="mm-callout mm-callout--warn">
+        <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 3.2l7.3 12.6H2.7z"></path><path d="M10 8.2v3.4"></path><path d="M10 14h.01"></path></svg>
+        <div class="mm-callout__content">
+          <p class="mm-callout__title">What this can't know</p>
+          <p>Changes that haven't happened yet, like a new job, a rent increase or a new subscription. If your income or costs are about to change, treat this as a rough guide.</p>
+        </div>
+      </div>
+    </div>
+    <div class="mm-drawer__foot">
+      <a class="mm-btn mm-btn--secondary" href="Result.dc.html">Close</a>
+    </div>
+  </aside>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    const dark = !!this.props.dark;
+    return { dark, themeClass: dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>
