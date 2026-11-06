@@ -333,7 +333,7 @@ A **golden test** checks that both samples reproduce the §2 monthly totals. Tho
 Desktop 1280 × 800 is the primary project. The same specs also run at 390 × 844.
 1. `/en` → Try sample → summary shows 6 months → €1,200 × 12 → verdict *doesn't fit*, July marked → open the explanation; the numbers are visible.
 2. Upload `other-bank.csv` → missing-columns error.
-3. `/et`: Estonian copy, and `1200` is formatted as `1 200,00 €`.
+3. `/et`: Estonian copy, and `1200` is formatted as `1200,00 €` (Estonian doesn't group 4-digit numbers; `1234567,89` → `1 234 567,89 €`, with no-break spaces).
 
 ### CI and deploy
 
