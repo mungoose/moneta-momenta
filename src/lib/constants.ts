@@ -65,3 +65,16 @@ export const MAX_MONTHLY_FEE_CENTS = 100_000;
  * A share of income rather than a fixed sum, so it scales with the household.
  */
 export const BUFFER_BPS = 1_000;
+
+/**
+ * The first unfinished month for the sample data, so its last full month is
+ * October 2026. Fixed rather than today's month, so the sample shows the same
+ * result to a reviewer who opens it months later.
+ */
+export const SAMPLE_REFERENCE_MONTH = "2026-11";
+
+/**
+ * Instalment counts offered as one-tap choices: the common offers. Any other
+ * count from {@link MIN_INSTALMENTS} to {@link MAX_INSTALMENTS} is typed in.
+ */
+export const INSTALMENT_PRESETS = [3, 6, 12] as const;

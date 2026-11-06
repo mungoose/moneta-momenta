@@ -9,14 +9,24 @@ function keyPaths(obj: object, prefix = ""): string[] {
 }
 
 describe("i18n", () => {
-  it("every locale has exactly the English keys and no empty strings", () => {
-    const reference = keyPaths(getMessages("en")).sort();
+  it("every locale has exactly the English keys, no empty strings and the same message parameters", () => {
+    const en = getMessages("en");
+    const reference = keyPaths(en).sort();
+    const at = (messages: object, path: string) =>
+      path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], messages);
     for (const locale of LOCALES) {
       const messages = getMessages(locale);
       expect(keyPaths(messages).sort()).toEqual(reference);
       for (const path of reference) {
-        const value = path.split(".").reduce<unknown>((node, key) => (node as Record<string, unknown>)[key], messages);
-        expect(value, `${locale}: ${path}`).toMatch(/\S/);
+        const value = at(messages, path);
+        if (typeof value === "function") {
+          // Messages with values are functions; same arity means no value is silently dropped.
+          expect(value.length, `${locale}: ${path}`).toBe((at(en, path) as (...args: never[]) => string).length);
+          const sample = (value as (...args: string[]) => string)(...Array<string>(value.length).fill("1"));
+          expect(sample, `${locale}: ${path}`).toMatch(/\S/);
+        } else {
+          expect(value, `${locale}: ${path}`).toMatch(/\S/);
+        }
       }
     }
   });

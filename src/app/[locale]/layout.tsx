@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter } from "next/font/google";
 import { LOCALES, getMessages, isLocale } from "@/lib/i18n";
 import "../globals.css";
 
-const geistSans = Geist({ variable: "--font-sans", subsets: ["latin", "latin-ext"] });
-const geistMono = Geist_Mono({ variable: "--font-geist-mono", subsets: ["latin"] });
+/** The design's typeface; `latin-ext` covers Estonian (õ, ä, ö, ü, š, ž). Self-hosted by Next at build time. */
+const inter = Inter({ variable: "--font-sans", subsets: ["latin", "latin-ext"] });
 
 /** Prerenders one static page per supported locale. */
 export function generateStaticParams() {
@@ -30,7 +30,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   }
 
   return (
-    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>
+    <html lang={locale} className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full bg-background text-foreground">{children}</body>
     </html>
   );

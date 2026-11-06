@@ -1,6 +1,8 @@
 /**
  * English UI copy. This is the reference dictionary: every other locale must
  * provide exactly the same keys (enforced with `satisfies Messages`).
+ * Entries that need values are functions; the caller passes values already
+ * formatted for the locale (money, months, counts).
  */
 export const en = {
   meta: {
@@ -9,12 +11,142 @@ export const en = {
   },
   header: {
     appName: "Moneta",
+    home: "Moneta, back to the start",
     languageSwitch: "Eesti keeles",
+    sampleBadge: "Sample data",
+    startOver: "Start over",
+  },
+  footer: "Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.",
+  scope: "For small loans and instalment purchases of up to 5 years. Not for mortgages or other long-term loans.",
+  status: {
+    fits: "Fits",
+    tight: "Tight",
+    "no-fit": "Doesn't fit",
   },
   landing: {
-    tagline: "See month by month whether an instalment plan fits what you really spend, before you commit.",
-    comingSoon: "Under construction. The affordability check is being built.",
+    title: "Check if an instalment plan fits your budget, month by month.",
+    lead: "Moneta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
+    trySample: "Try with sample data",
+    tryTight: "Try a tighter budget",
+    sampleNote: "The sample is a made-up household's year of transactions.",
+    loading: "Loading the sample…",
+    loadFailed: "The sample data didn't load. Check your connection and try again.",
+    howTitle: "How it works",
+    steps: {
+      dataTitle: "Load 3 to 12 months of transactions",
+      dataBody: "We work out your usual income and spending, and which months usually cost more.",
+      purchaseTitle: "Enter the purchase",
+      purchaseBody: "Price, upfront payment, number of instalments, interest rate and any monthly fee.",
+      resultTitle: "See every month of the plan",
+      resultBody: "Each month gets one of three answers, and every number shows where it comes from.",
+    },
   },
+  summary: {
+    step: "Step 1 of 3 · Your money",
+    title: "Here's what your money usually looks like",
+    source: (rows: string, from: string, to: string) => `Sample data: ${rows} transactions, ${from} to ${to}.`,
+    periodLabel: "Period to average over",
+    periodOption: (months: number) => `${months} months`,
+    periodHint:
+      "The averages use your most recent full months. Every plan month also checks what the same month cost last year.",
+    monthlyAverage: "Monthly average",
+    incomeTitle: "Income",
+    incomeTotal: "Average income",
+    spendingTitle: "Spending by category group",
+    spendingTotal: "Usual spending",
+    marginTitle: "Usual monthly margin",
+    marginExplain: (income: string, spending: string) =>
+      `${income} income − ${spending} usual spending. This is the room a new instalment has to fit into.`,
+    noMarginTitle: "Nothing is left over on average",
+    noMarginBody:
+      "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest groups are at the top of the list above.",
+    continue: "Continue to the purchase",
+  },
+  purchase: {
+    step: "Step 2 of 3 · The purchase",
+    title: "What would you like to buy?",
+    intro: "Use the figures from the offer you've been given. You can change them later.",
+    price: "Price",
+    upfront: "Upfront payment",
+    upfrontHint: "Paid at purchase, not spread over the plan. Enter 0 if there isn't one.",
+    count: "Number of instalments",
+    countHint: (min: number, max: number) =>
+      `One payment a month. Custom lets you type any number from ${min} to ${max}.`,
+    custom: "Custom",
+    customLabel: "Number of months",
+    rate: "Interest rate",
+    rateUnit: "% per year",
+    rateHint: "Enter 0 for an interest-free plan.",
+    fee: "Monthly fee",
+    feeHint: "Any fixed fee charged with each instalment.",
+    spread: "Amount to spread",
+    spreadMeta: (price: string, upfront: string) => `${price} price − ${upfront} upfront`,
+    firstInstalment: "First instalment",
+    payment: "Monthly payment",
+    paymentFee: (fee: string) => `Includes the ${fee} fee`,
+    paymentLast: (last: string) => `The last one is ${last}`,
+    submit: "Check affordability",
+    back: "Back",
+    errors: {
+      requiredPrice: "Enter the price.",
+      requiredCount: "Enter the number of months.",
+      money: "Enter an amount, like 1200 or 1200.50.",
+      count: "Enter a whole number of months.",
+      rate: "Enter a rate with up to two decimals, like 9.9.",
+      priceLow: "The price has to be more than 0.",
+      priceHigh: (max: string) => `The price can be at most ${max}.`,
+      upfrontHigh: "The upfront payment has to be less than the price.",
+      countLow: (min: number) => `The plan needs at least ${min} instalments.`,
+      countHigh: (max: number) => `At most ${max} instalments: this check is for plans of up to 5 years.`,
+      rateHigh: "The rate can be at most 100% a year.",
+      feeHigh: (max: string) => `The fee can be at most ${max} a month.`,
+    },
+  },
+  result: {
+    step: "Step 3 of 3 · Result",
+    title: (price: string, count: number) => `${price} over ${count} instalments`,
+    termsUpfront: (amount: string) => `${amount} upfront`,
+    termsRate: (percent: string) => `${percent}% interest a year`,
+    termsFee: (amount: string) => `${amount} monthly fee`,
+    termsMonths: (from: string, to: string) => `${from} to ${to}`,
+    verdictFits: "The plan fits every month",
+    verdictTightOne: (month: string) => `It fits, but ${month} is tight`,
+    verdictTightMany: (count: number) => `It fits, but ${count} months are tight`,
+    verdictNoFitOne: (month: string, short: string) => `${month} comes up ${short} short`,
+    verdictNoFitMany: (count: number, month: string, short: string) =>
+      `${count} months come up short, ${month} by ${short}`,
+    fitsBody: (buffer: string, month: string, left: string) =>
+      `Every month leaves at least ${buffer} after the instalment. The closest is ${month}, with ${left} left.`,
+    fitShare: (fit: number, total: number) => `The plan fits in ${fit} of ${total} months.`,
+    monthSum: (month: string, margin: string, instalment: string, left: string) =>
+      `${month}: ${margin} margin − ${instalment} instalment = ${left} left over.`,
+    seasonal: (pastMonth: string, spent: string, average: string, planMonth: string) =>
+      `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so ${planMonth} counts on that.`,
+    belowBuffer: (buffer: string) => `A month is tight when less than ${buffer} is left: 10% of your average income.`,
+    payment: "Monthly payment",
+    months: "Months",
+    monthsValue: (fit: number, tight: number, noFit: number) =>
+      `${fit} fit · ${tight} tight · ${noFit} ${noFit === 1 ? "doesn't" : "don't"} fit`,
+    totalPaid: "Total you pay",
+    totalPaidMeta: (upfront: string, instalments: string) => `${upfront} upfront + ${instalments} in instalments`,
+    creditCost: "Cost of credit",
+    creditCostMeta: (interest: string, fees: string) => `${interest} interest + ${fees} fees`,
+    change: "Change the purchase",
+    monthsTitle: "Month by month",
+    monthsIntro: (buffer: string) =>
+      `Margin is your average income minus what that month is expected to cost. A month fits when ${buffer} or more is left over after the instalment.`,
+    colMonth: "Month",
+    colMargin: "Margin",
+    colInstalment: "Instalment",
+    colLeft: "Left over",
+    colStatus: "Status",
+    basedOn: (month: string) => `Spent in ${month}`,
+    phoneMargin: "Margin",
+    phoneLeft: "Left",
+    tryAgain: "Try different terms",
+    backToMoney: "Back to your money",
+  },
+  unexpected: "Something went wrong with these numbers. Start over and try again.",
 };
 
 /** Shape every locale dictionary must match. */
