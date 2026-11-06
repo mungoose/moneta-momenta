@@ -16,7 +16,8 @@ Instalment affordability check: upload a transactions CSV (or use the sample), e
 
 ```bash
 npm run dev            # local dev server
-npm run check          # typecheck + lint + unit tests: run before saying anything works
+npm run check          # typecheck + lint + format check + unit tests: run before saying anything works
+npm run format         # Prettier: rewrites files in place; never format by hand
 npm test               # unit tests once
 npm run test:mutation  # Stryker on src/lib (incremental); single module: npx stryker run --mutate src/lib/money/**
 npm run test:e2e       # Playwright against a production build

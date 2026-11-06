@@ -5,16 +5,14 @@
 export const en = {
   meta: {
     title: "Moneta Momenta",
-    description:
-      "See month by month whether an instalment plan fits your real spending, before you commit.",
+    description: "See month by month whether an instalment plan fits your real spending, before you commit.",
   },
   header: {
     appName: "Moneta",
     languageSwitch: "Eesti keeles",
   },
   landing: {
-    tagline:
-      "See month by month whether an instalment plan fits what you really spend, before you commit.",
+    tagline: "See month by month whether an instalment plan fits what you really spend, before you commit.",
     comingSoon: "Under construction. The affordability check is being built.",
   },
 };

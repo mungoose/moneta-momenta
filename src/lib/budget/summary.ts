@@ -128,9 +128,11 @@ export function summarise(file: ParsedFile, reference: YearMonth, periodLength?:
 }
 
 /** Largest first; ties by name, so the order doesn't depend on the file's row order. */
-const byAvgThenName = <T extends { avg: Cents }>(name: (item: T) => string) => (a: T, b: T) =>
-  // Stryker disable next-line EqualityOperator: equivalent; group names, and category names within a group, are unique
-  b.avg - a.avg || (name(a) < name(b) ? -1 : 1);
+const byAvgThenName =
+  <T extends { avg: Cents }>(name: (item: T) => string) =>
+  (a: T, b: T) =>
+    // Stryker disable next-line EqualityOperator: equivalent; group names, and category names within a group, are unique
+    b.avg - a.avg || (name(a) < name(b) ? -1 : 1);
 
 /** Averages each group and category over the period's months. */
 function groupAverages(months: readonly MonthTotals[], average: (total: Cents) => Cents): GroupAverage[] {
