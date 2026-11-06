@@ -15,6 +15,20 @@ The mockups use placeholder copy and numbers. Where they disagree with the code,
 
 - **Accepted file:** the landing hint mentions a bank CSV with Date, Amount and Description columns. The app accepts a transactions export with `Date`, `Payee`, `Category Group`, `Category`, `Outflow` and `Inflow`; bank statements are not supported.
 - **"Tight" threshold:** the tokens board says "€0 to €199.99 left". The app uses a buffer of 10% of average income, so the boundary depends on the data.
+- **Upfront payment:** the components board's error says "Upfront can't be more than the price". The app also rejects an upfront equal to the price, because nothing would be left to spread, so the message should say it has to be less than the price.
+
+## Not in the mockups: who the app is for
+
+The app is strictly for small loans and instalment purchases (*väikelaenud*, *järelmaks*), up to 5 years. It isn't for mortgages or other long-term loans, which come with their own terms and limits. The mockups never say this, so add it in three places:
+
+- **Landing:** one line under the lead paragraph, before the user picks sample data or an upload.
+- **Purchase form:** a hint under the intro, above the price field.
+- **README:** in the opening paragraph.
+
+Suggested copy (Margus reviews the Estonian):
+
+- en: "For small loans and instalment purchases of up to 5 years. Not for mortgages or other long-term loans."
+- et: "Mõeldud väikelaenudele ja järelmaksule kuni 5 aastaks. Ei sobi kodulaenu ega muude pikaajaliste laenude jaoks."
 
 ## Files
 
