@@ -33,3 +33,35 @@ export const PERIOD_OPTIONS = [3, 6, 12] as const;
  * recent income.
  */
 export const DEFAULT_PERIOD_MONTHS = 6;
+
+/**
+ * Highest purchase price the plan accepts, in cents (€1,000,000). Far above
+ * any household instalment purchase; it keeps every total well inside the
+ * safe-integer range, so a typo gets a field message instead of a crash.
+ */
+export const MAX_PRICE_CENTS = 100_000_000;
+
+/** Fewest instalments: one payment isn't a plan. */
+export const MIN_INSTALMENTS = 2;
+
+/** Most instalments: five years, the usual upper end of hire-purchase terms. */
+export const MAX_INSTALMENTS = 60;
+
+/**
+ * Highest annual interest rate, in basis points (100%). Real offers stay far
+ * below it; the cap only stops a mistyped rate from producing absurd numbers.
+ */
+export const MAX_ANNUAL_RATE_BPS = 10_000;
+
+/**
+ * Highest monthly fee, in cents (€1,000). Real account fees are a few euros;
+ * the cap stops a mistyped fee and keeps fee × count a safe integer.
+ */
+export const MAX_MONTHLY_FEE_CENTS = 100_000;
+
+/**
+ * Leftover below this share of average income, in basis points (10%), makes a
+ * month "tight": the plan is paid, but one unexpected bill would break it.
+ * A share of income rather than a fixed sum, so it scales with the household.
+ */
+export const BUFFER_BPS = 1_000;
