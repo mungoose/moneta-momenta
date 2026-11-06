@@ -1,0 +1,3 @@
+"Account"	"Flag"	"Date"	"Payee"	"Category Group/Category"	"Category Group"	"Category"	"Memo"	"Outflow"	"Inflow"	"Cleared"
+"SEB"	""	"02/10/2026"	"Shop"	"Lifestyle: Clothes"	"Lifestyle"	"Clothes"	""	80,00	0,00	"Cleared"
+"SEB"	""	"09/10/2026"	"Shop"	"Lifestyle: Clothes"	"Lifestyle"	"Clothes"	"Refund"	0,00	100,00	"Cleared"

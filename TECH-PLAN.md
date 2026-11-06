@@ -56,12 +56,12 @@ Checked against `sample-dataset/*.tsv`, which Margus confirms mirror a real expo
 
 | Row | Counted as |
 |---|---|
-| Payee starts with `Transfer : ` | excluded: `transfer` |
+| Payee starts with `Transfer : ` and Category Group is empty | excluded: `transfer` (between the user's own budget accounts) |
 | Payee is `Starting Balance` | excluded: `opening-balance`. It's an account balance, not income, even if filed under Inflow. Required by the brief. |
 | Category Group `Credit Card Payments` | excluded: `card-payment` |
 | Category Group `Inflow` | **income**: `inflow − outflow` |
 | Category Group empty | excluded: `uncategorised` (tracking/off-budget rows) |
-| anything else | **spending**: `outflow − inflow` per category. A refund lowers it, and it can go below 0 within one month. |
+| anything else | **spending**: `outflow − inflow` per category. A refund lowers it, and it can go below 0 within one month. This includes a `Transfer : ` row *with* a category: money moved out of the budget, e.g. to a loan or investment tracking account. Excluding it would overstate the margin. |
 
 Excluded rows are counted and totalled per reason, and the explanation view shows those totals.
 

@@ -1,0 +1,4 @@
+"Account"	"Flag"	"Date"	"Payee"	"Category Group/Category"	"Category Group"	"Category"	"Memo"	"Outflow"	"Inflow"	"Cleared"
+"SEB"	""	"05/10/2026"	"Transfer : SEB Credit"	""	""	""	""	300,00	0,00	"Cleared"
+"SEB Credit"	""	"05/10/2026"	"Transfer : SEB"	""	""	""	""	0,00	300,00	"Cleared"
+"SEB"	""	"15/10/2026"	"Transfer : Mortgage"	"Home: Mortgage"	"Home"	"Mortgage"	""	650,00	0,00	"Cleared"

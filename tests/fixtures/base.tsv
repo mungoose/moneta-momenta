@@ -1,0 +1,7 @@
+"Account"	"Flag"	"Date"	"Payee"	"Category Group/Category"	"Category Group"	"Category"	"Memo"	"Outflow"	"Inflow"	"Cleared"
+"SEB"	""	"31/10/2026"	"Rimi"	"Food & Drink: Groceries"	"Food & Drink"	"Groceries"	""	51,40	0,00	"Cleared"
+"SEB"	""	"28/10/2026"	"Transfer : SEB Credit"	""	""	""	""	250,00	0,00	"Cleared"
+"SEB"	""	"25/10/2026"	"Employer"	"Inflow: Ready to Assign"	"Inflow"	"Ready to Assign"	"Salary"	0,00	2465,87	"Cleared"
+"SEB Credit"	""	"03/10/2026"	"Hardware store"	"Home: Repairs"	"Home"	"Repairs"	"Said ""thanks""	and
+left"	1234,56	0,00	"Cleared"
+"SEB"	""	"01/10/2026"	"Shop"	"Lifestyle: Clothes"	"Lifestyle"	"Clothes"	"Returned a jacket"	0,00	20,00	"Cleared"
