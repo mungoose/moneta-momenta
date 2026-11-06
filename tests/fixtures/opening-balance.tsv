@@ -1,0 +1,3 @@
+"Account"	"Flag"	"Date"	"Payee"	"Category Group/Category"	"Category Group"	"Category"	"Memo"	"Outflow"	"Inflow"	"Cleared"
+"SEB"	""	"01/10/2026"	"Starting Balance"	"Inflow: Ready to Assign"	"Inflow"	"Ready to Assign"	""	0,00	1500,00	"Cleared"
+"SEB Credit"	""	"01/10/2026"	"Starting Balance"	""	""	""	""	120,00	0,00	"Cleared"
