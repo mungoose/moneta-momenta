@@ -4,16 +4,8 @@
   "vitest": {
     "configFile": "vitest.config.mts"
   },
-  "mutate": [
-    "src/lib/**/*.ts",
-    "!src/lib/i18n/**",
-    "!src/lib/utils.ts"
-  ],
-  "reporters": [
-    "clear-text",
-    "html",
-    "progress"
-  ],
+  "mutate": ["src/lib/**/*.ts", "!src/lib/i18n/**", "!src/lib/utils.ts"],
+  "reporters": ["clear-text", "html", "progress"],
   "htmlReporter": {
     "fileName": "reports/mutation/index.html"
   },

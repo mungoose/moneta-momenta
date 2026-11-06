@@ -26,11 +26,35 @@ function failed(text: string) {
 }
 
 const BASE_ROWS: Row[] = [
-  { line: 2, date: "2026-10-31", payee: "Rimi", group: "Food & Drink", category: "Groceries", outflow: 5140, inflow: 0 },
+  {
+    line: 2,
+    date: "2026-10-31",
+    payee: "Rimi",
+    group: "Food & Drink",
+    category: "Groceries",
+    outflow: 5140,
+    inflow: 0,
+  },
   { line: 3, date: "2026-10-28", payee: "Transfer : SEB Credit", group: "", category: "", outflow: 25000, inflow: 0 },
-  { line: 4, date: "2026-10-25", payee: "Employer", group: "Inflow", category: "Ready to Assign", outflow: 0, inflow: 246587 },
+  {
+    line: 4,
+    date: "2026-10-25",
+    payee: "Employer",
+    group: "Inflow",
+    category: "Ready to Assign",
+    outflow: 0,
+    inflow: 246587,
+  },
   // its memo holds a quoted newline, so the next row starts on line 7
-  { line: 5, date: "2026-10-03", payee: "Hardware store", group: "Home", category: "Repairs", outflow: 123456, inflow: 0 },
+  {
+    line: 5,
+    date: "2026-10-03",
+    payee: "Hardware store",
+    group: "Home",
+    category: "Repairs",
+    outflow: 123456,
+    inflow: 0,
+  },
   { line: 7, date: "2026-10-01", payee: "Shop", group: "Lifestyle", category: "Clothes", outflow: 0, inflow: 2000 },
 ] as Row[];
 
@@ -77,14 +101,10 @@ describe("parseTransactions: accepted variants", () => {
 
   it("unescapes doubled quotes and keeps a lone quote in an unquoted field", () => {
     const { rows } = parsed(
-      tsv(['31/10/2026', '"Joe ""Best"" Shop"', "Food", "Groceries", "1,00", "0,00"], [
-        "30/10/2026",
-        'Joe\'s "shop"',
-        "Food",
-        "Groceries",
-        "1,00",
-        "0,00",
-      ]),
+      tsv(
+        ["31/10/2026", '"Joe ""Best"" Shop"', "Food", "Groceries", "1,00", "0,00"],
+        ["30/10/2026", 'Joe\'s "shop"', "Food", "Groceries", "1,00", "0,00"],
+      ),
     );
     expect(rows.map((r) => r.payee)).toEqual(['Joe "Best" Shop', 'Joe\'s "shop"']);
   });
@@ -95,7 +115,8 @@ describe("parseTransactions: accepted variants", () => {
   });
 
   it("skips blank lines but keeps physical line numbers", () => {
-    const text = tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"]) + "\r\n\r\n" + "30/10/2026\tB\tG\tC\t2,00\t0,00\r\n\r\n";
+    const text =
+      tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"]) + "\r\n\r\n" + "30/10/2026\tB\tG\tC\t2,00\t0,00\r\n\r\n";
     expect(parsed(text).rows.map((r) => [r.line, r.payee])).toEqual([
       [2, "A"],
       [4, "B"],
@@ -143,7 +164,12 @@ describe("parseTransactions: errors", () => {
     ["", "0,00", "Outflow", ""],
     ["-1,00", "0,00", "Outflow", "-1,00"],
   ])("reports a bad amount (%j, %j) with its line and column", (outflow, inflow, column, value) => {
-    expect(failed(tsv(["31/10/2026", "A", "G", "C", outflow, inflow]))).toEqual({ code: "bad-amount", line: 2, column, value });
+    expect(failed(tsv(["31/10/2026", "A", "G", "C", outflow, inflow]))).toEqual({
+      code: "bad-amount",
+      line: 2,
+      column,
+      value,
+    });
   });
 
   it("rejects an amount that uses the other decimal separator than the rest of the file", () => {
@@ -159,10 +185,18 @@ describe("parseTransactions: errors", () => {
   it.each([
     ["too few fields", tsv(["31/10/2026", "A", "G", "C", "1,00"]), 2],
     ["too many fields", tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00", "x"]), 2],
-    ["an unterminated quote (reported where it opens)", tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"], ['"30/10/2026', "B"]) + "\r\nmore", 3],
+    [
+      "an unterminated quote (reported where it opens)",
+      tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"], ['"30/10/2026', "B"]) + "\r\nmore",
+      3,
+    ],
     ["text after a closing quote", tsv(["31/10/2026", '"A"x', "G", "C", "1,00", "0,00"]), 2],
     ["text after a closing quote in the last field", tsv(["31/10/2026", "A", "G", "C", "1,00", '"0,00"x']), 2],
-    ["a misaligned row after a multi-line field", tsv(["31/10/2026", '"A\r\nB"', "G", "C", "1,00", "0,00"], ["30/10/2026", "B"]), 4],
+    [
+      "a misaligned row after a multi-line field",
+      tsv(["31/10/2026", '"A\r\nB"', "G", "C", "1,00", "0,00"], ["30/10/2026", "B"]),
+      4,
+    ],
   ])("reports a malformed line: %s", (_, text, line) => {
     expect(failed(text)).toEqual({ code: "malformed", line });
   });
@@ -274,7 +308,11 @@ describe("classify", () => {
   });
 
   it("income is inflow minus outflow", () => {
-    expect(classify(row("Employer", "Inflow", 500, 2000))).toEqual({ kind: "income", row: row("Employer", "Inflow", 500, 2000), amount: 1500 });
+    expect(classify(row("Employer", "Inflow", 500, 2000))).toEqual({
+      kind: "income",
+      row: row("Employer", "Inflow", 500, 2000),
+      amount: 1500,
+    });
     expect(classify(row("Employer", "Inflow", 500, 0))).toMatchObject({ amount: -500 });
   });
 

@@ -96,7 +96,12 @@ function detectDecimal(amount: string): DecimalSeparator {
 }
 
 /** Parses one amount cell, turning a rejection into a line-numbered error. */
-function readAmount(value: string, decimal: DecimalSeparator, line: number, column: "Outflow" | "Inflow"): Cents | ImportError {
+function readAmount(
+  value: string,
+  decimal: DecimalSeparator,
+  line: number,
+  column: "Outflow" | "Inflow",
+): Cents | ImportError {
   try {
     return parseAmount(value, decimal);
   } catch (error) {
@@ -150,7 +155,15 @@ export function parseTransactions(text: string): ParseResult {
     const inflow = readAmount(cell("Inflow"), decimal, line, "Inflow");
     if (typeof inflow !== "number") return fail(inflow);
 
-    rows.push({ line, date, payee: cell("Payee"), group: cell("Category Group"), category: cell("Category"), outflow, inflow });
+    rows.push({
+      line,
+      date,
+      payee: cell("Payee"),
+      group: cell("Category Group"),
+      category: cell("Category"),
+      outflow,
+      inflow,
+    });
   }
   // `data` is non-empty, so the first row has set it.
   return { ok: true, rows, decimal: decimal! };

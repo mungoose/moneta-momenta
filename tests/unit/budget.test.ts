@@ -172,14 +172,23 @@ describe("buildMonths", () => {
     expect(october.spending).toBe(10000 + 8000 - 10000 + 1500 + 500);
     expect(october.groups).toEqual(
       new Map([
-        ["Lifestyle", new Map([["Clothes", -2000], ["Hobbies", 1500]])],
+        [
+          "Lifestyle",
+          new Map([
+            ["Clothes", -2000],
+            ["Hobbies", 1500],
+          ]),
+        ],
         ["Food & Drink", new Map([["Groceries", 10500]])],
       ]),
     );
   });
 
   it("keeps a category of the same name apart in different groups", () => {
-    const text = threeMonths(spend("05/10/2026", "1,00", "Kids", "Other"), spend("06/10/2026", "2,00", "Home", "Other"));
+    const text = threeMonths(
+      spend("05/10/2026", "1,00", "Kids", "Other"),
+      spend("06/10/2026", "2,00", "Home", "Other"),
+    );
     const october = months(text).fullMonths[2] as MonthTotals;
     expect(october.groups.get("Kids")).toEqual(new Map([["Other", 100]]));
     expect(october.groups.get("Home")).toEqual(new Map([["Other", 200]]));

@@ -1,0 +1,14 @@
+# Prettier also skips everything in .gitignore.
+
+# Data compared byte for byte: reformatting would change what the parser sees.
+tests/fixtures/
+public/samples/
+sample-dataset/
+
+# Design hand-off from a separate tool; kept as delivered.
+design/
+
+# Hand-edited prose; reformatting re-pads every table.
+*.md
+
+package-lock.json
