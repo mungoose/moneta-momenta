@@ -326,7 +326,7 @@ A **golden test** checks that both samples reproduce the §2 monthly totals. Tho
 - **Scope:** `src/lib/**` except the i18n dictionaries. UI code is excluded, because mutating JSX produces noise rather than useful signal.
 - **Thresholds:** `high: 90, low: 80, break: 80`. The `money/` and `plan/` modules should reach ~100%, since that's where a surviving mutant means a wrong verdict could ship unnoticed.
 - **Cost control:** run per module with `--mutate` while developing, use `--incremental` (only changed code is re-mutated), and report with `clear-text` + `html`. Claude reads only the survived-mutant list, never the full log.
-- **CI:** a separate job on pushes to `main`. The core is small, so a full run should take minutes. The README shows the mutation score next to the test count. It's a stronger quality claim than line coverage.
+- **CI:** a separate job on every PR and on `main`, so a score below `break` blocks the merge. The core is small, so a full run should take minutes. The README shows the mutation score next to the test count. It's a stronger quality claim than line coverage.
 
 ### E2E (Playwright)
 
@@ -337,7 +337,7 @@ Desktop 1280 × 800 is the primary project. The same specs also run at 390 × 84
 
 ### CI and deploy
 
-- A GitHub Action runs typecheck, lint, `vitest run` and Playwright on every push, plus Stryker on `main`.
+- A GitHub Action runs typecheck, lint, `vitest run`, Playwright and Stryker on every PR and on pushes to `main`. All changes reach `main` through PRs that Margus merges.
 - Vercel's Git integration deploys `main` and gives each branch a preview URL.
 
 ## 12. LLM suggestions (Could, last)

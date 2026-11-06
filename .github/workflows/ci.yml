@@ -1,7 +1,10 @@
 name: CI
 
+# Work reaches main only through PRs, so branch pushes are covered by
+# `pull_request`; also triggering on every `push` would run each job twice.
 on:
   push:
+    branches: [main]
   pull_request:
 
 jobs:
@@ -19,8 +22,9 @@ jobs:
       - run: npm run test:e2e
 
   mutation:
-    # Mutation testing on main only: slower, and the incremental cache is local.
-    if: github.ref == 'refs/heads/main'
+    # Runs on PRs too, so a score below the break threshold blocks the merge
+    # instead of turning up on main afterwards. The core is small enough that
+    # a full run takes seconds.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
