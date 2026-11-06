@@ -3,7 +3,7 @@ import { DEFAULT_LOCALE, LOCALES, getMessages, isLocale } from "@/lib/i18n";
 
 /** Collects dotted key paths of a nested dictionary, e.g. `landing.tagline`. */
 function keyPaths(obj: object, prefix = ""): string[] {
-  return Object.entries(obj).flatMap(([key, value]) =>
+  return Object.entries(obj as Record<string, unknown>).flatMap(([key, value]) =>
     typeof value === "object" && value !== null ? keyPaths(value, `${prefix}${key}.`) : [`${prefix}${key}`],
   );
 }

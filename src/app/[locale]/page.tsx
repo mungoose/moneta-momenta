@@ -8,7 +8,9 @@ import { getMessages, isLocale } from "@/lib/i18n";
  */
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
-  if (!isLocale(locale)) notFound();
+  if (!isLocale(locale)) {
+    notFound();
+  }
   const t = getMessages(locale);
   const otherLocale = locale === "en" ? "et" : "en";
 

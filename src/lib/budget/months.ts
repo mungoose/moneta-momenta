@@ -55,6 +55,8 @@ export function monthOf(date: string): YearMonth {
  */
 export function addMonths(month: YearMonth, count: number): YearMonth {
   const index = Number(month.slice(0, 4)) * 12 + Number(month.slice(5, 7)) - 1 + count;
+  // Calendar arithmetic on a month count, not money, so plain division is right here.
+  // eslint-disable-next-line no-restricted-syntax
   const year = Math.floor(index / 12);
   return `${String(year).padStart(4, "0")}-${String(index - year * 12 + 1).padStart(2, "0")}`;
 }
@@ -97,18 +99,20 @@ export function buildMonths(
   reference: YearMonth,
 ): { fullMonths: MonthTotals[]; droppedMonths: DroppedMonth[] } {
   const byMonth = new Map<YearMonth, MonthTotals>();
-  const current = new Set<YearMonth>();
+  const currentMonths = new Set<YearMonth>();
   let firstDate: string | undefined;
 
   for (const item of items) {
     const { date } = item.row;
     const month = monthOf(date);
     if (month >= reference) {
-      current.add(month);
+      currentMonths.add(month);
       continue;
     }
     // Stryker disable next-line EqualityOperator: equivalent; an equal date assigns the same value
-    if (firstDate === undefined || date < firstDate) firstDate = date;
+    if (firstDate === undefined || date < firstDate) {
+      firstDate = date;
+    }
     let totals = byMonth.get(month);
     if (totals === undefined) {
       totals = emptyMonth(month);
@@ -117,22 +121,36 @@ export function buildMonths(
     addTo(totals, item);
   }
 
-  const droppedMonths: DroppedMonth[] = [];
-  const fullMonths: MonthTotals[] = [];
-  if (firstDate !== undefined) {
-    // Stryker disable next-line EqualityOperator: equivalent; map keys are unique, so a and b never tie
-    const last = [...byMonth.keys()].reduce((a, b) => (b > a ? b : a));
-    let month = monthOf(firstDate);
-    if (Number(firstDate.slice(8, 10)) > FIRST_MONTH_MAX_START_DAY) {
-      droppedMonths.push({ month, why: "starts-mid-month", firstDate });
-      month = addMonths(month, 1);
-    }
-    for (; month <= last; month = addMonths(month, 1)) {
-      fullMonths.push(byMonth.get(month) ?? emptyMonth(month));
-    }
+  const current = [...currentMonths].sort().map((month): DroppedMonth => ({ month, why: "current" }));
+  if (firstDate === undefined) {
+    return { fullMonths: [], droppedMonths: current };
   }
-  for (const month of [...current].sort()) droppedMonths.push({ month, why: "current" });
-  return { fullMonths, droppedMonths };
+  const { fullMonths, startsMidMonth } = fullRange(byMonth, firstDate);
+  return { fullMonths, droppedMonths: [...startsMidMonth, ...current] };
+}
+
+/**
+ * Lays out the months from the file's first month to the last one with rows,
+ * with empty months for the gaps. The first month is left out, and returned in
+ * `startsMidMonth`, when its earliest row is after {@link FIRST_MONTH_MAX_START_DAY}.
+ */
+function fullRange(
+  byMonth: ReadonlyMap<YearMonth, MonthTotals>,
+  firstDate: string,
+): { fullMonths: MonthTotals[]; startsMidMonth: DroppedMonth[] } {
+  const startsMidMonth: DroppedMonth[] = [];
+  let month = monthOf(firstDate);
+  if (Number(firstDate.slice(8, 10)) > FIRST_MONTH_MAX_START_DAY) {
+    startsMidMonth.push({ month, why: "starts-mid-month", firstDate });
+    month = addMonths(month, 1);
+  }
+  // Stryker disable next-line EqualityOperator: equivalent; map keys are unique, so a and b never tie
+  const last = [...byMonth.keys()].reduce((a, b) => (b > a ? b : a));
+  const fullMonths: MonthTotals[] = [];
+  for (; month <= last; month = addMonths(month, 1)) {
+    fullMonths.push(byMonth.get(month) ?? emptyMonth(month));
+  }
+  return { fullMonths, startsMidMonth };
 }
 
 /** Adds one classified row to its month's totals. */

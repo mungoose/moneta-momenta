@@ -11,7 +11,9 @@ test.beforeEach(({ page }) => {
   consoleErrors = [];
   expectedErrors = [];
   page.on("console", (msg) => {
-    if (msg.type() === "error") consoleErrors.push(msg.text());
+    if (msg.type() === "error") {
+      consoleErrors.push(msg.text());
+    }
   });
   page.on("pageerror", (err) => consoleErrors.push(err.message));
 });

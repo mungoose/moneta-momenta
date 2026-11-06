@@ -20,44 +20,81 @@ interface RawRecord {
  */
 function readRecords(text: string, delimiter: string): RawRecord[] | { malformedLine: number } {
   const records: RawRecord[] = [];
-  let line = 1;
-  let i = 0;
+  const at: Cursor = { i: 0, line: 1 };
   // Stryker disable next-line EqualityOperator: one more pass at the end only adds a blank record, which the caller skips
-  while (i < text.length) {
-    const recordLine = line;
+  while (at.i < text.length) {
+    const recordLine = at.line;
     const fields: string[] = [];
     for (;;) {
-      let value = "";
-      if (text[i] === '"') {
-        const openLine = line;
-        i++;
-        for (;;) {
-          const close = text.indexOf('"', i);
-          if (close === -1) return { malformedLine: openLine };
-          const chunk = text.slice(i, close);
-          value += chunk;
-          line += chunk.split("\n").length - 1;
-          i = close + 1;
-          if (text[i] !== '"') break;
-          value += '"';
-          i++;
-        }
-        if (i < text.length && text[i] !== delimiter && text[i] !== "\n") return { malformedLine: line };
-      } else {
-        const start = i;
-        // Stryker disable next-line EqualityOperator: stepping one past the end slices the same value
-        while (i < text.length && text[i] !== delimiter && text[i] !== "\n") i++;
-        value = text.slice(start, i);
+      const field = readField(text, delimiter, at);
+      if (typeof field !== "string") {
+        return field;
       }
-      fields.push(value);
-      if (text[i] !== delimiter) break;
-      i++;
+      fields.push(field);
+      if (text[at.i] !== delimiter) {
+        break;
+      }
+      at.i++;
     }
-    i++; // past the newline (or past the end)
-    line++;
+    at.i++; // past the newline (or past the end)
+    at.line++;
     records.push({ line: recordLine, fields });
   }
   return records;
+}
+
+/** A read position in the text, and the physical line it is on. */
+interface Cursor {
+  i: number;
+  line: number;
+}
+
+/**
+ * Reads one field starting at `at`, leaving `at` on the delimiter, newline or
+ * end of text after it.
+ * @returns The field's value, or the line to report when its quoting is broken:
+ *          where an unclosed quote opened, or where text follows a closing quote.
+ */
+function readField(text: string, delimiter: string, at: Cursor): string | { malformedLine: number } {
+  const endsField = () => at.i >= text.length || text[at.i] === delimiter || text[at.i] === "\n";
+  if (text[at.i] !== '"') {
+    const start = at.i;
+    while (!endsField()) {
+      at.i++;
+    }
+    return text.slice(start, at.i);
+  }
+  const openLine = at.line;
+  const value = readQuoted(text, at);
+  if (value === null) {
+    return { malformedLine: openLine };
+  }
+  return endsField() ? value : { malformedLine: at.line };
+}
+
+/**
+ * Reads a quoted field from its opening quote to just past its closing one.
+ * `""` inside it is a literal quote; newlines inside it advance `at.line`.
+ * @returns The unquoted value, or `null` when the quote never closes.
+ */
+function readQuoted(text: string, at: Cursor): string | null {
+  at.i++;
+  let value = "";
+  for (;;) {
+    const close = text.indexOf('"', at.i);
+    if (close === -1) {
+      return null;
+    }
+    const chunk = text.slice(at.i, close);
+    value += chunk;
+    at.line += chunk.split("\n").length - 1;
+    at.i = close + 1;
+    if (text[at.i] !== '"') {
+      return value;
+    }
+    value += '"';
+    at.i++;
+  }
 }
 
 const DATE_PATTERN = /^(\d{2})\/(\d{2})\/(\d{4})$/;
@@ -73,14 +110,18 @@ export function parseDate(raw: string): string | null {
   // Date format is fixed to DD/MM/YYYY for this demo. For real users: let them
   // pick the format, or infer it from the file (a part > 12 settles DMY vs MDY), here.
   const match = DATE_PATTERN.exec(raw);
-  if (!match) return null;
+  if (!match) {
+    return null;
+  }
   // All three groups are mandatory in the pattern, so they're always set.
   const [, dd, mm, yyyy] = match as unknown as [string, string, string, string];
   const day = Number(dd);
   const month = Number(mm);
   // Day 0 of the next month is the last day of this one.
   const daysInMonth = new Date(Date.UTC(Number(yyyy), month, 0)).getUTCDate();
-  if (month < 1 || month > 12 || day < 1 || day > daysInMonth) return null;
+  if (month < 1 || month > 12 || day < 1 || day > daysInMonth) {
+    return null;
+  }
   return `${yyyy}-${mm}-${dd}`;
 }
 
@@ -105,8 +146,11 @@ function readAmount(
   try {
     return parseAmount(value, decimal);
   } catch (error) {
-    // Stryker disable next-line ConditionalExpression: parseAmount throws nothing else; a programming error must not be reported as a bad amount
-    if (!(error instanceof InvalidAmountError)) throw error;
+    // parseAmount throws nothing else; a programming error must not be reported as a bad amount
+    // Stryker disable next-line ConditionalExpression,BlockStatement: unreachable in tests for that reason
+    if (!(error instanceof InvalidAmountError)) {
+      throw error;
+    }
     return { code: "bad-amount", line, column, value };
   }
 }
@@ -122,49 +166,79 @@ function readAmount(
 export function parseTransactions(text: string): ParseResult {
   const fail = (error: ImportError): ParseResult => ({ ok: false, error });
   const normalised = text.replace(/^\uFEFF/, "").replace(/\r\n/g, "\n");
-  // split() always returns at least one element, even for "".
-  const headerLine = normalised.split("\n", 1)[0]!;
-  const delimiter = headerLine.includes("\t") ? "\t" : ",";
+  // A tab anywhere in the header line makes the file tab-separated.
+  const delimiter = /^[^\n]*\t/.test(normalised) ? "\t" : ",";
 
   const read = readRecords(normalised, delimiter);
-  if (!Array.isArray(read)) return fail({ code: "malformed", line: read.malformedLine });
-  const records = read.filter((r) => r.fields.some((f) => f.trim() !== ""));
-  const [header, ...data] = records;
-  if (!header) return fail({ code: "empty" });
-
-  const names = header.fields.map((f) => f.trim());
-  const missing = REQUIRED_COLUMNS.filter((c) => !names.includes(c));
-  if (missing.length > 0) return fail({ code: "missing-columns", missing });
-  if (data.length === 0) return fail({ code: "empty" });
+  if (!Array.isArray(read)) {
+    return fail({ code: "malformed", line: read.malformedLine });
+  }
+  const table = readHeader(read.filter((r) => r.fields.some((f) => f.trim() !== "")));
+  if ("code" in table) {
+    return fail(table);
+  }
 
   let decimal: DecimalSeparator | undefined;
   const rows: Row[] = [];
-  for (const record of data) {
-    const { line } = record;
-    if (record.fields.length !== names.length) return fail({ code: "malformed", line });
-    // The field count matches the header, so every required column has a cell.
-    const cell = (column: RequiredColumn) => record.fields[names.indexOf(column)]!.trim();
-
-    const rawDate = cell("Date");
-    const date = parseDate(rawDate);
-    if (date === null) return fail({ code: "bad-date", line, value: rawDate });
-
+  for (const record of table.data) {
+    if (record.fields.length !== table.names.length) {
+      return fail({ code: "malformed", line: record.line });
+    }
+    const cell = (column: RequiredColumn) =>
+      // The field count matches the header, so every required column has a cell.
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      record.fields[table.names.indexOf(column)]!.trim();
     decimal ??= detectDecimal(cell("Outflow"));
-    const outflow = readAmount(cell("Outflow"), decimal, line, "Outflow");
-    if (typeof outflow !== "number") return fail(outflow);
-    const inflow = readAmount(cell("Inflow"), decimal, line, "Inflow");
-    if (typeof inflow !== "number") return fail(inflow);
-
-    rows.push({
-      line,
-      date,
-      payee: cell("Payee"),
-      group: cell("Category Group"),
-      category: cell("Category"),
-      outflow,
-      inflow,
-    });
+    const row = readRow(cell, record.line, decimal);
+    if ("code" in row) {
+      return fail(row);
+    }
+    rows.push(row);
   }
   // `data` is non-empty, so the first row has set it.
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   return { ok: true, rows, decimal: decimal! };
+}
+
+/**
+ * Splits the non-blank records into the header's column names and the data,
+ * checking that every required column is there and that there is data.
+ */
+function readHeader(records: RawRecord[]): { names: string[]; data: RawRecord[] } | ImportError {
+  const [header, ...data] = records;
+  if (!header) {
+    return { code: "empty" };
+  }
+  const names = header.fields.map((f) => f.trim());
+  const missing = REQUIRED_COLUMNS.filter((c) => !names.includes(c));
+  if (missing.length > 0) {
+    return { code: "missing-columns", missing };
+  }
+  return data.length === 0 ? { code: "empty" } : { names, data };
+}
+
+/** Checks and converts one record's cells into a row. */
+function readRow(cell: (column: RequiredColumn) => string, line: number, decimal: DecimalSeparator): Row | ImportError {
+  const rawDate = cell("Date");
+  const date = parseDate(rawDate);
+  if (date === null) {
+    return { code: "bad-date", line, value: rawDate };
+  }
+  const outflow = readAmount(cell("Outflow"), decimal, line, "Outflow");
+  if (typeof outflow !== "number") {
+    return outflow;
+  }
+  const inflow = readAmount(cell("Inflow"), decimal, line, "Inflow");
+  if (typeof inflow !== "number") {
+    return inflow;
+  }
+  return {
+    line,
+    date,
+    payee: cell("Payee"),
+    group: cell("Category Group"),
+    category: cell("Category"),
+    outflow,
+    inflow,
+  };
 }

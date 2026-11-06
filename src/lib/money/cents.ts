@@ -67,6 +67,7 @@ export function divRound(a: number, b: number): number {
   // Stryker restore StringLiteral
   const remainder = a % b; // exact, and has the sign of `a`
   // `a - remainder` is a multiple of `b`, so this division is exact.
+  // eslint-disable-next-line no-restricted-syntax
   const quotient = (a - remainder) / b;
   // 2·|remainder| < 2^54 and is even, so it is exactly representable.
   if (2 * Math.abs(remainder) >= Math.abs(b)) {

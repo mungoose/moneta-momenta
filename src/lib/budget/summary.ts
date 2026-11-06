@@ -105,7 +105,9 @@ export function summarise(file: ParsedFile, reference: YearMonth, periodLength?:
   const months = fullMonths.slice(-length);
 
   const totalIncome = sum(months.map((m) => m.income));
-  if (totalIncome <= 0) return { ok: false, error: { code: "no-income" } };
+  if (totalIncome <= 0) {
+    return { ok: false, error: { code: "no-income" } };
+  }
   const average = (total: Cents) => toCents(divRound(total, length));
   const avgIncome = average(totalIncome);
   const avgSpending = average(sum(months.map((m) => m.spending)));
@@ -144,7 +146,9 @@ function groupAverages(months: readonly MonthTotals[], average: (total: Cents) =
         entry = new Map();
         totals.set(group, entry);
       }
-      for (const [category, net] of categories) entry.set(category, toCents((entry.get(category) ?? 0) + net));
+      for (const [category, net] of categories) {
+        entry.set(category, toCents((entry.get(category) ?? 0) + net));
+      }
     }
   }
   return [...totals]
