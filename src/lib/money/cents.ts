@@ -94,7 +94,7 @@ export function sum(values: readonly Cents[]): Cents {
 }
 
 /** Space, no-break space and narrow no-break space: all used as thousands separators. */
-const SPACES = "   ";
+const SPACES = " \u00a0\u202f";
 
 /**
  * Whole-value patterns per decimal separator. The integer part is either

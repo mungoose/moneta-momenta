@@ -3,8 +3,8 @@ import { InvalidAmountError, divRound, parseAmount, sum, toCents, type Cents } f
 import { formatCents } from "@/lib/money/format";
 
 const MAX = Number.MAX_SAFE_INTEGER; // 9 007 199 254 740 991
-const NBSP = " ";
-const NNBSP = " ";
+const NBSP = "\u00a0";
+const NNBSP = "\u202f";
 const c = (n: number) => n as Cents;
 
 describe("toCents", () => {
@@ -144,7 +144,7 @@ describe("parseAmount", () => {
     "-5,00",
     "+5,00",
     "5,00-",
-    "−5,00",
+    "\u22125,00",
     // other currencies, doubled symbols, other notations
     "5,00 €€",
     "€5,00 €",
@@ -199,7 +199,7 @@ describe("formatCents", () => {
     [123456789, `1${NBSP}234${NBSP}567,89${NBSP}€`],
     [5, `0,05${NBSP}€`],
     [0, `0,00${NBSP}€`],
-    [-649, `−6,49${NBSP}€`],
+    [-649, `\u22126,49${NBSP}€`],
     [MAX, `90${NBSP}071${NBSP}992${NBSP}547${NBSP}409,91${NBSP}€`],
   ])("et: %d → %j", (value, expected) => {
     expect(formatCents(c(value), "et")).toBe(expected);
