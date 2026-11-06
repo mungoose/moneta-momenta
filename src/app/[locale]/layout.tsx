@@ -15,7 +15,9 @@ export function generateStaticParams() {
 /** Localised page title and description. */
 export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Promise<Metadata> {
   const { locale } = await params;
-  if (!isLocale(locale)) return {};
+  if (!isLocale(locale)) {
+    return {};
+  }
   const t = getMessages(locale);
   return { title: t.meta.title, description: t.meta.description };
 }
@@ -23,7 +25,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
 /** Root layout: sets `<html lang>` from the route locale. Unknown locales 404. */
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;
-  if (!isLocale(locale)) notFound();
+  if (!isLocale(locale)) {
+    notFound();
+  }
 
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}>

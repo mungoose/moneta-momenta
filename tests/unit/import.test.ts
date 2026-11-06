@@ -15,13 +15,17 @@ const tsv = (...rows: string[][]) =>
 
 function parsed(text: string): { rows: Row[]; decimal: string } {
   const result = parseTransactions(text);
-  if (!result.ok) throw new Error(`expected rows, got ${JSON.stringify(result.error)}`);
+  if (!result.ok) {
+    throw new Error(`expected rows, got ${JSON.stringify(result.error)}`);
+  }
   return { rows: result.rows, decimal: result.decimal };
 }
 
 function failed(text: string) {
   const result = parseTransactions(text);
-  if (result.ok) throw new Error("expected an import error");
+  if (result.ok) {
+    throw new Error("expected an import error");
+  }
   return result.error;
 }
 
@@ -72,7 +76,7 @@ describe("parseTransactions: accepted variants", () => {
   });
 
   it("drops a leading byte-order mark, so a required first column still matches", () => {
-    expect(parsed("\uFEFF" + tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"])).rows).toHaveLength(1);
+    expect(parsed(`\uFEFF${tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"])}`).rows).toHaveLength(1);
   });
 
   it("keeps the same character when it's inside a value", () => {
@@ -115,8 +119,7 @@ describe("parseTransactions: accepted variants", () => {
   });
 
   it("skips blank lines but keeps physical line numbers", () => {
-    const text =
-      tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"]) + "\r\n\r\n" + "30/10/2026\tB\tG\tC\t2,00\t0,00\r\n\r\n";
+    const text = `${tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"])}\r\n\r\n30/10/2026\tB\tG\tC\t2,00\t0,00\r\n\r\n`;
     expect(parsed(text).rows.map((r) => [r.line, r.payee])).toEqual([
       [2, "A"],
       [4, "B"],
@@ -187,9 +190,11 @@ describe("parseTransactions: errors", () => {
     ["too many fields", tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00", "x"]), 2],
     [
       "an unterminated quote (reported where it opens)",
-      tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"], ['"30/10/2026', "B"]) + "\r\nmore",
+      `${tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"], ['"30/10/2026', "B"])}\r\nmore`,
       3,
     ],
+    ["a quote that opens at the very end", `${tsv(["31/10/2026", "A", "G", "C", "1,00", "0,00"])}\r\n"`, 3],
+    ["an unclosed quote right before a delimiter", tsv(["31/10/2026", '"\tA', "G", "C", "1,00", "0,00"]), 2],
     ["text after a closing quote", tsv(["31/10/2026", '"A"x', "G", "C", "1,00", "0,00"]), 2],
     ["text after a closing quote in the last field", tsv(["31/10/2026", "A", "G", "C", "1,00", '"0,00"x']), 2],
     [
@@ -242,8 +247,12 @@ describe("classify", () => {
   const kinds = (name: string) =>
     parsed(fixture(name)).rows.map((row) => {
       const c: Classified = classify(row);
-      if (c.kind === "income") return ["income", c.amount];
-      if (c.kind === "spending") return ["spending", `${c.group}/${c.category}`, c.net];
+      if (c.kind === "income") {
+        return ["income", c.amount];
+      }
+      if (c.kind === "spending") {
+        return ["spending", `${c.group}/${c.category}`, c.net];
+      }
       return [c.kind, c.reason];
     });
 

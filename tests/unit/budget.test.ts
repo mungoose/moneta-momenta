@@ -16,7 +16,9 @@ const tsv = (...rows: string[][]) =>
 
 function parsed(text: string): ParsedFile {
   const result = parseTransactions(text);
-  if (!result.ok) throw new Error(`expected rows, got ${JSON.stringify(result.error)}`);
+  if (!result.ok) {
+    throw new Error(`expected rows, got ${JSON.stringify(result.error)}`);
+  }
   return result;
 }
 
@@ -24,13 +26,17 @@ const months = (text: string, reference = "2026-11") => buildMonths(parsed(text)
 
 function summary(text: string, reference = "2026-11", periodLength?: number): DataSummary {
   const result = summarise(parsed(text), reference, periodLength);
-  if (!result.ok) throw new Error(`expected a summary, got ${JSON.stringify(result.error)}`);
+  if (!result.ok) {
+    throw new Error(`expected a summary, got ${JSON.stringify(result.error)}`);
+  }
   return result.summary;
 }
 
 function budgetError(text: string, reference = "2026-11") {
   const result = summarise(parsed(text), reference);
-  if (result.ok) throw new Error("expected a budget error");
+  if (result.ok) {
+    throw new Error("expected a budget error");
+  }
   return result.error;
 }
 

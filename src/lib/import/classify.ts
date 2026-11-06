@@ -32,10 +32,18 @@ export function classify(row: Row): Classified {
   if (row.payee.startsWith(TRANSFER_PAYEE_PREFIX) && row.group === "") {
     return { kind: "excluded", row, reason: "transfer" };
   }
-  if (row.payee === OPENING_BALANCE_PAYEE) return { kind: "excluded", row, reason: "opening-balance" };
-  if (sameText(row.group, CARD_PAYMENT_GROUP)) return { kind: "excluded", row, reason: "card-payment" };
+  if (row.payee === OPENING_BALANCE_PAYEE) {
+    return { kind: "excluded", row, reason: "opening-balance" };
+  }
+  if (sameText(row.group, CARD_PAYMENT_GROUP)) {
+    return { kind: "excluded", row, reason: "card-payment" };
+  }
   // Both amounts are non-negative safe integers, so their difference is too.
-  if (sameText(row.group, INCOME_GROUP)) return { kind: "income", row, amount: (row.inflow - row.outflow) as Cents };
-  if (row.group === "") return { kind: "excluded", row, reason: "uncategorised" };
+  if (sameText(row.group, INCOME_GROUP)) {
+    return { kind: "income", row, amount: (row.inflow - row.outflow) as Cents };
+  }
+  if (row.group === "") {
+    return { kind: "excluded", row, reason: "uncategorised" };
+  }
   return { kind: "spending", row, group: row.group, category: row.category, net: (row.outflow - row.inflow) as Cents };
 }
