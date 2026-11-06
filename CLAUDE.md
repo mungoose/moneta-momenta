@@ -60,4 +60,5 @@ When reading Stryker output, look only at the `[Survived]` mutants and the score
 - Run the tests (`npm run check`) before saying something works. Check UI changes in a real browser at 1280 and 390.
 - When unsure about the data, check the fixture or the sample instead of assuming.
 - Remove `allowEmpty` from `stryker.config.json` once the first `src/lib` module exists. It only exists so CI passes while `src/lib` has no core modules.
+- **Never push to `main`.** Work on a branch, push it and open a PR. Margus reviews and merges every PR; don't merge or enable auto-merge.
 - End each session with `/handoff` and start the next with `/pickup`.
