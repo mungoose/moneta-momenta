@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta — the purchase</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm mm-page {{themeClass}}">
+  <header class="mm-top">
+    <div class="mm-col mm-top__in">
+      <a class="mm-brand" href="Landing.dc.html"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8"></rect><path d="M7 19v-6M11.67 19v-9M16.33 19v-6M21 19v-9" stroke-width="2.2" stroke-linecap="round" fill="none"></path></svg>Moneta</a>
+      <div style="display: flex; align-items: center; gap: 8px">
+        <span class="mm-pill">Sample data</span>
+        <a class="mm-btn mm-btn--ghost" href="Landing.dc.html">Start over</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="mm-col mm-main">
+    <section class="mm-intro">
+      <p class="mm-step">Step 2 of 3 · The purchase</p>
+      <h1 class="mm-t-h1">What would you like to buy?</h1>
+      <p class="mm-muted">Use the figures from the offer you've been given. You can change them later and compare.</p>
+    </section>
+
+    <form class="mm-card" style="gap: 28px" action="Result.dc.html">
+      <div class="mm-field">
+        <label class="mm-label" for="price">Price</label>
+        <div class="mm-money"><span class="mm-money__affix" aria-hidden="true">€</span><input id="price" class="mm-money__input" inputmode="decimal" value="1,890.00"></div>
+      </div>
+
+      <div class="mm-field">
+        <label class="mm-label" for="upfront">Upfront payment</label>
+        <div class="mm-money"><span class="mm-money__affix" aria-hidden="true">€</span><input id="upfront" class="mm-money__input" inputmode="decimal" value="290.00" aria-describedby="upfront-hint"></div>
+        <p class="mm-hint" id="upfront-hint">Paid today, not spread over the plan. Enter 0 if there isn't one.</p>
+      </div>
+
+      <div class="mm-field">
+        <span class="mm-label" id="inst">Number of instalments</span>
+        <div class="mm-seg" role="group" aria-labelledby="inst">
+          <button type="button" class="mm-seg__opt" aria-pressed="false">3</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="false">6</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="true">12</button>
+          <button type="button" class="mm-seg__opt" aria-pressed="false">Custom</button>
+        </div>
+        <p class="mm-hint">One payment a month. Custom lets you type any number of months.</p>
+      </div>
+
+      <div class="mm-row2">
+        <div class="mm-field">
+          <label class="mm-label" for="rate">Interest rate</label>
+          <div class="mm-money"><input id="rate" class="mm-money__input" inputmode="decimal" value="9.9" aria-describedby="rate-hint"><span class="mm-money__affix">% per year</span></div>
+          <p class="mm-hint" id="rate-hint">Enter 0 for an interest-free plan.</p>
+        </div>
+        <div class="mm-field">
+          <label class="mm-label" for="fee">Monthly fee</label>
+          <div class="mm-money"><span class="mm-money__affix" aria-hidden="true">€</span><input id="fee" class="mm-money__input" inputmode="decimal" value="2.50" aria-describedby="fee-hint"></div>
+          <p class="mm-hint" id="fee-hint">Any fixed fee charged with each instalment.</p>
+        </div>
+      </div>
+
+      <div style="border-top: 1px solid var(--mm-border); padding-top: 8px">
+        <dl class="mm-stats">
+          <div class="mm-stat"><dt>Amount to spread<span class="mm-stat__meta">€1,890.00 price − €290.00 upfront</span></dt><dd>€1,600.00</dd></div>
+          <div class="mm-stat"><dt>First instalment</dt><dd style="font-weight: 500">December 2026</dd></div>
+          <div class="mm-stat mm-stat--hero"><dt>Estimated monthly payment<span class="mm-stat__meta">€140.59 repayment + €2.50 fee</span></dt><dd>€143.09</dd></div>
+        </dl>
+      </div>
+    </form>
+
+    <div class="mm-actions">
+      <a class="mm-btn mm-btn--primary" href="Result.dc.html">Check affordability<svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"></path></svg></a>
+      <a class="mm-btn mm-btn--secondary" href="Summary.dc.html">Back</a>
+    </div>
+  </main>
+
+  <footer class="mm-foot">
+    <div class="mm-col">Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":1300}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Moneta — missing required columns</title>
+<script src="./support.js"></script>
+<link rel="stylesheet" href="moneta.css">
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+</style>
+</helmet>
+<div class="mm mm-page {{themeClass}}">
+  <header class="mm-top">
+    <div class="mm-col mm-top__in">
+      <a class="mm-brand" href="Landing.dc.html"><svg width="28" height="28" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="8"></rect><path d="M7 19v-6M11.67 19v-9M16.33 19v-6M21 19v-9" stroke-width="2.2" stroke-linecap="round" fill="none"></path></svg>Moneta</a>
+      <a class="mm-btn mm-btn--ghost" href="Landing.dc.html">Start over</a>
+    </div>
+  </header>
+
+  <main class="mm-col mm-main">
+    <section class="mm-intro">
+      <p class="mm-step">Upload</p>
+      <h1 class="mm-t-h1">We couldn't read this file</h1>
+    </section>
+
+    <div class="mm-callout mm-callout--error" role="alert">
+      <svg class="mm-ico mm-callout__icon" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg>
+      <div class="mm-callout__content">
+        <p class="mm-callout__title">Missing required columns</p>
+        <p>transactions-oct-2026.csv has no Amount column. We need Date, Amount and Description to work out your income and spending.</p>
+      </div>
+    </div>
+
+    <section class="mm-card" aria-labelledby="cols">
+      <div class="mm-card__head">
+        <h2 class="mm-t-h2" id="cols">What we found</h2>
+        <span class="mm-t-small mm-muted" style="display: inline-flex; align-items: center; gap: 6px"><svg class="mm-ico mm-ico--sm" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M11.5 2.5H5.5a1 1 0 00-1 1v13a1 1 0 001 1h9a1 1 0 001-1V6.5z"></path><path d="M11.5 2.5v4h4"></path></svg>transactions-oct-2026.csv · 412 rows</span>
+      </div>
+      <p class="mm-t-small mm-muted">Required columns</p>
+      <ul class="mm-colcheck">
+        <li><svg class="mm-ico is-ok" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg><span class="mm-colcheck__name">Date</span><span class="mm-colcheck__meta">Found as “Booking date”</span></li>
+        <li><svg class="mm-ico is-missing" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 2.8h6l4.2 4.2v6L13 17.2H7L2.8 13V7z"></path><path d="M7.6 7.6l4.8 4.8M12.4 7.6l-4.8 4.8"></path></svg><span class="mm-colcheck__name">Amount</span><span class="mm-colcheck__meta" style="color: var(--mm-nofit); font-weight: 600">Missing</span></li>
+        <li><svg class="mm-ico is-ok" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="10" cy="10" r="7.5"></circle><path d="M6.8 10.2l2.2 2.2 4.2-4.6"></path></svg><span class="mm-colcheck__name">Description</span><span class="mm-colcheck__meta">Found as “Details”</span></li>
+      </ul>
+      <p class="mm-t-small mm-muted">Other columns in the file, not used: Reference, Balance</p>
+    </section>
+
+    <section class="mm-card" aria-labelledby="fix" style="gap: 12px">
+      <h2 class="mm-t-h2" id="fix">How to fix it</h2>
+      <ol style="padding-left: 20px; display: flex; flex-direction: column; gap: 8px">
+        <li>Export the statement again and make sure the amount of each transaction is included.</li>
+        <li>If the amounts are there under another name, rename that column header to Amount.</li>
+        <li>Upload the new file. Nothing from this attempt was kept.</li>
+      </ol>
+      <p class="mm-t-small"><a class="mm-link" href="#template">Download a template CSV</a></p>
+    </section>
+
+    <div class="mm-actions">
+      <a class="mm-btn mm-btn--primary" href="Summary.dc.html"><svg class="mm-ico" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13V3.5M6 7.5l4-4 4 4"></path><path d="M3.5 13v2.5a1 1 0 001 1h11a1 1 0 001-1V13"></path></svg>Upload another file</a>
+      <a class="mm-btn mm-btn--secondary" href="Summary.dc.html">Try with sample data</a>
+    </div>
+  </main>
+
+  <footer class="mm-foot">
+    <div class="mm-col">Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.</div>
+  </footer>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"dark":{"editor":"boolean","default":false},"$preview":{"width":1280,"height":1180}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { themeClass: this.props.dark ? 'mm-dark' : '' };
+  }
+}
+</script>
+</body>
+</html>
