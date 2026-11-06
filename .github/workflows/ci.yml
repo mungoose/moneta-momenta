@@ -29,4 +29,5 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx stryker run --incremental false
+      # No incremental cache in CI (it is gitignored), so this is always a full run.
+      - run: npm run test:mutation
