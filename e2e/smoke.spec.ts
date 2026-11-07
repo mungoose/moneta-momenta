@@ -84,6 +84,20 @@ test("a sample link opens its result directly", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
 });
 
+test("Estonian copy inflects a month inside a sentence", async ({ page }) => {
+  // December, not July: July's genitive is the same word as its nominative, so it would hide the bug.
+  await page.goto("/et?sample=comfortable&period=3&price=3000&n=6");
+  await expect(
+    page.getByRole("heading", {
+      level: 2,
+      name: "2 kuul jääb puudu, kõige rohkem 2026. aasta detsembri puhul: 50,82 €",
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText(/^Sul kulus 2025\. aasta detsembri jooksul .* 2026\. aasta detsembri puhul sellega\.$/),
+  ).toBeVisible();
+});
+
 test("the language switch keeps the sample link", async ({ page }) => {
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();

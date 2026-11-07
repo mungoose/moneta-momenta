@@ -1,6 +1,6 @@
 import type { DataSummary } from "@/lib/budget/summary";
 import type { Locale, Messages } from "@/lib/i18n";
-import { formatMonth, formatPercent } from "@/lib/i18n/format";
+import { formatMonth, formatOfMonth, formatPercent } from "@/lib/i18n/format";
 import { sum, toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { Affordability, PlanMonth, Status } from "@/lib/plan/affordability";
@@ -26,6 +26,8 @@ function closestMonth(months: readonly PlanMonth[]): PlanMonth | undefined {
 interface Formatters {
   money: (value: Cents) => string;
   month: (value: string) => string;
+  /** A month as "of <month>" (Estonian genitive), for copy that inflects it. */
+  monthOf: (value: string) => string;
 }
 
 /** How many plan months have each status. */
@@ -43,7 +45,7 @@ interface VerdictFacts {
  * The verdict headline. A single tight or failing month is named; several are
  * counted, and a failing plan also says how short the worst month is.
  */
-function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month }: Formatters): string {
+function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month, monthOf }: Formatters): string {
   const { assessment, counts, critical } = facts;
   const { verdict } = assessment;
   if (verdict === "fits") {
@@ -55,7 +57,9 @@ function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month
   }
   // `0 - x`, not `-x`: unary minus on the branded type isn't type-safe, and it would turn 0 into −0.
   const short = money(toCents(0 - critical.leftover));
-  return counts["no-fit"] === 1 ? r.verdictNoFitOne(worst, short) : r.verdictNoFitMany(counts["no-fit"], worst, short);
+  return counts["no-fit"] === 1
+    ? r.verdictNoFitOne(worst, short)
+    : r.verdictNoFitMany(counts["no-fit"], monthOf(critical.month), short);
 }
 
 /**
@@ -68,7 +72,7 @@ function verdictReasons(
   r: Messages["result"],
   facts: VerdictFacts,
   avgSpending: Cents,
-  { money, month }: Formatters,
+  { money, month, monthOf }: Formatters,
 ): string[] {
   const { assessment, counts, critical } = facts;
   const { verdict, buffer, months } = assessment;
@@ -82,10 +86,10 @@ function verdictReasons(
   if (critical.spendingSource === "seasonal") {
     lines.push(
       r.seasonal(
-        month(critical.seasonalMonth),
+        monthOf(critical.seasonalMonth),
         money(critical.expectedSpending),
         money(avgSpending),
-        month(critical.month),
+        monthOf(critical.month),
       ),
     );
   }
@@ -122,6 +126,7 @@ export function Result({
   const format: Formatters = {
     money: (value) => formatCents(value, locale),
     month: (value) => formatMonth(value, locale),
+    monthOf: (value) => formatOfMonth(value, locale),
   };
   const { money, month } = format;
   const { months, verdict, buffer } = assessment;
