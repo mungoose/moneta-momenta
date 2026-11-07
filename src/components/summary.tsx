@@ -224,7 +224,7 @@ function IrregularItems({ t, locale, items }: { t: Messages; locale: Locale; ite
     <div className="mm-callout mm-callout--info">
       <InfoIcon className="mm-ico mm-callout__icon" />
       <div className="mm-callout__content flex-auto">
-        <p className="mm-callout__title">{s.irregularTitle(items.length)}</p>
+        <h2 className="mm-callout__title">{s.irregularTitle(items.length)}</h2>
         <p>
           {s.irregularBody}
           {items.some((item) => item.kind === "spending") && ` ${s.irregularSpending}`}
@@ -262,7 +262,7 @@ function Warning({ title, body }: { title: string; body: string }) {
     <div className="mm-callout mm-callout--warn">
       <StatusIcon status="tight" className="mm-ico mm-callout__icon" />
       <div className="mm-callout__content">
-        <p className="mm-callout__title">{title}</p>
+        <h2 className="mm-callout__title">{title}</h2>
         <p>{body}</p>
       </div>
     </div>

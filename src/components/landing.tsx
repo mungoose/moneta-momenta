@@ -221,7 +221,7 @@ function HowStep({ n, title, body, children }: { n: number; title: string; body:
         {n}
       </span>
       <div className="mm-calcstep__c">
-        <p className="mm-t-h3">{title}</p>
+        <h3 className="mm-t-h3">{title}</h3>
         <p className="mm-t-small mm-muted">{body}</p>
         {children}
       </div>

@@ -27,6 +27,7 @@ test("walks through the sample's verdict in four steps, with its numbers", async
     "Your monthly instalment",
     "Months that cost more last time",
     "What's left each month",
+    "What this can't know",
   ]);
   await expect(drawer).toContainText("€2,537.13 average income − €2,023.19 usual spending = €513.94");
   await expect(drawer).toContainText("May 2026 to October 2026");

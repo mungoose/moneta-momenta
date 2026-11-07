@@ -42,7 +42,7 @@ test("the summary lists the period's one-off amounts, and they follow the period
   const callout = page.locator(".mm-callout--info");
 
   // 6 months, May–October 2026: the summer trip and a dentist bill, all spending.
-  await expect(callout.locator(".mm-callout__title")).toHaveText("3 amounts stood out");
+  await expect(callout.getByRole("heading", { level: 2 })).toHaveText("3 amounts stood out");
   await expect(callout.getByRole("listitem")).toHaveText([
     /Accommodation · July 2026\s*€520\.00/,
     /Travel · July 2026\s*€300\.00/,
@@ -53,7 +53,7 @@ test("the summary lists the period's one-off amounts, and they follow the period
 
   // 12 months adds December's gifts and April's tax refund, which is income.
   await page.getByRole("button", { name: "12 months" }).click();
-  await expect(callout.locator(".mm-callout__title")).toHaveText("5 amounts stood out");
+  await expect(callout.getByRole("heading", { level: 2 })).toHaveText("5 amounts stood out");
   await expect(callout.getByRole("listitem").nth(1)).toHaveText(/Tax Authority \(income\) · April 2026\s*€340\.00/);
   await expect(callout).toContainText("One-off income raises the average income.");
 
