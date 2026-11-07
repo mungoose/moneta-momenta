@@ -71,15 +71,25 @@ const nextConfig: NextConfig = {
       },
     },
   },
-  /** `/` has no page of its own: send visitors to the default locale. */
+  /**
+   * `/` has no page of its own, and an unknown locale (`/lv`, `/EN`) is most
+   * likely a guessed or mistyped link: both go to the default locale, keeping
+   * the query so a sample link still opens its result. Temporary, so adding a
+   * locale later isn't fought by cached redirects. Segments with a dot are left
+   * alone, because redirects run before `public/` files (`/favicon.ico`).
+   */
   async redirects() {
-    return [{ source: "/", destination: "/en", permanent: false }];
+    return [
+      { source: "/", destination: "/en", permanent: false },
+      { source: "/:locale((?!(?:en|et)$)[^/.]+)", destination: "/en", permanent: false },
+    ];
   },
   /**
-   * An unknown first segment (`/lv`) would match `[locale]` and render its 404
-   * at request time, with inline scripts that contain the path and so aren't
-   * in the CSP. Sent to the prerendered 404 instead, whose scripts are hashed.
-   * `afterFiles` runs after `public/` files, so `/favicon.ico` still resolves.
+   * Any other unknown first segment (`/x.y`, not a file) would match `[locale]`
+   * and render its 404 at request time, with inline scripts that contain the
+   * path and so aren't in the CSP. Sent to the prerendered 404 instead, whose
+   * scripts are hashed. `afterFiles` runs after `public/` files, so
+   * `/favicon.ico` still resolves.
    */
   async rewrites() {
     return {

@@ -82,10 +82,21 @@ test("a missing price shows its error and takes focus", async ({ page }) => {
   await expect(price).toHaveAttribute("aria-invalid", "true");
 });
 
-test("unknown locale is a 404", async ({ page }) => {
-  // Served the prerendered 404 (a rewrite in next.config.ts), so its inline
+test("unknown locale redirects to English and keeps the sample link", async ({ page }) => {
+  await page.goto("/lv?sample=comfortable&price=1200&n=12");
+  await expect(page).toHaveURL(/\/en\?sample=comfortable&price=1200&n=12$/);
+  await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
+});
+
+test("public files are not redirected", async ({ request }) => {
+  const response = await request.get("/transactions-template.csv", { maxRedirects: 0 });
+  expect(response.status()).toBe(200);
+});
+
+test("an unknown path with a dot is the prerendered 404", async ({ page }) => {
+  // A rewrite in next.config.ts serves the prerendered 404, so its inline
   // scripts are hashed and guardConsole would catch any the CSP blocked.
   allowErrors(/status of 404/);
-  const response = await page.goto("/lv");
+  const response = await page.goto("/x.y");
   expect(response?.status()).toBe(404);
 });
