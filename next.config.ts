@@ -8,6 +8,10 @@ const isDev = process.env.NODE_ENV === "development";
  * send an uploaded file (or anything else) to another origin. If telemetry ever
  * ships to a real collector, add exactly that one origin here.
  * `'unsafe-eval'` is dev-only (React uses eval for debug stacks).
+ * No `upgrade-insecure-requests`: Safari applies it to http://localhost too, so
+ * every asset of the dev server or a local build fails over https. In production
+ * it adds nothing: every source is same-origin, and Vercel already redirects
+ * http to https and sends HSTS.
  */
 const csp = [
   "default-src 'self'",
@@ -20,7 +24,6 @@ const csp = [
   "base-uri 'self'",
   "form-action 'self'",
   "frame-ancestors 'none'",
-  "upgrade-insecure-requests",
 ].join("; ");
 
 const nextConfig: NextConfig = {
