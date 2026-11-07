@@ -105,7 +105,7 @@ Browser (transaction data stays here)                Vercel
 ```
 
 - **Pure core.** `src/lib` has no React and no DOM. All the money logic lives there, and that's what the unit and mutation tests target.
-- **Privacy is enforced.** A CSP of `connect-src 'self'` means an uploaded file can't be sent anywhere else, which is why the README can say "your file never leaves your browser". Transactions are never stored in `localStorage` and never logged.
+- **Privacy is enforced.** A CSP of `connect-src 'self'` means the page's code can't send an uploaded file anywhere else, which is why the README can say "your file never leaves your browser". `script-src` has no `'unsafe-inline'`, so injected markup can't run script either. What CSP can't block is a script that already runs navigating the tab away with data in the URL, so the bundle itself has to be trusted. Transactions are never stored in `localStorage` and never logged.
 - **State.** One client page per locale, with a `useReducer` flow: `landing → summary → purchase → result`.
   - With sample data, purchase inputs are mirrored into the URL (`?sample=comfortable&price=1200&n=12`), so the README can deep-link a reviewer straight to a result.
   - Uploaded data is never put in the URL. A reload returns to landing with a short note.
@@ -397,7 +397,7 @@ They're upload fixtures, not samples: they aren't in `public/samples/` and the l
 
 - Public GitHub repo, linked to Vercel. The URL is `moneta-<suffix>.vercel.app`, because `moneta` itself is almost certainly taken.
 - Environment variables: only `ANTHROPIC_API_KEY`, and only if the Could item is built.
-- Security headers (CSP, `Referrer-Policy`, `X-Content-Type-Options`) are set in `next.config.ts`.
+- Security headers (CSP, `Referrer-Policy`, `X-Content-Type-Options`) are set in `next.config.ts`. `npm run build` (`scripts/build.mts`) builds twice so the CSP can list the hash of every inline script Next writes, keeping pages static without `'unsafe-inline'`. `vercel.json` pins that build command, and a plain `next build` fails rather than ship a CSP without hashes.
 
 ## 14. Build order
 
