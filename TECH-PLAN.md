@@ -339,6 +339,13 @@ Desktop 1280 × 800 is the primary project. The same specs also run at 390 × 84
 1. `/en` → Try sample → summary shows 6 months → €1,200 × 12 → verdict *doesn't fit*, July marked → open the explanation; the numbers are visible.
 2. Upload `other-bank.csv` → missing-columns error.
 3. `/et`: Estonian copy, and `1200` is formatted as `1200,00 €` (Estonian doesn't group 4-digit numbers; `1234567,89` → `1 234 567,89 €`, with no-break spaces).
+4. Upload a realistic file whose first or last month is incomplete → the summary shows the "may be missing transactions" warning, and the flow still reaches a verdict.
+
+**Incomplete-month datasets (to do, with the upload PR).** The unit fixtures (`starts-mid-month.tsv`, `ends-mid-month.tsv`) cover the rule, but they have about 10 rows each. To see the warning on realistic data, generate two more sets with `sample-dataset/generate_ynab_sample.py`. It's seeded, so the output is reproducible.
+- **Ends early:** the comfortable profile with its data stopping on 12 October 2026 → October flagged as ending mid-month.
+- **Starts late:** data starting on 18 November 2025 → November flagged as starting mid-month. The flag only shows while that month is in the period, so the test picks 12 months, or the file is shortened to under 6 full months so the first month is in the default period.
+
+The generator needs two small changes first: it hard-codes `START`/`END`, and it writes to `~/Desktop`. Both should become arguments, so the script can write the sets straight into `tests/fixtures/` or `e2e/fixtures/`. These files are upload fixtures, not samples: they don't go in `public/samples/`, and the landing page doesn't offer them. The spec uploads them with `setInputFiles` and fixes the clock with `page.clock`. Uploads count from today's month, so a fixed clock keeps the expected months stable; it also keeps a planned "data ends long before today" warning from appearing as time passes.
 
 ### CI and deploy
 
