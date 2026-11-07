@@ -34,6 +34,33 @@ test("sample data goes through every step to a verdict", async ({ page }) => {
   await expect(page.getByRole("table")).toBeVisible();
 });
 
+test("the summary lists the period's one-off amounts, and they follow the period", async ({ page }) => {
+  await page.goto("/en");
+  await page.getByRole("button", { name: "Try with sample data" }).click();
+  const callout = page.locator(".mm-callout--info");
+
+  // 6 months, May–October 2026: the summer trip and a dentist bill, all spending.
+  await expect(callout.locator(".mm-callout__title")).toHaveText("3 amounts stood out");
+  await expect(callout.getByRole("listitem")).toHaveText([
+    /Accommodation · July 2026\s*€520\.00/,
+    /Travel · July 2026\s*€300\.00/,
+    /Doctor & dentist · June 2026\s*€117\.42/,
+  ]);
+  await expect(callout).toContainText("If a plan reaches the same month of the year");
+  await expect(callout).not.toContainText("One-off income");
+
+  // 12 months adds December's gifts and April's tax refund, which is income.
+  await page.getByRole("button", { name: "12 months" }).click();
+  await expect(callout.locator(".mm-callout__title")).toHaveText("5 amounts stood out");
+  await expect(callout.getByRole("listitem").nth(1)).toHaveText(/Tax Authority \(income\) · April 2026\s*€340\.00/);
+  await expect(callout).toContainText("One-off income raises the average income.");
+
+  // The last 3 months have nothing unusual, so there's no callout.
+  await page.getByRole("button", { name: "3 months" }).click();
+  await expect(page.getByRole("heading", { level: 2, name: "Usual monthly margin" })).toBeVisible();
+  await expect(callout).toHaveCount(0);
+});
+
 test("Back returns to the previous step", async ({ page }) => {
   await page.goto("/en");
   await page.getByRole("button", { name: "Try with sample data" }).click();

@@ -4,12 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import type { DataSummary } from "@/lib/budget/summary";
 import { BUFFER_BPS } from "@/lib/constants";
 import type { Locale, Messages } from "@/lib/i18n";
-import { formatMonth, formatPercent } from "@/lib/i18n/format";
+import { formatList, formatMonth, formatPercent } from "@/lib/i18n/format";
 import { toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { Affordability, PlanMonth } from "@/lib/plan/affordability";
 import type { PlanInput, Schedule } from "@/lib/plan/schedule";
 import { CloseIcon, InfoIcon, StatusChip, StatusIcon } from "./icons";
+
+/** One-off costs named in the seasonal step; the Summary lists them all. */
+const ONE_OFFS_SHOWN = 3;
 
 /** Everything the explanation shows. It adds no maths of its own: each figure is one the result already uses. */
 interface ExplanationFacts {
@@ -187,13 +190,17 @@ function InstalmentStep({ t, input, schedule, money, locale }: ExplanationFacts)
 }
 
 /** Step 3: the plan months that count on a past month's higher spending instead of the average. */
-function SeasonalStep({ t, summary, assessment, money, month }: ExplanationFacts) {
+function SeasonalStep({ t, summary, assessment, money, month, locale }: ExplanationFacts) {
   const e = t.explanation;
   const usual = money(summary.avgSpending);
   const seasonal = assessment.months.filter((m) => m.spendingSource === "seasonal");
+  const oneOffs = summary.irregular
+    .flatMap((item) => (item.kind === "spending" ? [e.irregularNoteItem(item.category, month(item.peakMonth))] : []))
+    .slice(0, ONE_OFFS_SHOWN);
   return (
     <Step n={3} title={e.seasonalTitle}>
       <p className="mm-t-small mm-muted">{e.seasonalRule}</p>
+      {oneOffs.length > 0 && <p className="mm-t-small mm-muted">{e.irregularNote(formatList(oneOffs, locale))}</p>}
       {seasonal.length === 0 ? (
         <p>{e.seasonalNone(usual)}</p>
       ) : (

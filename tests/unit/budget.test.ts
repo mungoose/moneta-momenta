@@ -307,6 +307,23 @@ describe("buildMonths", () => {
     expect(months(text).fullMonths[2]?.income).toBe(200000 - 5000);
   });
 
+  it("totals net income per payee", () => {
+    const text = threeMonths(
+      ["10/10/2026", "Tax Office", "Inflow", "Ready to Assign", "0,00", "340,00"],
+      ["26/10/2026", "Employer", "Inflow", "Ready to Assign", "50,00", "0,00"],
+      ["27/10/2026", "__proto__", "Inflow", "Ready to Assign", "0,00", "1,00"],
+    );
+    const { fullMonths } = months(text);
+    expect(fullMonths[2]?.incomeByPayee).toEqual(
+      new Map([
+        ["Tax Office", 34000],
+        ["Employer", 200000 - 5000],
+        ["__proto__", 100],
+      ]),
+    );
+    expect(fullMonths[1]?.incomeByPayee).toEqual(new Map([["Employer", 200000]]));
+  });
+
   it("counts and totals excluded rows per reason and month, by the money each row moved", () => {
     const text = threeMonths(
       ["05/10/2026", "Transfer : SEB Credit", "", "", "300,00", "0,00"],
@@ -509,6 +526,23 @@ describe("summarise", () => {
     expect(summary(text, "2026-11", 3).excluded).toEqual({ ...NO_EXCLUDED, transfer: { count: 2, total: 6000 } });
     expect(summary(text, "2026-11", 4).excluded).toEqual({ ...NO_EXCLUDED, transfer: { count: 3, total: 7000 } });
   });
+
+  it("finds irregular items in the period's months only", () => {
+    const text = tsv(
+      spend("01/07/2026", "500,00", "Home", "Repairs"),
+      salary("25/07/2026"),
+      salary("25/08/2026"),
+      salary("25/09/2026"),
+      spend("02/10/2026", "200,00", "Holidays", "Travel"),
+      salary("25/10/2026"),
+    );
+    const travel = { kind: "spending", group: "Holidays", category: "Travel", peak: 20000, peakMonth: "2026-10" };
+    expect(summary(text, "2026-11", 3).irregular).toEqual([{ ...travel, median: 0 }]);
+    expect(summary(text, "2026-11", 4).irregular).toEqual([
+      { kind: "spending", group: "Home", category: "Repairs", peak: 50000, peakMonth: "2026-07", median: 0 },
+      { ...travel, median: 0 },
+    ]);
+  });
 });
 
 /** Expected averages are written as the division they come from; rounding half away from zero. */
@@ -605,6 +639,51 @@ describe("golden: sample files", () => {
     const s = summary(sample("en_comfortable"), "2026-11", length);
     expect(s.period).toHaveLength(length);
     expect([s.avgIncome, s.avgSpending, s.margin]).toEqual([avgIncome, avgSpending, avgIncome - avgSpending]);
+  });
+
+  // Independent Python calculation over the sample TSV: per category or income payee, the period's
+  // monthly nets (0 when absent); flagged when peak > 3 × median and peak − median ≥ €100.
+  const spendingPeak = (group: string, category: string, peak: number, peakMonth: string) => ({
+    kind: "spending",
+    group,
+    category,
+    peak,
+    peakMonth,
+    median: 0,
+  });
+  const comfortableTrip = [
+    spendingPeak("Holidays", "Accommodation", 52000, "2026-07"),
+    spendingPeak("Holidays", "Travel", 30000, "2026-07"),
+  ];
+
+  it.each([
+    [3, []],
+    [6, [...comfortableTrip, spendingPeak("Health", "Doctor & dentist", 11742, "2026-06")]],
+    [
+      12,
+      [
+        comfortableTrip[0],
+        { kind: "income", payee: "Tax Authority", peak: 34000, peakMonth: "2026-04", median: 0 },
+        spendingPeak("Lifestyle", "Gifts", 32640, "2025-12"),
+        comfortableTrip[1],
+        spendingPeak("Health", "Doctor & dentist", 11742, "2026-06"),
+      ],
+    ],
+  ] as const)("comfortable, last %i months: irregular items", (length, expected) => {
+    expect(summary(sample("en_comfortable"), "2026-11", length).irregular).toEqual(expected);
+  });
+
+  it("tight, last 3 months: back-to-school clothes in September stand out from the median", () => {
+    expect(summary(sample("en_tight"), "2026-11", 3).irregular).toEqual([
+      {
+        kind: "spending",
+        group: "Kids",
+        category: "Kids' clothes & supplies",
+        peak: 13716,
+        peakMonth: "2026-09",
+        median: 2467,
+      },
+    ]);
   });
 
   it("tight, last 6 months: margin ≈ €5; July 2026 margin −€234.08", () => {

@@ -168,14 +168,18 @@ type Classified =
   | { kind: 'spending'; row: Row; group: string; category: string; net: Cents }
   | { kind: 'excluded'; row: Row; reason: ExcludedReason }
 
-interface MonthTotals { month: YearMonth; income: Cents; spending: Cents; byCategory: Record<string, Cents> }
+interface MonthTotals { month: YearMonth; income: Cents; spending: Cents;
+                        groups: Map<string, Map<string, Cents>>;   // group → category → net spending
+                        incomeByPayee: Map<string, Cents>;
+                        excluded: Record<ExcludedReason, { count: number; total: Cents }> }
 
 interface DataSummary {
   fullMonths: YearMonth[]; droppedMonths: { month: YearMonth; why: 'current' }[];
   incomplete: ({ month: YearMonth; why: 'starts-mid-month'; firstDate: string } | { month: YearMonth; why: 'ends-mid-month'; lastDate: string })[];
   period: YearMonth[]; avgIncome: Cents; avgSpending: Cents; margin: Cents;
   byGroup: { group: string; avg: Cents; categories: { category: string; avg: Cents }[] }[];
-  irregular: { name: string; kind: 'income' | 'spending'; avg: Cents; median: Cents; peakMonth: YearMonth; peak: Cents }[];
+  irregular: (({ kind: 'spending'; group: string; category: string } | { kind: 'income'; payee: string })
+              & { peak: Cents; peakMonth: YearMonth; median: Cents })[];
   excluded: Record<ExcludedReason, { count: number; total: Cents }>;
   decimal: ',' | '.';
 }
@@ -226,7 +230,9 @@ Every row keeps its `line` number, so errors can say exactly where the problem i
 
 The **verdict** is the worst month's status. It's always shown next to its inputs.
 
-**Irregular items (Should).** A category, or an income payee, counts as irregular when its peak month is more than `2 × median` and at least €50. Showing irregular *income* too (the December bonus, the April tax refund) tells the user how much of the average income they shouldn't count on.
+**Irregular items: ✅ informational only.** A spending category, or an income payee, counts as irregular when, over the period's months (a month without its rows counts as zero), its peak month is more than `IRREGULAR_PEAK_RATIO = 3` × its median and at least `IRREGULAR_MIN_GAP_CENTS = 10_000` (€100) above it. A median below zero (refunds) counts as zero. The Summary lists them, largest peak first, and the explanation names up to three spending ones. Showing irregular *income* too (the April tax refund) tells the user how much of the average income they shouldn't count on.
+- **They stay in the averages and change no verdict.** The seasonal lookup already expects a past spike again in the same calendar month, so taking them out of the averages would only make plans look easier to afford, and would change every verdict the tests pin.
+- **Why 3× and €100, not 2× and €50:** the looser rule flagged 11 items on the comfortable sample's 12 months (fuel at 2.07× its median, electricity, household goods): ordinary wobble, not one-offs. The tighter one flags the trip, a dentist bill, December's gifts and the tax refund.
 
 ## 7. Errors (each one says what to do next, none names a product)
 

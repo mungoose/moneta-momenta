@@ -25,6 +25,8 @@ export interface MonthTotals {
    * is a valid category name.
    */
   groups: Map<string, Map<string, Cents>>;
+  /** Net income per payee, so a one-off payer (a tax refund) can be told from the salary. A Map for the same reason. */
+  incomeByPayee: Map<string, Cents>;
   excluded: Record<ExcludedReason, ExcludedTotal>;
 }
 
@@ -91,6 +93,7 @@ const emptyMonth = (month: YearMonth): MonthTotals => ({
   income: 0 as Cents,
   spending: 0 as Cents,
   groups: new Map(),
+  incomeByPayee: new Map(),
   excluded: {
     transfer: { count: 0, total: 0 as Cents },
     "opening-balance": { count: 0, total: 0 as Cents },
@@ -196,9 +199,12 @@ function endsEarly(lastDate: string): boolean {
 /** Adds one classified row to its month's totals. */
 function addTo(totals: MonthTotals, item: Classified): void {
   switch (item.kind) {
-    case "income":
+    case "income": {
       totals.income = add(totals.income, item.amount);
+      const { payee } = item.row;
+      totals.incomeByPayee.set(payee, add(totals.incomeByPayee.get(payee) ?? (0 as Cents), item.amount));
       return;
+    }
     case "spending": {
       totals.spending = add(totals.spending, item.net);
       let group = totals.groups.get(item.group);

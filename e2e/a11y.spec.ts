@@ -47,6 +47,14 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     },
   },
   {
+    // Estonian, 12 months, tight sample: one-off income and "usually" amounts, the longest callout.
+    name: "summary with one-off amounts",
+    open: async (page) => {
+      await page.goto("/et?sample=tight&period=12");
+      await expect(page.locator(".mm-callout--info")).toContainText("Ühekordne tulu");
+    },
+  },
+  {
     name: "purchase with field errors",
     open: async (page) => {
       await page.goto("/en");

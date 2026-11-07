@@ -208,6 +208,7 @@ const month = (yearMonth: string, spending: number, income = 300000): MonthTotal
   income: c(income),
   spending: c(spending),
   groups: new Map(),
+  incomeByPayee: new Map(),
   excluded: {
     transfer: { count: 0, total: c(0) },
     "opening-balance": { count: 0, total: c(0) },

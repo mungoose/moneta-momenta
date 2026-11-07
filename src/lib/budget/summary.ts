@@ -10,6 +10,7 @@ import {
   type MonthTotals,
   type YearMonth,
 } from "./months";
+import { irregularItems, type IrregularItem } from "./irregular";
 
 /** A category's average monthly net spending over the period. */
 export interface CategoryAverage {
@@ -48,6 +49,8 @@ export interface DataSummary {
    * from their group's average by a cent or so.
    */
   byGroup: GroupAverage[];
+  /** Spending categories and income payees with a one-off month in the period; informational, the averages include them. */
+  irregular: IrregularItem[];
   /** Rows in the period that count as neither income nor spending, per reason. */
   excluded: Record<ExcludedReason, ExcludedTotal>;
   /** Period months without any income; a warning, not an error. */
@@ -135,6 +138,7 @@ export function summarise(file: ParsedFile, reference: YearMonth, periodLength?:
       avgSpending,
       margin: toCents(avgIncome - avgSpending),
       byGroup: groupAverages(months, average),
+      irregular: irregularItems(months),
       excluded: excludedTotals(months),
       noIncomeMonths: months.filter((m) => m.income === 0).map((m) => m.month),
       incomplete: incomplete.filter((edge) => months.some((m) => m.month === edge.month)),
