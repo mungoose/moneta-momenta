@@ -1,30 +1,10 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { guardConsole, heading } from "./helpers";
 
 // Smoke tests for the sample flow: landing → summary → purchase → result, plus
 // the browser history and sample links. The upload path gets its own specs.
 
-// CSP violations and runtime errors surface as console errors: every test fails on any,
-// except errors a test explicitly expects.
-let consoleErrors: string[] = [];
-let expectedErrors: RegExp[] = [];
-
-test.beforeEach(({ page }) => {
-  consoleErrors = [];
-  expectedErrors = [];
-  page.on("console", (msg) => {
-    if (msg.type() === "error") {
-      consoleErrors.push(msg.text());
-    }
-  });
-  page.on("pageerror", (err) => consoleErrors.push(err.message));
-});
-
-test.afterEach(() => {
-  const unexpected = consoleErrors.filter((text) => !expectedErrors.some((re) => re.test(text)));
-  expect(unexpected, "unexpected browser console errors").toEqual([]);
-});
-
-const heading = (page: Page) => page.getByRole("heading", { level: 1 });
+const allowErrors = guardConsole();
 
 // The sample's prefilled purchase (€1,200 over 12 at 0%, 6-month average) fails in one month:
 // July 2027 counts on the July 2026 spending and ends €6.49 short.
@@ -103,7 +83,7 @@ test("a missing price shows its error and takes focus", async ({ page }) => {
 });
 
 test("unknown locale is a 404", async ({ page }) => {
-  expectedErrors = [/status of 404/];
+  allowErrors(/status of 404/);
   const response = await page.goto("/lv");
   expect(response?.status()).toBe(404);
 });
