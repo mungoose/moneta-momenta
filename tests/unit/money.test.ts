@@ -186,8 +186,9 @@ describe("formatCents", () => {
     [246587, "€2,465.87"],
     [5, "€0.05"],
     [0, "€0.00"],
-    [-649, "-€6.49"],
-    [-5, "-€0.05"],
+    // A true minus sign (U+2212), as Estonian already gets: a hyphen reads as a dash and is shorter.
+    [-649, "\u2212€6.49"],
+    [-5, "\u2212€0.05"],
     [MAX, "€90,071,992,547,409.91"],
   ])("en: %d → %j", (value, expected) => {
     expect(formatCents(c(value), "en")).toBe(expected);

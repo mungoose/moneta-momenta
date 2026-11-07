@@ -37,7 +37,9 @@ const numberFormatters = Object.fromEntries(
  */
 export function formatMonth(month: YearMonth, locale: Locale, style: MonthStyle = "long"): string {
   const date = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1, 1));
-  return monthFormatters[locale][style].format(date);
+  // Irish English shortens September to "Sept"; three letters like every other month keeps the table column even.
+  // Estonian's lowercase "sept" never matches.
+  return monthFormatters[locale][style].format(date).replace("Sept ", "Sep ");
 }
 
 /**

@@ -32,7 +32,7 @@ test("walks through the sample's verdict in four steps, with its numbers", async
   await expect(drawer).toContainText("May 2026 to October 2026");
   await expect(drawer).toContainText("€1,200.00 ÷ 12 = €100.00 a month");
   // July 2027 counts on July 2026's spending, and it's the month that decides the verdict.
-  await expect(drawer).toContainText("July 2027: €2,537.13 − €2,443.62 − €100.00 = -€6.49");
+  await expect(drawer).toContainText("July 2027: €2,537.13 − €2,443.62 − €100.00 = \u2212€6.49");
   await expect(drawer).toContainText(
     "€0.00 to €253.70 left over, or below €0.00 when savings from earlier months cover the gap.",
   );
