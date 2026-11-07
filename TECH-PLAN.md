@@ -397,7 +397,7 @@ They're upload fixtures, not samples: they aren't in `public/samples/` and the l
 
 - Public GitHub repo, linked to Vercel. The URL is `moneta-<suffix>.vercel.app`, because `moneta` itself is almost certainly taken.
 - Environment variables: only `ANTHROPIC_API_KEY`, and only if the Could item is built.
-- Security headers (CSP, `Referrer-Policy`, `X-Content-Type-Options`) are set in `next.config.ts`. `npm run build` (`scripts/build.mts`) builds twice so the CSP can list the hash of every inline script Next writes, keeping pages static without `'unsafe-inline'`; Vercel must use `npm run build`, not `next build`.
+- Security headers (CSP, `Referrer-Policy`, `X-Content-Type-Options`) are set in `next.config.ts`. `npm run build` (`scripts/build.mts`) builds twice so the CSP can list the hash of every inline script Next writes, keeping pages static without `'unsafe-inline'`. `vercel.json` pins that build command, and a plain `next build` fails rather than ship a CSP without hashes.
 
 ## 14. Build order
 
