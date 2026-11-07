@@ -61,6 +61,15 @@ export function InfoIcon({ className = "mm-ico" }: { className?: string }) {
   );
 }
 
+/** A cross, for closing a drawer. */
+export function CloseIcon() {
+  return (
+    <svg className="mm-ico" {...stroke}>
+      <path d="M5 5l10 10M15 5L5 15" />
+    </svg>
+  );
+}
+
 /**
  * The icon for a status. Each has its own shape (circle + check, triangle +
  * mark, octagon + cross), so status never relies on colour alone.

@@ -525,6 +525,9 @@ function ResultStep({
       onBack={() => {
         dispatch({ type: "go", step: "summary" });
       }}
+      onExplain={() => {
+        track({ name: "explanation_opened" });
+      }}
     />
   ) : (
     <Unexpected t={t} />

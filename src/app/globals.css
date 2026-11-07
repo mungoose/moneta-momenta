@@ -146,6 +146,33 @@
     outline: none;
   }
 
+  /*
+   * The design's drawer sits in a mocked-up page, positioned over a scrim element. The app's is a native modal
+   * <dialog> in the top layer: pinned to the viewport's right edge, with the scrim as its backdrop, and without the
+   * browser's own dialog box styles. The page behind it doesn't scroll while it's open.
+   */
+  dialog.mm-drawer {
+    position: fixed;
+    inset: 0 0 0 auto;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    color: var(--mm-text);
+  }
+  dialog.mm-drawer::backdrop {
+    background: var(--mm-scrim);
+  }
+  /* The body is a tab stop so the keyboard can scroll it; the ring goes inside, where the head and foot can't cover it. */
+  .mm-drawer__body:focus-visible {
+    outline-offset: -2px;
+  }
+  html:has(dialog.mm-drawer[open]) {
+    overflow: hidden;
+  }
+
   /* Narrow column fixes where the app's content is longer than the design's placeholders. */
   @container mm (max-width: 600px) {
     /* Brand, badge, "Start over" and the language switch don't fit one 390px row; the summary already says it's sample data. */

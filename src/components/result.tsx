@@ -5,6 +5,7 @@ import { sum, toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { Affordability, PlanMonth, Status } from "@/lib/plan/affordability";
 import type { PlanInput, Schedule } from "@/lib/plan/schedule";
+import { Explanation } from "./explanation";
 import { StatusChip, StatusIcon } from "./icons";
 
 const VERDICT_CLASS: Record<Status, string> = {
@@ -104,6 +105,7 @@ export function Result({
   assessment,
   onChange,
   onBack,
+  onExplain,
 }: {
   t: Messages;
   locale: Locale;
@@ -113,6 +115,8 @@ export function Result({
   assessment: Affordability;
   onChange: () => void;
   onBack: () => void;
+  /** The user opened "How we calculated this". */
+  onExplain: () => void;
 }) {
   const r = t.result;
   const format: Formatters = {
@@ -202,6 +206,16 @@ export function Result({
           </dl>
         </div>
         <div className="mm-verdict__foot">
+          <Explanation
+            t={t}
+            locale={locale}
+            summary={summary}
+            input={input}
+            schedule={schedule}
+            assessment={assessment}
+            critical={critical}
+            onOpen={onExplain}
+          />
           <button type="button" className="mm-btn mm-btn--secondary" onClick={onChange}>
             {r.change}
           </button>

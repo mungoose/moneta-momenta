@@ -80,6 +80,14 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     },
   },
   {
+    name: "explanation drawer",
+    open: async (page) => {
+      await page.goto("/et?sample=comfortable&price=1200&n=12&upfront=150&rate=9.9&fee=2.5");
+      await page.getByRole("button", { name: "Kuidas me selle arvutasime" }).click();
+      await expect(page.getByRole("dialog", { name: "Kuidas me selle arvutasime" })).toBeVisible();
+    },
+  },
+  {
     name: "upload error",
     open: async (page) => {
       await page.goto("/en");

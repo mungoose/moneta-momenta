@@ -243,6 +243,46 @@ export const et = {
     tryAgain: "Proovi teisi tingimusi",
     backToMoney: "Tagasi sinu raha juurde",
   },
+  explanation: {
+    title: "Kuidas me selle arvutasime",
+    close: "Sulge",
+    intro: "Iga arv tuleb sinu tehingutest ja sisestatud ostust. Neli sammu:",
+    marginTitle: "Sinu tavaline kuujääk",
+    marginFormula: (income: string, spending: string) =>
+      `${income} keskmine sissetulek − ${spending} tavalised kulud =`,
+    marginNote: (count: number, from: string, to: string) =>
+      `Kuu keskmised ${count} täiskuu põhjal, ${from} kuni ${to}.`,
+    instalmentTitle: "Sinu kuumakse",
+    financedFormula: (price: string, upfront: string) => `${price} hind − ${upfront} sissemakse =`,
+    toSpread: "jagada maksete peale",
+    toSpreadNoUpfront: "jagada maksete peale, sissemakseta",
+    plusInterest: (interest: string) => `+ ${interest} intress`,
+    plusFees: (fees: string, count: number, fee: string) => `+ ${fees} tasud (${count} × ${fee})`,
+    aMonth: "kuus",
+    lastDiffers: (last: string) => `Viimane makse on ${last}: see sisaldab sente, mis ei jagunenud võrdselt.`,
+    rateNote: (percent: string) =>
+      `Intress ${percent}% aastas on arvutatud võrdse kuumakse järgi, nagu järelmaksu pakkumistes tavaks.`,
+    seasonalTitle: "Kuud, mis eelmisel korral läksid rohkem maksma",
+    seasonalRule:
+      "Iga maksekuu puhul vaatame sinu failist sama kuud kuni aasta tagasi. Kui kulutasid siis tavalisest rohkem, arvestame selle kuu puhul sellega. Odavam kuu ei muuda plaani kunagi paremaks.",
+    spentIn: (month: string) => `Kulud: ${month}`,
+    seasonalNone: (usual: string) =>
+      `Ükski maksekuu ei läinud eelmisel korral tavalisest rohkem maksma, seega arvestame igas kuus sinu tavaliste kuludega ${usual}.`,
+    seasonalOthers: (usual: string) => `Ülejäänud kuudel arvestame sinu tavaliste kuludega ${usual}.`,
+    leftoverTitle: "Mis igas kuus üle jääb",
+    leftoverFormula: "Keskmine sissetulek − selle kuu kulud − makse = jääb üle",
+    leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
+      `${capital(month)}: ${income} − ${spending} − ${instalment} =`,
+    criticalNote: "Selles kuus jääb kõige vähem üle, nii et see otsustab tulemuse.",
+    fitsRange: (buffer: string) => `Üle jääb ${buffer} või rohkem`,
+    tightRange: (from: string, to: string) => `Üle jääb ${from} kuni ${to}`,
+    noFitRange: (zero: string) => `Üle jääb vähem kui ${zero}`,
+    bufferNote: (buffer: string, percent: string) =>
+      `${buffer} puhver on ${percent}% sinu keskmisest sissetulekust ettearvamatute kulude jaoks, nagu remont või arsti arve.`,
+    limitsTitle: "Mida see ei tea",
+    limitsBody:
+      "Muutusi, mida pole veel juhtunud, nagu uus töö, üüri tõus või uus tellimus. Kui sinu sissetulek või kulud on muutumas, pea seda ligikaudseks juhiseks.",
+  },
   unexpectedTitle: "Midagi läks valesti",
   unexpected: "Nende numbritega läks midagi valesti. Alusta uuesti ja proovi veel kord.",
 } satisfies Messages;

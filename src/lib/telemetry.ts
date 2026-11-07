@@ -27,7 +27,9 @@ export type TelemetryEvent =
       instalments: InstalmentBucket;
       priceBucket: PriceBucket;
       hasInterest: boolean;
-    };
+    }
+  /** The user opened "How we calculated this" on a result. */
+  | { name: "explanation_opened" };
 
 /** The event named `N`. */
 export type EventNamed<N extends TelemetryEvent["name"]> = Extract<TelemetryEvent, { name: N }>;
@@ -48,6 +50,8 @@ const FIELDS: { [N in TelemetryEvent["name"]]: readonly Fields<N>[] } = {
   import_failed: ["reason"],
   period_changed: ["months"],
   plan_checked: ["verdict", "instalments", "priceBucket", "hasInterest"],
+  // Stryker disable next-line ArrayDeclaration: equivalent; whitelisting a made-up key changes nothing, as no event carries it
+  explanation_opened: [],
 };
 
 /** The event with only its name and whitelisted properties. */
