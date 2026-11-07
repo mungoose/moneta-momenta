@@ -81,6 +81,19 @@ test("Back returns to the previous step", async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/);
 });
 
+test("each step has its own browser tab title", async ({ page }) => {
+  await page.goto("/en");
+  await expect(page).toHaveTitle("Moneta Momenta");
+  await page.goto("/en?sample=comfortable");
+  await expect(page).toHaveTitle("Your money – Step 1 of 3 – Moneta Momenta");
+  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await expect(page).toHaveTitle("The purchase – Step 2 of 3 – Moneta Momenta");
+  await page.getByRole("button", { name: "Check affordability" }).click();
+  await expect(page).toHaveTitle("Result: Tight – Step 3 of 3 – Moneta Momenta");
+  await page.goto("/et?sample=tight&price=1200&n=12");
+  await expect(page).toHaveTitle("Tulemus: Ei mahu – samm 3/3 – Moneta Momenta");
+});
+
 test("a sample link opens its result directly", async ({ page }) => {
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();

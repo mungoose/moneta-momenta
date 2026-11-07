@@ -11,6 +11,11 @@ export const et = {
     title: "Moneta Momenta",
     description: "Vaata kuude kaupa, kas järelmaks mahub sinu tegelike kulude sisse, enne kui otsustad.",
   },
+  titles: {
+    summary: "Sinu raha – samm 1/3",
+    purchase: "Ost – samm 2/3",
+    result: (status: string) => `Tulemus: ${status} – samm 3/3`,
+  },
   header: {
     appName: "Moneta Momenta",
     home: "Moneta Momenta, tagasi algusesse",

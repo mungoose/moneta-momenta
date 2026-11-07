@@ -210,6 +210,7 @@ for (const { name, file, h1, title, body, template } of ERRORS) {
 
     await expect(heading(page)).toHaveText(h1);
     await expect(heading(page)).toBeFocused();
+    await expect(page).toHaveTitle(`${h1} – Moneta Momenta`);
     await expect(alert(page)).toContainText(title);
     if (body) {
       await expect(alert(page)).toContainText(body);

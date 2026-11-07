@@ -9,6 +9,12 @@ export const en = {
     title: "Moneta Momenta",
     description: "See month by month whether an instalment plan fits your real spending, before you commit.",
   },
+  /** Browser tab titles, each followed by " – " and the app name. The landing has the app name alone. */
+  titles: {
+    summary: "Your money – Step 1 of 3",
+    purchase: "The purchase – Step 2 of 3",
+    result: (status: string) => `Result: ${status} – Step 3 of 3`,
+  },
   header: {
     appName: "Moneta Momenta",
     home: "Moneta Momenta, back to the start",

@@ -80,6 +80,20 @@ function explainRead(t: Messages, error: ImportError, file: string, locale: Loca
 }
 
 /**
+ * The error screen's heading, also its browser tab title: whether the file
+ * couldn't be read, or was read but its data can't be used.
+ * @param t      UI copy.
+ * @param error  The load error; `null` when reading failed in a way no check describes.
+ * @returns      The heading text.
+ */
+export function uploadErrorTitle(t: Messages, error: LoadError | null): string {
+  return isUnusable(error) ? t.uploadError.useTitle : t.uploadError.readTitle;
+}
+
+/** The file was read, but its data can't be used: a template wouldn't help. */
+const isUnusable = (error: LoadError | null) => error?.code === "too-little-data" || error?.code === "no-income";
+
+/**
  * Shown on the landing step when an upload can't be used: what's wrong, how
  * to fix it, and the ways on. It isn't a step of its own, so it adds no
  * history entry.
@@ -109,14 +123,13 @@ export function UploadErrorView({
   }, [failure]);
 
   const { title, body, fix } = explain(t, error, fileName, locale);
-  // The file was read, but its data can't be used: a template wouldn't help.
-  const unusable = error?.code === "too-little-data" || error?.code === "no-income";
+  const unusable = isUnusable(error);
   return (
     <>
       <section className="mm-intro">
         <p className="mm-step">{u.step}</p>
         <h1 className="mm-t-h1" id="step-title" tabIndex={-1} ref={heading}>
-          {unusable ? u.useTitle : u.readTitle}
+          {uploadErrorTitle(t, error)}
         </h1>
       </section>
 
