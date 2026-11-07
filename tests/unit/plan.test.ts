@@ -11,7 +11,7 @@ import {
 } from "@/lib/constants";
 import { parseTransactions } from "@/lib/import/parse";
 import { sum, type Cents } from "@/lib/money/cents";
-import { assessPlan, bufferFor, statusOf, type PlanMonth } from "@/lib/plan/affordability";
+import { assessPlan, bufferFor, statusOf, verdictOf, type PlanMonth, type Status } from "@/lib/plan/affordability";
 import { annuityInterest, buildSchedule, type PlanInput, type Schedule } from "@/lib/plan/schedule";
 
 const c = (value: number) => value as Cents;
@@ -244,6 +244,8 @@ describe("assessPlan", () => {
         spendingSource: "average",
         margin: c(100000),
         leftover: c(90000),
+        savedBefore: c(0),
+        covered: false,
         status: "fits",
       },
       {
@@ -253,6 +255,8 @@ describe("assessPlan", () => {
         spendingSource: "average",
         margin: c(100000),
         leftover: c(89993),
+        savedBefore: c(60000),
+        covered: false,
         status: "fits",
       },
     ]);
@@ -271,6 +275,8 @@ describe("assessPlan", () => {
       seasonalMonth: "2026-07",
       margin: 40000,
       leftover: 30000,
+      savedBefore: 420000, // Dec–Jun: 7 × (90000 − 30000)
+      covered: false,
       status: "fits",
     });
   });
@@ -309,17 +315,17 @@ describe("assessPlan", () => {
   });
 
   it("status per month, and the verdict is the worst month", () => {
-    // buffer 30000; margins: Dec 100000, Jan 39999, Feb 30000, Mar 9999
+    // buffer 30000; margins: Dec 100000, Jan 39999, Feb 30000, Mar 9999.
+    // March is €0.01 short, and the €600 Dec saved above the buffer covers it.
     const data = budget(month("2026-01", 260001), month("2026-02", 270000), month("2026-03", 290001));
     const result = assessPlan(data, instalments(4, 10000), "2026-11");
-    expect(result.months.map((m) => [m.leftover, m.status])).toEqual([
-      [90000, "fits"],
-      [29999, "tight"],
-      [20000, "tight"],
-      [-1, "no-fit"],
+    expect(result.months.map((m) => [m.leftover, m.status, m.covered])).toEqual([
+      [90000, "fits", false],
+      [29999, "tight", false],
+      [20000, "tight", false],
+      [-1, "tight", true],
     ]);
-    expect(result.verdict).toBe("no-fit");
-    expect(assessPlan(data, instalments(3, 10000), "2026-11").verdict).toBe("tight");
+    expect(result.verdict).toBe("tight");
     expect(assessPlan(data, instalments(1, 10000), "2026-11").verdict).toBe("fits");
   });
 
@@ -327,6 +333,101 @@ describe("assessPlan", () => {
     // Dec no-fit, Jan tight
     const data = budget(month("2025-12", 300001), month("2026-01", 280000));
     expect(assessPlan(data, instalments(2, 0), "2026-11").verdict).toBe("no-fit");
+  });
+});
+
+/** Plan months Dec 2026 onwards at a €600 instalment: an average month leaves €400, €100 above the €300 buffer. */
+const carried = (...fullMonths: MonthTotals[]) => assessPlan(budget(...fullMonths), instalments(5, 60000), "2026-11");
+
+const rows = (result: { months: PlanMonth[] }) => result.months.map((m) => [m.savedBefore, m.status, m.covered]);
+
+describe("assessPlan: savings carried between plan months", () => {
+  it("what earlier months left above the buffer covers a short month, which then counts as tight", () => {
+    // March leaves −€200; Dec–Feb saved €300 above the buffer.
+    const result = carried(month("2026-03", 260000));
+    expect(result.months[3]?.leftover).toBe(-20000);
+    expect(rows(result)).toEqual([
+      [0, "fits", false],
+      [10000, "fits", false],
+      [20000, "fits", false],
+      [30000, "tight", true],
+      [10000, "fits", false], // €300 − €200 used in March
+    ]);
+    expect(result.verdict).toBe("tight");
+  });
+
+  it.each([
+    [270000, "tight", true], // −€300 short, exactly what was saved
+    [270001, "no-fit", false], // one cent more
+  ] as const)("March spending %i: %s", (spending, status, covered) => {
+    const [, , , march, april] = carried(month("2026-03", spending), month("2026-04", 260000)).months;
+    expect(march).toMatchObject({ savedBefore: 30000, status, covered });
+    // Either way nothing is left for April, which is €200 short.
+    expect(april).toMatchObject({ savedBefore: 0, leftover: -20000, status: "no-fit", covered: false });
+  });
+
+  it("only what is left above the buffer is saved", () => {
+    // A €700 instalment leaves exactly the €300 buffer in an average month, so nothing is saved.
+    const result = assessPlan(budget(month("2026-03", 230001)), instalments(4, 70000), "2026-11");
+    expect(result.months.map((m) => [m.savedBefore, m.leftover, m.status])).toEqual([
+      [0, 30000, "fits"],
+      [0, 30000, "fits"],
+      [0, 30000, "fits"],
+      [0, -1, "no-fit"],
+    ]);
+  });
+
+  it("a tight month neither adds to the savings nor takes from them", () => {
+    // January leaves €100: tight, below the €300 buffer.
+    const result = carried(month("2026-01", 230000));
+    expect(result.months.slice(0, 3).map((m) => [m.savedBefore, m.leftover, m.status])).toEqual([
+      [0, 40000, "fits"],
+      [10000, 10000, "tight"],
+      [10000, 40000, "fits"],
+    ]);
+  });
+
+  it("a short month the savings can't cover uses them all up", () => {
+    // January is €600 short with €100 saved. February saves €100 again, which
+    // can't cover March's €150 shortfall; without the reset there would be €200.
+    const result = carried(month("2026-01", 300000), month("2026-03", 255000));
+    expect(rows(result).slice(0, 4)).toEqual([
+      [0, "fits", false],
+      [10000, "no-fit", false],
+      [0, "fits", false],
+      [10000, "no-fit", false],
+    ]);
+    expect(result.verdict).toBe("no-fit");
+  });
+
+  it("the first plan month has nothing saved to draw on", () => {
+    const [dec] = carried(month("2025-12", 260001)).months;
+    expect(dec).toMatchObject({ savedBefore: 0, leftover: -20001, status: "no-fit", covered: false });
+  });
+});
+
+describe("verdictOf", () => {
+  it.each<[Status[], Status]>([
+    [["fits", "fits"], "fits"],
+    [["fits", "tight"], "tight"],
+    // One short month among months that all fit is a warning, not a refusal.
+    [["fits", "no-fit", "fits"], "tight"],
+    [["no-fit", "fits"], "tight"],
+    // Anything more and the worst month decides.
+    [["fits", "no-fit", "tight"], "no-fit"],
+    [["no-fit", "fits", "no-fit"], "no-fit"],
+    // A lone month has no fitting months beside it.
+    [["no-fit"], "no-fit"],
+    [[], "fits"],
+  ])("%j → %s", (statuses, verdict) => {
+    expect(verdictOf(statuses)).toBe(verdict);
+  });
+
+  it("assessPlan uses it: one uncovered short month among fitting ones is tight", () => {
+    // December is €200.01 short with nothing saved yet; every other month fits.
+    const result = carried(month("2025-12", 260001));
+    expect(result.months.map((m) => m.status)).toEqual(["no-fit", "fits", "fits", "fits", "fits"]);
+    expect(result.verdict).toBe("tight");
   });
 });
 
@@ -351,7 +452,7 @@ function samplePlan(name: string, price: number, count: number, periodLength?: n
 }
 
 describe("golden: sample plans (reference 2026-11, values from Python over the awk month totals)", () => {
-  it("comfortable, €1,200 × 12: fits on average, but July 2027 leaves −€6.49", () => {
+  it("comfortable, €1,200 × 12: July 2027 leaves −€6.49, covered by what Dec–Jun saved", () => {
     const result = samplePlan("en_comfortable", 120000, 12);
     expect(result.buffer).toBe(25371);
     expect(result.months.map((m) => [m.month, m.expectedSpending, m.leftover, m.status])).toEqual([
@@ -362,13 +463,15 @@ describe("golden: sample plans (reference 2026-11, values from Python over the a
       ["2027-04", 202319, 41394, "fits"],
       ["2027-05", 202319, 41394, "fits"],
       ["2027-06", 210270, 33443, "fits"],
-      ["2027-07", 244362, -649, "no-fit"],
+      ["2027-07", 244362, -649, "tight"],
       ["2027-08", 202319, 41394, "fits"],
       ["2027-09", 202319, 41394, "fits"],
       ["2027-10", 207642, 36071, "fits"],
       ["2027-11", 202319, 41394, "fits"],
     ]);
-    expect(result.verdict).toBe("no-fit");
+    // Σ (leftover − 25371) over Dec–Jun.
+    expect(result.months[7]).toMatchObject({ savedBefore: 93104, covered: true });
+    expect(result.verdict).toBe("tight");
   });
 
   it.each([6, 3])("comfortable, €600 × 12, %i-month period: tight in July 2027 only", (period) => {
