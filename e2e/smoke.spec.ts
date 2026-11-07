@@ -86,6 +86,20 @@ test("a sample link opens its result directly", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
 });
 
+test("a budget with no room above the buffer says no terms can fit", async ({ page }) => {
+  await page.goto("/en?sample=tight&price=1200&n=12");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "You usually have €4.94 left a month, less than the €217.40 buffer" }),
+  ).toBeVisible();
+  await expect(page.getByText(/^So no instalment fits every month right now/)).toBeVisible();
+  await expect(page.getByText(/would fit every month/)).toHaveCount(0);
+});
+
+test("a plan that doesn't fit names the largest payment that would", async ({ page }) => {
+  await page.goto("/en?sample=comfortable&price=3000&n=6");
+  await expect(page.getByText("A monthly payment of up to €194.75 would fit every month.")).toBeVisible();
+});
+
 test("Estonian copy inflects a month inside a sentence", async ({ page }) => {
   // December, not July: July's genitive is the same word as its nominative, so it would hide the bug.
   await page.goto("/et?sample=comfortable&period=3&price=3000&n=6");

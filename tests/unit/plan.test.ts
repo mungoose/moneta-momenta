@@ -11,7 +11,15 @@ import {
 } from "@/lib/constants";
 import { parseTransactions } from "@/lib/import/parse";
 import { sum, type Cents } from "@/lib/money/cents";
-import { assessPlan, bufferFor, statusOf, verdictOf, type PlanMonth, type Status } from "@/lib/plan/affordability";
+import {
+  assessPlan,
+  bufferFor,
+  largestFittingPayment,
+  statusOf,
+  verdictOf,
+  type PlanMonth,
+  type Status,
+} from "@/lib/plan/affordability";
 import { annuityInterest, buildSchedule, type PlanInput, type Schedule } from "@/lib/plan/schedule";
 
 const c = (value: number) => value as Cents;
@@ -431,6 +439,44 @@ describe("verdictOf", () => {
   });
 });
 
+describe("largestFittingPayment", () => {
+  it("is the margin left above the buffer: €3,000 − €2,000 − €300", () => {
+    expect(largestFittingPayment(assessPlan(budget(), instalments(6), "2026-11"))).toBe(70000);
+  });
+
+  it("the costliest plan month sets it", () => {
+    // December counts on €2,600.01 of spending: €399.99 margin, €99.99 above the buffer.
+    const result = assessPlan(budget(month("2025-12", 260001)), instalments(6), "2026-11");
+    expect(largestFittingPayment(result)).toBe(9999);
+  });
+
+  it("doesn't depend on the instalments being checked", () => {
+    const small = assessPlan(budget(), instalments(6, 100), "2026-11");
+    const large = assessPlan(budget(), instalments(6, 500000), "2026-11");
+    expect(largestFittingPayment(small)).toBe(largestFittingPayment(large));
+  });
+
+  it("none when a month's margin only reaches the buffer", () => {
+    // December's margin is exactly the €300 buffer.
+    const result = assessPlan(budget(month("2025-12", 270000)), instalments(6), "2026-11");
+    expect(largestFittingPayment(result)).toBeNull();
+  });
+
+  it("one cent above the buffer: a one-cent payment fits", () => {
+    const result = assessPlan(budget(month("2025-12", 269999)), instalments(6), "2026-11");
+    expect(largestFittingPayment(result)).toBe(1);
+  });
+
+  it("none when a month's margin is below the buffer", () => {
+    const result = assessPlan(budget(month("2025-12", 280000)), instalments(6), "2026-11");
+    expect(largestFittingPayment(result)).toBeNull();
+  });
+
+  it("none for a plan without months", () => {
+    expect(largestFittingPayment({ buffer: c(30000), months: [] })).toBeNull();
+  });
+});
+
 const sample = (name: string) => readFileSync(new URL(`../../public/samples/${name}.tsv`, import.meta.url), "utf8");
 
 function sampleSummary(name: string, periodLength?: number): DataSummary {
@@ -480,6 +526,17 @@ describe("golden: sample plans (reference 2026-11, values from Python over the a
       ["2027-07", "tight"],
     ]);
     expect(result.verdict).toBe("tight");
+  });
+
+  it("comfortable, €3,000 × 6: December 2026 sets the largest payment that fits, €194.75", () => {
+    const result = samplePlan("en_comfortable", 300000, 6);
+    expect(result.verdict).toBe("no-fit");
+    // €2,537.13 − €2,088.67 − €253.71.
+    expect(largestFittingPayment(result)).toBe(19475);
+  });
+
+  it("comfortable, €1,200 × 12: July 2027's margin is below the buffer, so no payment fits every month", () => {
+    expect(largestFittingPayment(samplePlan("en_comfortable", 120000, 12))).toBeNull();
   });
 
   it("tight: even the smallest plan doesn't fit, because December 2026 is over budget", () => {

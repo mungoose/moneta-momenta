@@ -232,6 +232,11 @@ export const et = {
     verdictNoFitOne: (month: string, short: string) => `${capital(month)} jääb ${short} puudu`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
       `${count} kuul jääb puudu, kõige rohkem ${month} puhul: ${short}`,
+    verdictNoRoom: (margin: string, buffer: string) =>
+      `Sul jääb tavaliselt kuus üle ${margin}, vähem kui ${buffer} puhver`,
+    noRoomBody:
+      "Seega ei mahu praegu ükski järelmaks igasse kuusse, olgu hind või tingimused mis tahes. Puhver on 10% sinu keskmisest sissetulekust ettearvamatute kulude jaoks.",
+    fittingPayment: (payment: string) => `Igasse kuusse mahuks kuumakse kuni ${payment}.`,
     fitsBody: (buffer: string, month: string, left: string) =>
       `Igas kuus jääb pärast makset üle vähemalt ${buffer}. Kõige napim on ${month}, kui üle jääb ${left}.`,
     fitShare: (fit: number, total: number) => `Maksed mahuvad ${fit} kuusse ${total}-st.`,

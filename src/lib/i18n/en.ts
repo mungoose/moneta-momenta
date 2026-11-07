@@ -226,14 +226,19 @@ export const en = {
     verdictOneShort: (month: string, short: string) => `Only ${month} comes up short, by ${short}`,
     verdictNoFitOne: (month: string, short: string) => `${month} comes up ${short} short`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
-      `${count} months come up short, ${month} by ${short}`,
+      `${count} months come up short. The most is ${short}, in ${month}`,
+    verdictNoRoom: (margin: string, buffer: string) =>
+      `You usually have ${margin} left a month, less than the ${buffer} buffer`,
+    noRoomBody:
+      "So no instalment fits every month right now, whatever the price or the terms. The buffer is 10% of your average income, kept for costs nobody can predict.",
+    fittingPayment: (payment: string) => `A monthly payment of up to ${payment} would fit every month.`,
     fitsBody: (buffer: string, month: string, left: string) =>
       `Every month leaves at least ${buffer} after the instalment. The closest is ${month}, with ${left} left.`,
     fitShare: (fit: number, total: number) => `The plan fits in ${fit} of ${total} months.`,
     monthSum: (month: string, margin: string, instalment: string, left: string) =>
       `${month}: ${margin} margin − ${instalment} instalment = ${left} left over.`,
     seasonal: (pastMonth: string, spent: string, average: string, planMonth: string) =>
-      `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so ${planMonth} counts on that.`,
+      `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so we expect ${planMonth} to cost that much too.`,
     belowBuffer: (buffer: string) => `A month is tight when less than ${buffer} is left: 10% of your average income.`,
     coveredBody: (saved: string, buffer: string) =>
       `The months before it leave ${saved} on top of the ${buffer} cushion. Put that aside and it covers the gap.`,

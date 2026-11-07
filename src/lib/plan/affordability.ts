@@ -123,6 +123,25 @@ export function verdictOf(statuses: readonly Status[]): Status {
   return worst(statuses);
 }
 
+/**
+ * The largest monthly payment that would fit every plan month: the tightest
+ * month's margin less the buffer. It holds for any instalments over the same
+ * months, because a month's margin doesn't depend on them, so the result can
+ * say what to aim for instead of leaving the user to guess.
+ * @param assessment  From {@link assessPlan}.
+ * @returns           The payment in cents, or `null` when no payment above
+ *                    zero fits every month (a margin at or below the buffer).
+ * @example largestFittingPayment({ buffer: 25371, months: [{ margin: 44846, … }] }) // 19475
+ */
+export function largestFittingPayment(assessment: Pick<Affordability, "buffer" | "months">): Cents | null {
+  if (assessment.months.length === 0) {
+    return null;
+  }
+  const tightest = Math.min(...assessment.months.map((m) => m.margin));
+  const payment = tightest - assessment.buffer;
+  return payment > 0 ? toCents(payment) : null;
+}
+
 /** `MM` of a `YYYY-MM` month. */
 const calendarMonth = (month: YearMonth) => month.slice(5);
 

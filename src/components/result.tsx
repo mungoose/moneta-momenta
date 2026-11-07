@@ -3,7 +3,7 @@ import type { Locale, Messages } from "@/lib/i18n";
 import { formatMonth, formatOfMonth, formatPercent } from "@/lib/i18n/format";
 import { sum, toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
-import type { Affordability, PlanMonth, Status } from "@/lib/plan/affordability";
+import { largestFittingPayment, type Affordability, type PlanMonth, type Status } from "@/lib/plan/affordability";
 import type { PlanInput, Schedule } from "@/lib/plan/schedule";
 import { Explanation, StatusRules } from "./explanation";
 import { StatusChip, StatusIcon } from "./icons";
@@ -48,10 +48,19 @@ interface VerdictFacts {
   counts: StatusCounts;
   /** The month that decides the verdict: the worst status, then the least left over. */
   critical: PlanMonth;
+  /**
+   * The usual margin is below the buffer. Every plan month's margin is at most
+   * the usual one, so no month can fit, whatever the terms: the verdict says
+   * that first, or the user would keep trying other terms.
+   */
+  noRoom: boolean;
+  /** The usual margin (for the no-room headline) and usual spending (for the seasonal line). */
+  summary: Pick<DataSummary, "margin" | "avgSpending">;
 }
 
 /**
- * The verdict headline. A single tight or failing month is named; several are
+ * The verdict headline. With no room above the buffer, it says so: no terms
+ * can help. Otherwise a single tight or failing month is named; several are
  * counted, and a failing plan also says how short the worst month is. A tight
  * plan whose deciding month is short says how much it needs: from savings when
  * earlier months cover it, or as the one month that comes up short.
@@ -61,6 +70,9 @@ function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month
   const { verdict } = assessment;
   if (verdict === "fits") {
     return r.verdictFits;
+  }
+  if (facts.noRoom) {
+    return r.verdictNoRoom(money(facts.summary.margin), money(assessment.buffer));
   }
   const worst = month(critical.month);
   // `0 - x`, not `-x`: unary minus on the branded type isn't type-safe, and it would turn 0 into −0.
@@ -81,24 +93,23 @@ function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month
 
 /**
  * The lines under the headline. A fitting plan gets one line on the buffer and
- * its closest month. Otherwise: how many months fit, the deciding month's sum,
- * why that month's spending is higher (when it is seasonal), and, when the plan
- * is only tight, why: the buffer rule, the savings that cover a short month, or
- * the one short month among fitting ones.
+ * its closest month. Otherwise: why no terms fit (with no room), how many
+ * months fit (when any do), the deciding month's sum, why that month's
+ * spending is higher (when it is seasonal), and, when the plan is only tight,
+ * why: the buffer rule, the savings that cover a short month, or the one short
+ * month among fitting ones. Last, the largest payment that would fit every
+ * month, when there is one.
  */
-function verdictReasons(
-  r: Messages["result"],
-  facts: VerdictFacts,
-  avgSpending: Cents,
-  { money, month, monthOf }: Formatters,
-): string[] {
+function verdictReasons(r: Messages["result"], facts: VerdictFacts, { money, month, monthOf }: Formatters): string[] {
   const { assessment, counts, critical } = facts;
   const { verdict, buffer, months } = assessment;
   if (verdict === "fits") {
     return [r.fitsBody(money(buffer), month(critical.month), money(critical.leftover))];
   }
   const lines = [
-    r.fitShare(counts.fits, months.length),
+    ...(facts.noRoom ? [r.noRoomBody] : []),
+    // "Fits in 0 of 12 months" reads as a riddle when the counts below already say it.
+    ...(counts.fits > 0 ? [r.fitShare(counts.fits, months.length)] : []),
     r.monthSum(month(critical.month), money(critical.margin), money(critical.instalment), money(critical.leftover)),
   ];
   if (critical.spendingSource === "seasonal") {
@@ -106,7 +117,7 @@ function verdictReasons(
       r.seasonal(
         monthOf(critical.seasonalMonth),
         money(critical.expectedSpending),
-        money(avgSpending),
+        money(facts.summary.avgSpending),
         monthOf(critical.month),
       ),
     );
@@ -119,6 +130,10 @@ function verdictReasons(
     } else {
       lines.push(r.belowBuffer(money(buffer)));
     }
+  }
+  const payment = largestFittingPayment(assessment);
+  if (payment !== null) {
+    lines.push(r.fittingPayment(money(payment)));
   }
   return lines;
 }
@@ -171,9 +186,9 @@ export function Result({
     r.termsMonths(month(first.month), month(last.month)),
   ].filter((part) => part !== null);
 
-  const facts: VerdictFacts = { assessment, counts, critical };
+  const facts: VerdictFacts = { assessment, counts, critical, noRoom: summary.margin < buffer, summary };
   const title = verdictTitle(r, facts, format);
-  const why = verdictReasons(r, facts, summary.avgSpending, format);
+  const why = verdictReasons(r, facts, format);
 
   return (
     <>
