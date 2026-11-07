@@ -261,6 +261,8 @@ Other cases:
 |---|---|---|
 | Zero or negative margin | `margin ≤ 0` | Shows the numbers, says no instalment plan fits them, and points to the largest categories |
 | Invalid purchase input | form validation | An inline message on the field |
+| Total too large after loading | a longer period or the plan pushes a total past the safe-integer range; `guardRange` returns it as a value | The step's place shows "Something went wrong with these numbers. Start over and try again." The header and "Start over" stay |
+| Any other error while a step renders | a bug; the `StepBoundary` (`catchError` from `next/error`) around the step catches it | The same callout. Changing step or data renders the step afresh |
 | File gone | reload, language switch, or Back / Forward into a step of an earlier upload | The landing says the file isn't kept and asks to upload it again. Nothing about the file goes in the URL or history. |
 | LLM down / no key / invalid answer | | The deterministic suggestions are shown instead, without an error banner |
 

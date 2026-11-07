@@ -4,6 +4,7 @@ import { useEffect, useMemo, useReducer, useRef } from "react";
 import { referenceMonth } from "@/lib/budget/months";
 import { summarise, type SummaryResult } from "@/lib/budget/summary";
 import { SAMPLE_REFERENCE_MONTH } from "@/lib/constants";
+import { guardRange, type Guarded } from "@/lib/guard";
 import { getMessages, type Locale, type Messages } from "@/lib/i18n";
 import { loadFile, loadText, type LoadedData } from "@/lib/load";
 import { assessPlan, type Affordability } from "@/lib/plan/affordability";
@@ -23,7 +24,8 @@ import { BrandMark } from "./icons";
 import { Landing } from "./landing";
 import { Purchase } from "./purchase";
 import { Result } from "./result";
-import { Summary } from "./summary";
+import { StepBoundary } from "./step-boundary";
+import { Summary, Unexpected } from "./summary";
 import { UploadErrorView } from "./upload-error";
 
 /**
@@ -129,13 +131,18 @@ export function Flow({ locale }: { locale: Locale }) {
   const [state, dispatch] = useReducer(flowReducer, initialFlow);
   const { step, data, period, form } = state;
 
-  const summary = useMemo(() => (data ? summarise(data.file, data.reference, period) : null), [data, period]);
-  const plan = useMemo(() => checkPlanForm(form), [form]);
-  const assessment = useMemo(
-    () =>
-      data && summary?.ok && plan.ok ? assessPlan(summary.summary, plan.schedule.instalments, data.reference) : null,
-    [data, summary, plan],
+  // Both run while the page renders, so a total past the safe-integer range comes back as a value, not a crash.
+  const summary = useMemo(
+    () => (data ? guardRange(() => summarise(data.file, data.reference, period)) : null),
+    [data, period],
   );
+  const plan = useMemo(() => checkPlanForm(form), [form]);
+  const assessment = useMemo(() => {
+    const result = summary?.ok ? summary.value : null;
+    return data && result?.ok && plan.ok
+      ? guardRange(() => assessPlan(result.summary, plan.schedule.instalments, data.reference))
+      : null;
+  }, [data, summary, plan]);
 
   const shown = data !== null && step !== "landing";
   const { query, switchQuery } = queries(state, plan);
@@ -274,19 +281,21 @@ export function Flow({ locale }: { locale: Locale }) {
         }}
       />
       <main className="mm-col mm-main">
-        <StepView
-          t={t}
-          locale={locale}
-          state={state}
-          summary={summary}
-          plan={plan}
-          assessment={assessment}
-          dispatch={dispatch}
-          onSample={(profile) => {
-            start(profile);
-          }}
-          onUpload={upload}
-        />
+        <StepBoundary key={`${step}:${dataKey(data) ?? ""}`} t={t}>
+          <StepView
+            t={t}
+            locale={locale}
+            state={state}
+            summary={summary}
+            plan={plan}
+            assessment={assessment}
+            dispatch={dispatch}
+            onSample={(profile) => {
+              start(profile);
+            }}
+            onUpload={upload}
+          />
+        </StepBoundary>
       </main>
       <footer className="mm-foot">
         <div className="mm-col">{t.footer}</div>
@@ -355,7 +364,11 @@ function Header({
   );
 }
 
-/** The current step's screen. Renders nothing for a step whose data is missing (the reducer prevents that). */
+/**
+ * The current step's screen. Renders nothing for a step whose data is
+ * missing (the reducer prevents that), and the "Something went wrong"
+ * callout when a total left the safe-integer range.
+ */
 function StepView({
   t,
   locale,
@@ -370,9 +383,10 @@ function StepView({
   t: Messages;
   locale: Locale;
   state: FlowState;
-  summary: SummaryResult | null;
+  /** `ok: false` when a total left the safe-integer range. */
+  summary: Guarded<SummaryResult> | null;
   plan: PlanFormResult;
-  assessment: Affordability | null;
+  assessment: Guarded<Affordability> | null;
   dispatch: (action: FlowAction) => void;
   onSample: (profile: SampleProfile) => void;
   onUpload: (file: File) => void;
@@ -406,11 +420,14 @@ function StepView({
     return null;
   }
   if (step === "summary") {
+    if (!summary.ok) {
+      return <Unexpected t={t} />;
+    }
     return (
       <Summary
         t={t}
         locale={locale}
-        result={summary}
+        result={summary.value}
         source={data.source}
         reference={data.reference}
         rowCount={data.file.rows.length}
@@ -451,14 +468,33 @@ function StepView({
       />
     );
   }
-  return summary.ok && plan.ok && assessment ? (
+  return <ResultStep t={t} locale={locale} summary={summary} plan={plan} assessment={assessment} dispatch={dispatch} />;
+}
+
+/** The result step: the verdict, or the "Something went wrong" callout when a total left the safe-integer range. */
+function ResultStep({
+  t,
+  locale,
+  summary,
+  plan,
+  assessment,
+  dispatch,
+}: {
+  t: Messages;
+  locale: Locale;
+  summary: Guarded<SummaryResult>;
+  plan: PlanFormResult;
+  assessment: Guarded<Affordability> | null;
+  dispatch: (action: FlowAction) => void;
+}) {
+  return summary.ok && summary.value.ok && plan.ok && assessment?.ok ? (
     <Result
       t={t}
       locale={locale}
-      summary={summary.summary}
+      summary={summary.value.summary}
       input={plan.input}
       schedule={plan.schedule}
-      assessment={assessment}
+      assessment={assessment.value}
       onChange={() => {
         dispatch({ type: "go", step: "purchase" });
       }}
@@ -466,5 +502,7 @@ function StepView({
         dispatch({ type: "go", step: "summary" });
       }}
     />
-  ) : null;
+  ) : (
+    <Unexpected t={t} />
+  );
 }

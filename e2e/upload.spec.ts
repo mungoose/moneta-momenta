@@ -284,6 +284,54 @@ test("a file that starts late is flagged once its first month is in the period",
   await expect(page.getByText("Your transactions start on 19 November")).toBeVisible();
 });
 
+/** 2^52 cents: one fits a month's total, two pass the safe-integer range. */
+const HUGE = "45035996273704,96";
+
+/** Twelve full months to November 2026, salary at each month's end, plus `extra` rows. */
+function year(name: string, ...extra: string[]) {
+  const salaries = Array.from({ length: 12 }, (_, i) => {
+    const month = ((10 + i) % 12) + 1;
+    const yyyy = month >= 11 ? 2025 : 2026;
+    return row(`28/${String(month).padStart(2, "0")}/${String(yyyy)}`, "Inflow", "Ready to Assign", "0,00", "2000,00");
+  });
+  return tsv(name, [row("01/11/2025", "Food", "Groceries", "10,00", "0,00"), ...salaries, ...extra]);
+}
+
+const UNEXPECTED = "Something went wrong with these numbers. Start over and try again.";
+
+test("a period that adds up past what can be counted says so, and Start over recovers", async ({ page }) => {
+  await openLanding(page);
+  // Each month's total fits, and the default 6 months leave out January and February.
+  await upload(
+    page,
+    year(
+      "huge-spending.tsv",
+      row("15/01/2026", "Home", "Purchase", HUGE, "0,00"),
+      row("15/02/2026", "Home", "Purchase", HUGE, "0,00"),
+    ),
+  );
+  await expect(heading(page)).toHaveText("Here's what your money usually looks like");
+
+  await page.getByRole("button", { name: "12 months" }).click();
+  await expect(alert(page)).toHaveText(UNEXPECTED);
+  await expect(page.getByRole("button", { name: "Continue to the purchase" })).toHaveCount(0);
+
+  await page.getByRole("button", { name: "Start over" }).click();
+  await expect(heading(page)).toHaveText(LANDING_TITLE);
+});
+
+test("a plan that can't be counted says so on the result step", async ({ page }) => {
+  await openLanding(page);
+  // The summary averages fine, but 10% of that average income is past what can be counted.
+  await upload(page, year("huge-income.tsv", row("02/10/2026", "Inflow", "Ready to Assign", "0,00", HUGE)));
+  await expect(heading(page)).toHaveText("Here's what your money usually looks like");
+
+  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Check affordability" }).click();
+  await expect(alert(page)).toHaveText(UNEXPECTED);
+  await expect(page.getByRole("button", { name: "Start over" })).toBeVisible();
+});
+
 test("months without income and an old end date are warned about", async ({ page }) => {
   // Two months after the file ends: December 2026 is missing, so the data is out of date.
   await page.clock.setFixedTime(new Date("2027-01-15T12:00:00"));
