@@ -19,7 +19,7 @@ const unitFixture = (name: string) => path.join(ROOT, "tests/fixtures", name);
 const e2eFixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 /** The same purchase and verdict as the sample flow: the uploaded sample must give the same answer. */
-/** The prefilled purchase (€1,200 × 12 at the default 9.9%) on the sample's figures. */
+/** The sample's offer (€1,200 × 12 at 9.9%) on the sample's figures. */
 const SAMPLE_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 const LANDING_TITLE = "Check if an instalment plan fits your budget, month by month.";
@@ -69,10 +69,19 @@ async function openLanding(page: Page, locale = "en") {
   await expect(heading(page)).toBeVisible();
 }
 
-/** Summary → purchase → result with the prefilled purchase. */
-async function checkPrefilledPurchase(page: Page) {
+/** Types the sample's offer (€1,200, 12 instalments, 9.9%) into an upload's purchase form, which starts empty. */
+async function enterPurchase(page: Page) {
+  await expect(page.getByLabel("Price", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Interest rate")).toHaveValue("");
+  await page.getByLabel("Price", { exact: true }).fill("1200");
+  await page.getByLabel("Interest rate").fill("9.9");
+}
+
+/** Summary → purchase → result, with the sample's offer typed in. */
+async function checkPurchase(page: Page) {
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
+  await enterPurchase(page);
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText("€1,200.00 over 12 instalments");
 }
@@ -90,7 +99,7 @@ test("an uploaded file goes through every step to a verdict", async ({ page }) =
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.getByText("Sample data", { exact: true })).toHaveCount(0);
 
-  await checkPrefilledPurchase(page);
+  await checkPurchase(page);
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
   await expect(page).toHaveURL(/\/en$/);
@@ -268,7 +277,7 @@ test("a file that stops early is flagged and still reaches a verdict", async ({ 
   await expect(page.getByText("Your transactions stop on 11 October")).toBeVisible();
   await expect(page.getByText(/If some of the spending in October 2026 is missing/)).toBeVisible();
 
-  await checkPrefilledPurchase(page);
+  await checkPurchase(page);
   await expect(page.getByRole("heading", { level: 2 }).first()).toBeVisible();
   await expect(
     page.getByText(
@@ -292,7 +301,7 @@ test("one short month among months that all fit makes the plan tight", async ({ 
   // The sample plus a €300 repair in December 2025: December 2026 counts on
   // that month and comes up short, with nothing saved yet to cover it. The
   // repair is outside the 6-month period, so the averages don't change. The
-  // form's default 9.9% applies.
+  // offer is typed in at 9.9%.
   const sample = readFileSync(SAMPLE, "utf8").trimEnd();
   const repair = row("15/12/2025", "Home", "Repairs", "300.00", "0.00");
   await openLanding(page);
@@ -303,6 +312,7 @@ test("one short month among months that all fit makes the plan tight", async ({ 
   });
 
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await enterPurchase(page);
   await page.getByRole("button", { name: "6", exact: true }).click();
   await page.getByRole("button", { name: "Check affordability" }).click();
 
@@ -357,6 +367,7 @@ test("a plan that can't be counted says so on the result step", async ({ page })
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByLabel("Price", { exact: true }).fill("1200");
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText("Something went wrong");
   await expect(alert(page)).toHaveText(UNEXPECTED);

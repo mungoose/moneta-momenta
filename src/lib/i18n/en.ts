@@ -197,7 +197,8 @@ export const en = {
     customLabel: "Number of months",
     rate: "Interest rate",
     rateUnit: "% per year",
-    rateHint: "Enter 0 for an interest-free plan.",
+    rateHint:
+      "Use the yearly interest rate from the offer, not the APR, which already includes fees. Enter 0 if it's interest-free.",
     fee: "Monthly fee",
     feeHint: "Any fixed fee charged with each instalment.",
     spread: "Amount to spread",

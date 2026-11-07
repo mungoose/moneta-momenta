@@ -200,7 +200,8 @@ export const et = {
     customLabel: "Kuude arv",
     rate: "Intress",
     rateUnit: "% aastas",
-    rateHint: "Intressivaba järelmaksu puhul sisesta 0.",
+    rateHint:
+      "Kasuta pakkumise aastast intressimäära, mitte krediidi kulukuse määra, mis sisaldab juba tasusid. Intressivaba järelmaksu puhul sisesta 0.",
     fee: "Kuutasu",
     feeHint: "Iga maksega lisanduv püsitasu.",
     spread: "Maksetesse jagatav summa",
