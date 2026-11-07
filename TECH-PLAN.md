@@ -193,11 +193,12 @@ Every row keeps its `line` number, so errors can say exactly where the problem i
 
 **Months: ✅ derived only from transaction dates.** The file has no month-start or month-end markers, and the app doesn't need any.
 - Each row's month is taken from its `Date`. The months in range run from the earliest to the latest transaction month, with no gaps. A month inside that range with no rows counts as a real zero, which is the "month with no income" case. It shows a warning.
-- **Last month.** Any month ≥ the *reference month* is unfinished and dropped. The reference month is today's month for uploads and a fixed `2026-11` for the sample, so the sample never goes stale for a reviewer who opens it later.
+- **Last month.** Any month ≥ the *reference month* is unfinished and dropped. The reference month is today's month for uploads, in the browser's local time (`referenceMonth(new Date())`: just after midnight on 1 November in Tallinn it is already November there, while UTC still says October), and a fixed `2026-11` for the sample, so the sample never goes stale for a reviewer who opens it later.
 - **Edge months are flagged, never dropped.** The export's timeframe may start or end mid-month, but from dates alone a cut export looks the same as a quiet week (a work trip paid by an employer's card, a hospital stay). Dropping the month would throw away real data on a guess, and with a short history would force "too little data" on someone whose file is fine. So the month still counts, and the summary gets a warning while the month is in the period. The warning names the direction of the error: missing spending makes the averages too low, so plans look easier to afford than they are.
   - **First month:** flagged when its first transaction is after day `FIRST_MONTH_MAX_START_DAY = 7`.
   - **Last month before the reference month:** flagged when no transaction falls in its last `LAST_MONTH_END_WINDOW_DAYS = 7` days (25–31 October, 22–28 February). This is the export taken on 28 October and uploaded in November. Rows in a later month (the current one) prove the export went past its end, and then it isn't checked.
   - A one-month file can get both flags. Excluded rows (transfers, card payments) count as transactions for both checks. Both are date-only heuristics; the constants are named so the rules are easy to change.
+- **Data that ends early.** When the file's last full month is before the month before the reference month (an export from August uploaded in November), whole recent months are missing, which no edge-month check can see. The summary warns that the averages may describe an older situation (`outdatedEnd`).
 - ✅ **Minimum: `MIN_FULL_MONTHS = 3`.** Fewer gives the "too little data" error. Three months gives the average a better chance of absorbing one-off oddities.
 - **Period options:** last 3 / 6 / 12 full months. Options longer than the data are disabled. The default is 6, or all of them when only 3–5 exist, with a visible note.
 
@@ -229,18 +230,38 @@ The **verdict** is the worst month's status. It's always shown next to its input
 
 ## 7. Errors (each one says what to do next, none names a product)
 
+Sample data and uploads share one load pipeline (`lib/load.ts`), so the sample proves the upload path. A file that can't be used opens the error screen on the landing step (no history entry): a title, the problem with the file's own values filled in, a numbered fix list ending in "Upload the new file. Nothing from this attempt was kept.", and "Upload another file" / "Try with sample data". The English copy as built:
+
+| Case | Detection | Screen title · callout title |
+|---|---|---|
+| Too large | > `MAX_FILE_MB = 5` MB | We couldn't read this file · This file is too large |
+| Not text | binary content (NUL bytes, invalid UTF-8) | We couldn't read this file · This isn't a text file |
+| Empty file / header only | 0 data rows | We couldn't read this file · The file has no transactions |
+| Missing columns | required headers absent | We couldn't read this file · Missing required columns, plus a found/missing list of every required column |
+| Malformed line | wrong number of values, unclosed quote | We couldn't read this file · Line N doesn't match the columns |
+| Bad date | not `DD/MM/YYYY` | We couldn't read this file · Line N has a date we can't read |
+| Bad amount | unparseable `Outflow` / `Inflow` | We couldn't read this file · Line N has an amount we can't read |
+| Too little data | full months < 3 | We can't use this file yet · Found 2 full months; at least 3 are needed (lists months left out as unfinished) |
+| No income found | Σ income over the default period = 0 | We can't use this file yet · No income found |
+| Unexpected | a total leaves the safe-integer range, or the browser can't read the file | We couldn't read this file · Something went wrong reading this file |
+
+Read errors also link a template CSV (`/transactions-template.csv`). The two "can't use" errors don't: the file was read fine, and a template wouldn't help.
+
+Warnings on the summary, not blockers:
+
+| Case | Detection | Warning title |
+|---|---|---|
+| First or last month may be incomplete | `summary.incomplete` | "Your transactions start on 19 November" / "Your transactions stop on 11 October", then: "If some of the spending in October 2026 is missing, your usual spending looks lower than it is, and plans look easier to afford." The result repeats it in one line. |
+| Data ends more than a month ago | `outdatedEnd` | "Your transactions end in August 2026" |
+| Month without income | income 0 in a period month | "No income in September 2026" |
+
+Other cases:
+
 | Case | Detection | Message direction |
 |---|---|---|
-| Wrong file | binary content, `.xlsx`/`.pdf`/image, > 5 MB | "This isn't a text (CSV/TSV) file." plus a link to the format help |
-| Missing columns | required headers absent | "Missing required columns: `Category Group`, `Inflow`. The file needs: Date, Payee, Category Group, Category, Outflow, Inflow." |
-| Empty file / header only | 0 data rows | "The file has no transactions." |
-| Bad value | unparseable amount or date | "Line 214: '31-10-2026' isn't a date in DD/MM/YYYY format." |
-| Too little data | full months < 3 | "Found 2 full months; at least 3 are needed. The current month is left out because it isn't finished." |
-| No income found | Σ income over period = 0 | "No income found. Income rows need the category group **Inflow**." plus a rename tip |
 | Zero or negative margin | `margin ≤ 0` | Shows the numbers, says no instalment plan fits them, and points to the largest categories |
-| Month without income | income 0 in some month | A warning, not a blocker |
-| First or last month may be incomplete | `summary.incomplete` | A warning, not a blocker: "Your transactions stop on 12 October. If some of October's spending is missing, your usual spending looks lower than it is, and plans look easier to afford." |
 | Invalid purchase input | form validation | An inline message on the field |
+| File gone | reload, language switch, or Back / Forward into a step of an earlier upload | The landing says the file isn't kept and asks to upload it again. Nothing about the file goes in the URL or history. |
 | LLM down / no key / invalid answer | | The deterministic suggestions are shown instead, without an error banner |
 
 ## 8. Anonymous product telemetry
@@ -337,15 +358,15 @@ A **golden test** checks that both samples reproduce the §2 monthly totals. Tho
 
 Desktop 1280 × 800 is the primary project. The same specs also run at 390 × 844.
 1. `/en` → Try sample → summary shows 6 months → €1,200 × 12 → verdict *doesn't fit*, July marked → open the explanation; the numbers are visible.
-2. Upload `other-bank.csv` → missing-columns error.
+2. ✅ Upload `other-bank.csv` → missing-columns error. `e2e/upload.spec.ts` also covers every other error, the warnings, and the "upload it again" note after a reload, a language switch and Back.
 3. `/et`: Estonian copy, and `1200` is formatted as `1200,00 €` (Estonian doesn't group 4-digit numbers; `1234567,89` → `1 234 567,89 €`, with no-break spaces).
-4. Upload a realistic file whose first or last month is incomplete → the summary shows the "may be missing transactions" warning, and the flow still reaches a verdict.
+4. ✅ Upload a realistic file whose first or last month is incomplete → the summary shows the "may be missing transactions" warning, and the flow still reaches a verdict.
 
-**Incomplete-month datasets (to do, with the upload PR).** The unit fixtures (`starts-mid-month.tsv`, `ends-mid-month.tsv`) cover the rule, but they have about 10 rows each. To see the warning on realistic data, generate two more sets with `sample-dataset/generate_ynab_sample.py`. It's seeded, so the output is reproducible.
-- **Ends early:** the comfortable profile with its data stopping on 12 October 2026 → October flagged as ending mid-month.
-- **Starts late:** data starting on 18 November 2025 → November flagged as starting mid-month. The flag only shows while that month is in the period, so the test picks 12 months, or the file is shortened to under 6 full months so the first month is in the default period.
+**✅ Incomplete-month datasets.** The unit fixtures (`starts-mid-month.tsv`, `ends-mid-month.tsv`) cover the rule with about 10 rows each. Two realistic sets in `e2e/fixtures/` show the warning on real-sized data. Both are the comfortable profile from the seeded generator (`sample-dataset/generate_ynab_sample.py --start/--end/--out-dir`), so they're reproducible:
+- `ends-early.tsv` (`--end 2026-10-12`): last row on 11 October 2026 → October flagged on the default period.
+- `starts-late.tsv` (`--start 2025-11-18`): first row on 19 November 2025 → November flagged only with the 12-month period.
 
-The generator needs two small changes first: it hard-codes `START`/`END`, and it writes to `~/Desktop`. Both should become arguments, so the script can write the sets straight into `tests/fixtures/` or `e2e/fixtures/`. These files are upload fixtures, not samples: they don't go in `public/samples/`, and the landing page doesn't offer them. The spec uploads them with `setInputFiles` and fixes the clock with `page.clock`. Uploads count from today's month, so a fixed clock keeps the expected months stable; it also keeps a planned "data ends long before today" warning from appearing as time passes.
+They're upload fixtures, not samples: they aren't in `public/samples/` and the landing doesn't offer them. The spec fixes the clock with `page.clock` (15 November 2026), because uploads count from today's month.
 
 ### CI and deploy
 
