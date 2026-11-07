@@ -1,6 +1,6 @@
 # Moneta Momenta
 
-Instalment affordability check: upload a transactions CSV (or use the sample), enter a purchase, see month by month whether the instalments fit. A demo for a job application, so **small, polished and complete beats big and unfinished**.
+Instalment affordability check: upload a transactions CSV (or use the sample), enter a purchase, see month by month whether the instalments fit. A demo, so **small, polished and complete beats big and unfinished**.
 
 - Product brief: `PRODUCT-BRIEF.md`. Tech plan (the source of truth for design decisions): `TECH-PLAN.md`.
 - Next.js-specific agent rules: @AGENTS.md. This Next.js (16.4) differs from training data, so read `node_modules/next/dist/docs/` before using an unfamiliar API.

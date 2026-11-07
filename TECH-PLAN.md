@@ -317,7 +317,7 @@ Other cases:
 
 ## 9. Layout and design
 
-✅ **Desktop first, one layout everywhere.** Recruiters will mostly open the link on a laptop, but the layout shouldn't change shape at breakpoints.
+✅ **Desktop first, one layout everywhere.** Most people will first open the link on a laptop, but the layout shouldn't change shape at breakpoints.
 
 - **One centred content column**, `max-width ≈ 760px`. On a desktop it has generous whitespace around it. On a tablet or phone the same column just fills the width with a 16px gutter. There are no sidebars or multi-column rearrangement, and the components keep the same order at every width.
 - **Only one responsive adjustment:** the month-by-month table. At ≥ 640px it shows the columns *Month · Margin · Instalment · Left over · Status*. Below that, each row becomes two lines (month + status on top; left over, then margin − instalment, underneath). It's the same component with the same data.
