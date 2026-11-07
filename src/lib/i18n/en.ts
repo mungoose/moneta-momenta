@@ -238,6 +238,7 @@ export const en = {
     tryAgain: "Try different terms",
     backToMoney: "Back to your money",
   },
+  unexpectedTitle: "Something went wrong",
   unexpected: "Something went wrong with these numbers. Start over and try again.",
 };
 

@@ -1,5 +1,6 @@
 /* Moneta Momenta — tokens + components.
-   Every screen root carries class="mm" (light) or "mm mm-dark".
+   Every screen root carries class="mm". It is light by default and dark
+   when the system prefers dark (the canvas used an "mm-dark" class).
    .mm is a size container named "mm": below 600px the same column
    narrows (smaller headings, tighter gutters, month rows go two-line). */
 
@@ -56,28 +57,30 @@
   background: var(--mm-bg);
   -webkit-font-smoothing: antialiased;
 }
-.mm.mm-dark {
-  --mm-bg: #0E1317;
-  --mm-surface: #151C22;
-  --mm-surface-2: #1D262E;
-  --mm-border: #2B3640;
-  --mm-border-strong: #6B7884;
-  --mm-text: #E7ECF0;
-  --mm-text-muted: #9BA8B3;
-  --mm-accent: #6CC2B9;
-  --mm-accent-hover: #86D0C8;
-  --mm-accent-subtle: #17302F;
-  --mm-on-accent: #0B1F1E;
-  --mm-accent-ring: rgba(108, 194, 185, 0.35);
-  --mm-fits: #74D19C;
-  --mm-fits-bg: #102A1C;
-  --mm-tight: #F2B865;
-  --mm-tight-bg: #2D2312;
-  --mm-nofit: #FF8F85;
-  --mm-nofit-bg: #351A1C;
-  --mm-scrim: rgba(0, 0, 0, 0.6);
-  --mm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --mm-shadow-drawer: -16px 0 40px rgba(0, 0, 0, 0.5);
+@media (prefers-color-scheme: dark) {
+  .mm {
+    --mm-bg: #0E1317;
+    --mm-surface: #151C22;
+    --mm-surface-2: #1D262E;
+    --mm-border: #2B3640;
+    --mm-border-strong: #6B7884;
+    --mm-text: #E7ECF0;
+    --mm-text-muted: #9BA8B3;
+    --mm-accent: #6CC2B9;
+    --mm-accent-hover: #86D0C8;
+    --mm-accent-subtle: #17302F;
+    --mm-on-accent: #0B1F1E;
+    --mm-accent-ring: rgba(108, 194, 185, 0.35);
+    --mm-fits: #74D19C;
+    --mm-fits-bg: #102A1C;
+    --mm-tight: #F2B865;
+    --mm-tight-bg: #2D2312;
+    --mm-nofit: #FF8F85;
+    --mm-nofit-bg: #351A1C;
+    --mm-scrim: rgba(0, 0, 0, 0.6);
+    --mm-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    --mm-shadow-drawer: -16px 0 40px rgba(0, 0, 0, 0.5);
+  }
 }
 .mm *, .mm *::before, .mm *::after { box-sizing: border-box; }
 .mm h1, .mm h2, .mm h3, .mm p, .mm ul, .mm ol, .mm dl, .mm dd, .mm figure { margin: 0; }

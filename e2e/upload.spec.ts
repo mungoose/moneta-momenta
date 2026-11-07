@@ -313,6 +313,7 @@ test("a period that adds up past what can be counted says so, and Start over rec
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
   await page.getByRole("button", { name: "12 months" }).click();
+  await expect(heading(page)).toHaveText("Something went wrong");
   await expect(alert(page)).toHaveText(UNEXPECTED);
   await expect(page.getByRole("button", { name: "Continue to the purchase" })).toHaveCount(0);
 
@@ -328,6 +329,7 @@ test("a plan that can't be counted says so on the result step", async ({ page })
 
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
   await page.getByRole("button", { name: "Check affordability" }).click();
+  await expect(heading(page)).toHaveText("Something went wrong");
   await expect(alert(page)).toHaveText(UNEXPECTED);
   await expect(page.getByRole("button", { name: "Start over" })).toBeVisible();
 });
