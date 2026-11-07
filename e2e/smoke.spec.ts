@@ -8,9 +8,9 @@ const allowErrors = guardConsole();
 
 // The sample's prefilled purchase (€1,200 over 12 at 0%, 6-month average) fails in one month:
 // July 2027 counts on the July 2026 spending and ends €6.49 short.
-const SAMPLE_VERDICT = /July 2027 comes up €6\.49 short/;
+const SAMPLE_VERDICT = /It fits, but July 2027 needs €6\.49 from savings/;
 /** The same purchase at the form's default 9.9% rate: links without a rate mean 0%, the form starts at 9.9%. */
-const PREFILLED_VERDICT = /July 2027 comes up €11\.93 short/;
+const PREFILLED_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 test("root redirects to the English landing", async ({ page }) => {
   await page.goto("/");

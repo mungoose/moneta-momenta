@@ -10,9 +10,10 @@ Each link below opens the result for a sample household straight away:
 
 - [€100 × 3: fits](https://moneta-momenta.vercel.app/en?sample=comfortable&price=100&n=3)
 - [€1,200 × 12 over the last 12 months: tight](https://moneta-momenta.vercel.app/en?sample=comfortable&period=12&price=1200&n=12)
-- [€1,200 × 12 over the last 6 months: doesn't fit, because July comes up €6.49 short](https://moneta-momenta.vercel.app/en?sample=comfortable&price=1200&n=12)
+- [€1,200 × 12 over the last 6 months: tight, because July comes up €6.49 short and earlier months' savings cover it](https://moneta-momenta.vercel.app/en?sample=comfortable&price=1200&n=12)
+- [€3,000 × 6: doesn't fit, because December and another month come up short](https://moneta-momenta.vercel.app/en?sample=comfortable&price=3000&n=6)
 
-![The result for €1,200 over 12 instalments: 11 months fit, July 2027 doesn't, because last July's holiday spending is expected again](docs/result.png)
+![The result for €1,200 over 12 instalments: tight, because July 2027 comes up €6.49 short when last July's holiday spending is expected again, and the months before it saved enough to cover that](docs/result.png)
 
 ## How it works
 
@@ -42,7 +43,7 @@ A [template file](https://moneta-momenta.vercel.app/transactions-template.csv) s
 - **What counts.** Income is the `Inflow` group. Spending is every other category, net of refunds. Left out of both, and listed in the explanation: transfers between your own accounts, credit card payoffs (the purchases were already counted when you made them), opening balances, and rows with no category.
 - **Which months.** Only full months count. The current month is never used, because it isn't over. At least 3 full months are needed, so one odd month can't decide the average. If a file starts or ends partway through a month, that month is kept and flagged: missing spending makes plans look easier to afford than they are, and from dates alone a cut-off export looks the same as a quiet week.
 - **Expensive months come back.** Each plan month expects the higher of your average spending and what you actually spent in that calendar month last year. Last July's holiday makes next July tight; a cheap month never makes a plan look better. Income stays at the average.
-- **Fits / tight / doesn't fit.** A month *fits* when at least 10% of your average income is left after the instalment, is *tight* between €0 and that, and *doesn't fit* below €0. The verdict is the worst month, always shown with its numbers. Status is never shown by colour alone: each one has its own icon and label.
+- **Fits / tight / doesn't fit.** A month *fits* when at least 10% of your average income is left after the instalment, is *tight* between €0 and that, and *doesn't fit* below €0. Months aren't judged alone: a month that fits saves what it leaves above the cushion, and a later short month is *tight* if those savings cover it. The verdict is the worst month, except that one short month among months that all fit makes the plan tight, not refused. It's always shown with its numbers. Status is never shown by colour alone: each one has its own icon and label.
 - **One-off amounts are shown, not removed.** A category or income source with one month far above its usual (more than 3× its median and at least €100 above it) is listed as a one-off. It stays in the averages, because the seasonal rule already expects it again in the same month; taking it out would only make plans look easier to afford. One-off *income* gets the same note: a tax refund raises the average, but it may not come again.
 - **Interest.** An annual rate becomes a total through the standard annuity formula, plus any monthly fee. No APR is shown: it's a regulated disclosure, and this isn't a lender. The first instalment is due the month after the purchase.
 - **Money is integer cents.** No floating point in the maths. Instalments are whole cents and add up exactly to the total; the remainder goes on the last one.

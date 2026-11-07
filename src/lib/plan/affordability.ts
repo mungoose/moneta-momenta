@@ -16,6 +16,14 @@ interface PlanMonthBase {
   margin: Cents;
   /** `margin − instalment`. */
   leftover: Cents;
+  /**
+   * Savings carried into this month: what earlier plan months left above the
+   * buffer, less the shortfalls they covered. Zero again after a shortfall
+   * they couldn't cover.
+   */
+  savedBefore: Cents;
+  /** The leftover is below zero, but `savedBefore` covers it, so the month is tight rather than no-fit. */
+  covered: boolean;
   status: Status;
 }
 
@@ -35,7 +43,7 @@ export interface Affordability {
   /** Leftover below this makes a month tight. */
   buffer: Cents;
   months: PlanMonth[];
-  /** The worst month's status. */
+  /** From {@link verdictOf}: the worst month's status, except that one short month among fitting ones is tight. */
   verdict: Status;
 }
 
@@ -74,6 +82,9 @@ export function statusOf(leftover: Cents, buffer: Cents): Status {
  * never makes it look better. The lookup uses every full month, not just the
  * averaging period. Full months run without gaps, so each calendar month's
  * most recent occurrence is within the last 12 of them.
+ *
+ * Months aren't judged alone: what a month leaves above the buffer is saved,
+ * and a later month that comes up short is covered from it (see {@link carry}).
  * @param budget       Averages and full months, from `summarise`.
  * @param instalments  From `buildSchedule`; the first is due the month after `reference`.
  * @param reference    The first unfinished month, the same one the summary used.
@@ -83,11 +94,33 @@ export function statusOf(leftover: Cents, buffer: Cents): Status {
 export function assessPlan(budget: PlanBudget, instalments: readonly Cents[], reference: YearMonth): Affordability {
   const buffer = bufferFor(budget.avgIncome);
   const latest = latestByCalendarMonth(budget.fullMonths);
+  let saved = toCents(0);
   const months = instalments.map((instalment, i) => {
     const month = addMonths(reference, i + 1);
-    return planMonth(budget, month, instalment, latest.get(calendarMonth(month)), buffer);
+    const row = carry(planMonth(budget, month, instalment, latest.get(calendarMonth(month))), buffer, saved);
+    saved = row.savedAfter;
+    return row.month;
   });
-  return { buffer, months, verdict: worst(months.map((m) => m.status)) };
+  return { buffer, months, verdict: verdictOf(months.map((m) => m.status)) };
+}
+
+/**
+ * The verdict from the months' statuses: the worst month's, with one exception.
+ * A single month that doesn't fit, when every other month fits, makes the plan
+ * tight: one bad month is something to plan for, not a reason to refuse a plan
+ * that is comfortable the rest of the time. With any other month tight or short,
+ * the worst month decides.
+ * @param statuses  Every plan month's status.
+ * @returns         The verdict.
+ * @example verdictOf(["fits", "no-fit", "fits"]) // "tight"
+ * @example verdictOf(["fits", "no-fit", "tight"]) // "no-fit"
+ */
+export function verdictOf(statuses: readonly Status[]): Status {
+  const count = (status: Status) => statuses.filter((s) => s === status).length;
+  if (count("no-fit") === 1 && count("tight") === 0 && count("fits") > 0) {
+    return "tight";
+  }
+  return worst(statuses);
 }
 
 /** `MM` of a `YYYY-MM` month. */
@@ -98,23 +131,43 @@ function latestByCalendarMonth(fullMonths: readonly MonthTotals[]): Map<string, 
   return new Map(fullMonths.map((m) => [calendarMonth(m.month), m]));
 }
 
-/** One plan month, from the budget and that calendar month's last occurrence, if any. */
-function planMonth(
-  budget: PlanBudget,
-  month: YearMonth,
-  instalment: Cents,
-  past: MonthTotals | undefined,
-  buffer: Cents,
-): PlanMonth {
-  const row = (expectedSpending: Cents): PlanMonthBase => {
+/** A plan month before savings are applied: its own sum, judged alone. */
+type Unsaved = Omit<PlanMonthBase, "savedBefore" | "covered" | "status"> &
+  ({ spendingSource: "average" } | { spendingSource: "seasonal"; seasonalMonth: YearMonth });
+
+/** One plan month's sum, from the budget and that calendar month's last occurrence, if any. */
+function planMonth(budget: PlanBudget, month: YearMonth, instalment: Cents, past: MonthTotals | undefined): Unsaved {
+  const row = (expectedSpending: Cents) => {
     const margin = toCents(budget.avgIncome - expectedSpending);
-    const leftover = toCents(margin - instalment);
-    return { month, instalment, expectedSpending, margin, leftover, status: statusOf(leftover, buffer) };
+    return { month, instalment, expectedSpending, margin, leftover: toCents(margin - instalment) };
   };
   if (past !== undefined && past.spending > budget.avgSpending) {
     return { ...row(past.spending), spendingSource: "seasonal", seasonalMonth: past.month };
   }
   return { ...row(budget.avgSpending), spendingSource: "average" };
+}
+
+/**
+ * Applies the savings to one month and works out what carries on. A fitting
+ * month saves what it leaves above the buffer; the buffer itself stays for the
+ * unexpected. A tight month neither saves nor draws. A short month draws its
+ * shortfall when the savings cover it, and is then tight; when they don't, it
+ * doesn't fit and uses them all up.
+ */
+function carry(month: Unsaved, buffer: Cents, saved: Cents): { month: PlanMonth; savedAfter: Cents } {
+  const status = statusOf(month.leftover, buffer);
+  if (status === "fits") {
+    const savedAfter = toCents(saved + month.leftover - buffer);
+    return { month: { ...month, savedBefore: saved, covered: false, status }, savedAfter };
+  }
+  if (status === "tight") {
+    return { month: { ...month, savedBefore: saved, covered: false, status }, savedAfter: saved };
+  }
+  const covered = saved + month.leftover >= 0;
+  return {
+    month: { ...month, savedBefore: saved, covered, status: covered ? "tight" : "no-fit" },
+    savedAfter: covered ? toCents(saved + month.leftover) : toCents(0),
+  };
 }
 
 /** The worst of the statuses: any `no-fit` wins, then any `tight`. */

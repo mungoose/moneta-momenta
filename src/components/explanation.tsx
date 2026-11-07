@@ -21,7 +21,7 @@ interface ExplanationFacts {
   input: PlanInput;
   schedule: Schedule;
   assessment: Affordability;
-  /** The month with the least left over, which decides the verdict. */
+  /** The month that decides the verdict: the worst status, then the least left over. */
   critical: PlanMonth;
   money: (value: Cents) => string;
   month: (value: string) => string;
@@ -259,6 +259,7 @@ function LeftoverStep({ t, summary, assessment, critical, money, month, locale }
         </li>
       </ul>
       <p className="mm-t-small mm-muted">{e.bufferNote(money(buffer), formatPercent(BUFFER_BPS, locale))}</p>
+      <p className="mm-t-small mm-muted">{e.savingsNote(money(buffer))}</p>
     </Step>
   );
 }

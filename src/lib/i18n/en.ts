@@ -212,6 +212,8 @@ export const en = {
     verdictFits: "The plan fits every month",
     verdictTightOne: (month: string) => `It fits, but ${month} is tight`,
     verdictTightMany: (count: number) => `It fits, but ${count} months are tight`,
+    verdictCovered: (month: string, short: string) => `It fits, but ${month} needs ${short} from savings`,
+    verdictOneShort: (month: string, short: string) => `Only ${month} comes up short, by ${short}`,
     verdictNoFitOne: (month: string, short: string) => `${month} comes up ${short} short`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
       `${count} months come up short, ${month} by ${short}`,
@@ -223,6 +225,9 @@ export const en = {
     seasonal: (pastMonth: string, spent: string, average: string, planMonth: string) =>
       `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so ${planMonth} counts on that.`,
     belowBuffer: (buffer: string) => `A month is tight when less than ${buffer} is left: 10% of your average income.`,
+    coveredBody: (saved: string, buffer: string) =>
+      `The months before it leave ${saved} on top of the ${buffer} cushion. Put that aside and it covers the gap.`,
+    oneShortBody: "Every other month fits, so this is one month to plan for: set money aside before it.",
     payment: "Monthly payment",
     months: "Months",
     monthsValue: (fit: number, tight: number, noFit: number) =>
@@ -234,7 +239,7 @@ export const en = {
     change: "Change the purchase",
     monthsTitle: "Month by month",
     monthsIntro: (buffer: string) =>
-      `Margin is your average income minus what that month is expected to cost. A month fits when ${buffer} or more is left over after the instalment.`,
+      `Margin is your average income minus what that month is expected to cost. A month fits when ${buffer} or more is left over after the instalment. A month that comes up short is tight when what earlier months left on top of that covers it.`,
     colMonth: "Month",
     colMargin: "Margin",
     colInstalment: "Instalment",
@@ -243,6 +248,7 @@ export const en = {
     basedOn: (month: string) => `Spent in ${month}`,
     phoneMargin: "Margin",
     phoneLeft: "Left",
+    fromSavings: "From savings",
     incomplete:
       "Your file's first or last month may be missing transactions, so this result may look better than it is.",
     tryAgain: "Try different terms",
@@ -280,12 +286,14 @@ export const en = {
     leftoverFormula: "Average income − that month's spending − instalment = left over",
     leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
       `${month}: ${income} − ${spending} − ${instalment} =`,
-    criticalNote: "That's the month with the least left over, so it decides the verdict.",
+    criticalNote: "That's the month that decides the verdict.",
     fitsRange: (buffer: string) => `${buffer} or more left`,
     tightRange: (from: string, to: string) => `${from} to ${to} left`,
     noFitRange: (zero: string) => `Less than ${zero} left`,
     bufferNote: (buffer: string, percent: string) =>
       `The ${buffer} cushion is ${percent}% of your average income, for costs nobody can predict, like a repair or a doctor's bill.`,
+    savingsNote: (buffer: string) =>
+      `Months aren't judged alone. Each month that fits saves what it leaves on top of ${buffer}. A later month that comes up short is tight if those savings cover it, and doesn't fit if they don't. And when just one month doesn't fit while every other month fits, the plan as a whole is tight, not refused.`,
     limitsTitle: "What this can't know",
     limitsBody:
       "Changes that haven't happened yet, like a new job, a rent increase or a new subscription. If your income or costs are about to change, treat this as a rough guide.",

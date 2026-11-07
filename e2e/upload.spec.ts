@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import path from "node:path";
 import { expect, test, type Page } from "@playwright/test";
 import { guardConsole, heading } from "./helpers";
@@ -19,7 +20,7 @@ const e2eFixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 /** The same purchase and verdict as the sample flow: the uploaded sample must give the same answer. */
 /** The prefilled purchase (€1,200 × 12 at the default 9.9%) on the sample's figures. */
-const SAMPLE_VERDICT = /July 2027 comes up €11\.93 short/;
+const SAMPLE_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 const LANDING_TITLE = "Check if an instalment plan fits your budget, month by month.";
 const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Upload it again to continue.";
@@ -283,6 +284,31 @@ test("a file that starts late is flagged once its first month is in the period",
   await expect(page.getByText("Your transactions start on 19 November")).toHaveCount(0);
   await page.getByRole("button", { name: "12 months" }).click();
   await expect(page.getByText("Your transactions start on 19 November")).toBeVisible();
+});
+
+test("one short month among months that all fit makes the plan tight, not refused", async ({ page }) => {
+  // The sample plus a €300 repair in December 2025: December 2026 counts on
+  // that month and comes up short, with nothing saved yet to cover it. The
+  // repair is outside the 6-month period, so the averages don't change. The
+  // form's default 9.9% applies.
+  const sample = readFileSync(SAMPLE, "utf8").trimEnd();
+  const repair = row("15/12/2025", "Home", "Repairs", "300.00", "0.00");
+  await openLanding(page);
+  await upload(page, {
+    name: "one-short.tsv",
+    mimeType: "text/tab-separated-values",
+    buffer: Buffer.from(`${sample}\n${repair}\n`),
+  });
+
+  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "6", exact: true }).click();
+  await page.getByRole("button", { name: "Check affordability" }).click();
+
+  const verdict = page.locator(".mm-verdict");
+  await expect(verdict.getByRole("heading", { level: 2 })).toHaveText("Only December 2026 comes up short, by €57.35");
+  await expect(verdict).toContainText("Tight");
+  await expect(verdict).toContainText("Every other month fits");
+  await expect(page.locator("tr.is-nofit")).toHaveCount(1);
 });
 
 /** 2^52 cents: one fits a month's total, two pass the safe-integer range. */
