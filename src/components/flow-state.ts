@@ -70,6 +70,8 @@ export interface FlowState {
   showErrors: boolean;
   /** Bumped on every submit with errors, so the form can move focus to the first one. */
   failedSubmits: number;
+  /** Bumped on every submit that opens the result, so telemetry counts each check once. */
+  checks: number;
 }
 
 /** What can happen in the flow. */
@@ -107,6 +109,7 @@ export const initialFlow: FlowState = {
   customCount: false,
   showErrors: false,
   failedSubmits: 0,
+  checks: 0,
 };
 
 const isPreset = (count: string) => INSTALMENT_PRESETS.some((preset) => String(preset) === count);
@@ -159,7 +162,7 @@ function onGo(state: FlowState, step: Step, entry: string | null | undefined): F
 function onSubmit(state: FlowState): FlowState {
   const step = reachable(state, "result");
   return step === "result"
-    ? { ...state, step, showErrors: false }
+    ? { ...state, step, showErrors: false, checks: state.checks + 1 }
     : { ...state, step, showErrors: true, failedSubmits: state.failedSubmits + 1 };
 }
 

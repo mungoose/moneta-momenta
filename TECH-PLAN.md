@@ -272,18 +272,20 @@ Other cases:
 
 - **Typed event union.** Only these events exist, and their properties are enums or coarse buckets, never free values:
 
-  | Event | Properties |
-  |---|---|
-  | `flow_started` | `source: 'sample' \| 'upload'` |
-  | `import_failed` | `reason: ImportErrorCode` |
-  | `period_changed` | `months: 3 \| 6 \| 12` |
-  | `plan_checked` | `verdict`, `instalments: '3' \| '6' \| '12' \| 'custom'`, `priceBucket: '<300' \| '300–1000' \| '1000–3000' \| '>3000'`, `hasInterest: boolean` |
-  | `explanation_opened` | (none) |
-  | `suggestions_shown` | `source: 'ai' \| 'fallback'` |
+  | Event | Properties | Sent when |
+  |---|---|---|
+  | `flow_started` | `source: 'sample' \| 'upload'` | the user picks a sample or a file |
+  | `import_failed` | `reason: LoadError['code'] \| 'unreadable'` | an upload can't be used. The load codes include `too-little-data` and `no-income`; `unreadable` is a read failure no check describes |
+  | `period_changed` | `months: 3 \| 6 \| 12` | the user picks a different period |
+  | `plan_checked` | `verdict`, `instalments: '3' \| '6' \| '12' \| 'custom'`, `priceBucket: '<300' \| '300–1000' \| '1000–3000' \| '>3000'`, `hasInterest: boolean` | "Check affordability" opens a result |
+  | `explanation_opened` | (none) | added with the "how we calculated this" view |
+  | `suggestions_shown` | `source: 'ai' \| 'fallback'` | added with LLM suggestions (§12) |
 
-- **What's never sent:** amounts, categories, payees, dates, IDs, cookies or fingerprints. Each event carries only a per-page-load random session ID, so a funnel can be counted without tracking a person across visits.
-- **Sink:** in the demo, `console.info('[telemetry]', event)`. A comment at the sink says: *"In production, point this at a collector endpoint, e.g. a small API route shipping to Loki/Grafana or a product-analytics tool. The CSP `connect-src` would then allow that one origin."*
-- **Tests** check that an event with a non-whitelisted field doesn't compile. A unit test asserts that the payloads are made up only of whitelisted fields.
+  Only user actions send events: opening a sample link, Back / Forward and re-renders don't, so the funnel counts people rather than renders. `plan_checked` uses the verdict on screen; it isn't sent when the result shows the "Something went wrong" callout. Buckets: `priceBucket` is the full price (upfront included): under €300, €300 up to €999.99, €1,000 to €3,000, over €3,000. `instalments` is a preset count as itself, even when typed under "Custom". `hasInterest` is a rate above 0; a monthly fee isn't interest.
+- **What's never sent:** amounts, categories, payees, dates, IDs, cookies or fingerprints. Each event carries only a per-page-load random session ID (128 bits from `crypto.getRandomValues`, made on the first event), so a funnel can be counted without tracking a person across visits.
+- **Whitelist enforced twice.** The types reject an unknown property on an object literal, and `track()` rebuilds each payload from a per-event field list, because TypeScript lets an object built elsewhere or spread in through with extra properties.
+- **Sink:** in the demo, `console.info('[telemetry]', payload)`, the one `console` call lint allows. A comment at the sink says: *"In production, point this at a collector endpoint, e.g. a small API route shipping to Loki/Grafana or a product-analytics tool. The CSP `connect-src` would then allow that one origin."*
+- **Tests:** `@ts-expect-error` lines show that a free value or an unknown event doesn't compile; unit tests assert each payload holds exactly its whitelisted fields and the bucket edges; a Playwright spec reads the console and checks the events of a whole flow.
 - These events back the README's "how success would be measured" section: funnel conversion from `flow_started` → `plan_checked` → `explanation_opened`, the sample vs upload share, the import-failure reasons (to see which formats confuse people), and the verdict distribution.
 
 ## 9. Layout and design
