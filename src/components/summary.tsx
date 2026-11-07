@@ -33,7 +33,7 @@ export function Summary({
   rowCount: number;
   fullMonthCount: number;
   period: number;
-  onPeriod: (months: number) => void;
+  onPeriod: (months: (typeof PERIOD_OPTIONS)[number]) => void;
   onContinue: () => void;
 }) {
   const s = t.summary;

@@ -10,6 +10,7 @@ import { loadFile, loadText, type LoadedData } from "@/lib/load";
 import { assessPlan, type Affordability } from "@/lib/plan/affordability";
 import { checkPlanForm, type PlanFormResult } from "@/lib/plan/form";
 import { readSampleLink, writeSampleLink, type SampleLink, type SampleProfile } from "@/lib/sample-link";
+import { importFailed, planChecked, track } from "@/lib/telemetry";
 import {
   dataKey,
   flowReducer,
@@ -177,6 +178,7 @@ export function Flow({ locale }: { locale: Locale }) {
   };
 
   const upload = (file: File) => {
+    track({ name: "flow_started", source: "upload" });
     const signal = begin();
     const name = file.name;
     dispatch({ type: "load-start", loading: { kind: "upload", name } });
@@ -185,6 +187,9 @@ export function Flow({ locale }: { locale: Locale }) {
       (result) => {
         if (signal.aborted) {
           return;
+        }
+        if (!result.ok) {
+          track(importFailed(result.error));
         }
         dispatch(
           result.ok
@@ -195,6 +200,7 @@ export function Flow({ locale }: { locale: Locale }) {
       () => {
         // A total past the safe-integer range, or the browser failing to read the file.
         if (!signal.aborted) {
+          track(importFailed(null));
           dispatch({ type: "upload-failed", error: { error: null, fileName: name } });
         }
       },
@@ -217,6 +223,20 @@ export function Flow({ locale }: { locale: Locale }) {
     // Runs once on mount: the link is read from the URL the page was opened with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // One plan_checked per "Check affordability" that opens a result, with the verdict on screen.
+  // A sample link that opens a result, Back / Forward and re-renders don't bump `checks`, so they send nothing.
+  const countedChecks = useRef(0);
+  useEffect(() => {
+    if (state.checks === countedChecks.current) {
+      return;
+    }
+    countedChecks.current = state.checks;
+    const result = assessment?.ok ? assessment.value : null;
+    if (state.checks > 0 && plan.ok && result) {
+      track(planChecked(plan.input, result.verdict));
+    }
+  }, [state.checks, plan, assessment]);
 
   // Back / Forward: go to the step that history entry recorded, if it was made for the data loaded now.
   const fromHistory = useRef(false);
@@ -291,6 +311,7 @@ export function Flow({ locale }: { locale: Locale }) {
             assessment={assessment}
             dispatch={dispatch}
             onSample={(profile) => {
+              track({ name: "flow_started", source: "sample" });
               start(profile);
             }}
             onUpload={upload}
@@ -434,6 +455,9 @@ function StepView({
         fullMonthCount={data.fullMonthCount}
         period={state.period}
         onPeriod={(months) => {
+          if (months !== state.period) {
+            track({ name: "period_changed", months });
+          }
           dispatch({ type: "set-period", period: months });
         }}
         onContinue={() => {
