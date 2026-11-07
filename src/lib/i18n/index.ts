@@ -7,9 +7,6 @@ export const LOCALES = ["en", "et"] as const;
 /** A supported UI locale code. */
 export type Locale = (typeof LOCALES)[number];
 
-/** Locale used when the URL has none (`/` redirects here). */
-export const DEFAULT_LOCALE: Locale = "en";
-
 const dictionaries: Record<Locale, Messages> = { en, et };
 
 /**
