@@ -202,7 +202,9 @@ interface Schedule { financed: Cents; interest: Cents; fees: Cents; total: Cents
 
 type Status = 'fits' | 'tight' | 'no-fit'
 type PlanMonth = { month: YearMonth; instalment: Cents; expectedSpending: Cents;
-                   margin: Cents; leftover: Cents; status: Status }
+                   margin: Cents; leftover: Cents;
+                   savedBefore: Cents; covered: boolean;                 // savings carried in; a short month they cover
+                   status: Status }
                & ({ spendingSource: 'average' }
                 | { spendingSource: 'seasonal'; seasonalMonth: YearMonth })   // the past month used: "Last July you spent…"
 interface Affordability { buffer: Cents; months: PlanMonth[]; verdict: Status }
@@ -247,9 +249,15 @@ Every row keeps its `line` number, so errors can say exactly where the problem i
 **Status** (named constants). The buffer is 10% of average income: `buffer = divRound(avgIncome × 1000, 10000)`.
 - `leftover ≥ buffer` → **fits**
 - `0 ≤ leftover < buffer` → **tight**
-- `leftover < 0` → **doesn't fit**
+- `leftover < 0` → **doesn't fit**, unless savings cover it (below)
 
-The **verdict** is the worst month's status. It's always shown next to its inputs.
+**Savings carry between plan months: ✅.** Judged alone, one expensive month sank an otherwise comfortable plan: the sample's €1,200 × 12 left €329–€414 in eleven months and was refused for July 2027 coming up €6.49 short. A household that keeps what a good month leaves has that July covered many times over, so months aren't judged alone:
+- A month that fits saves `leftover − buffer`. The buffer itself is never saved: it stays for the unexpected.
+- A tight month neither saves nor draws.
+- A short month (`leftover < 0`) is **tight** and `covered` when `savedBefore ≥ −leftover`; the shortfall comes out of the savings. Otherwise it **doesn't fit** and the savings drop to zero.
+- Savings start at zero: the user's existing savings aren't known (the cash-buffer Could item would start them there).
+
+The **verdict** is the worst month's status, with one exception: exactly one month that doesn't fit, while every other month fits, makes the plan **tight**. One bad month is something to plan for ("Only December 2026 comes up short, by €51.54 … set money aside before it"), not a reason to refuse a plan that is comfortable the rest of the time. Any other mix (a second short month, or any tight month beside it) keeps the worst status. The month table still shows that month as doesn't fit. The verdict is always shown next to its inputs.
 
 **Irregular items: ✅ informational only.** A spending category, or an income payee, counts as irregular when, over the period's months (a month without its rows counts as zero), its peak month is more than `IRREGULAR_PEAK_RATIO = 3` × its median and at least `IRREGULAR_MIN_GAP_CENTS = 10_000` (€100) above it. A median below zero (refunds) counts as zero. The Summary lists them, largest peak first, and the explanation names up to three spending ones. Showing irregular *income* too (the April tax refund) tells the user how much of the average income they shouldn't count on.
 - **They stay in the averages and change no verdict.** The seasonal lookup already expects a past spike again in the same calendar month, so taking them out of the averages would only make plans look easier to afford, and would change every verdict the tests pin.
