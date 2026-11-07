@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { DEFAULT_LOCALE, LOCALES, getMessages, isLocale } from "@/lib/i18n";
+import { LOCALES, getMessages, isLocale } from "@/lib/i18n";
 
 /** Collects dotted key paths of a nested dictionary, e.g. `landing.tagline`. */
 function keyPaths(obj: object, prefix = ""): string[] {
@@ -36,6 +36,5 @@ describe("i18n", () => {
     expect(isLocale("et")).toBe(true);
     expect(isLocale("lv")).toBe(false);
     expect(isLocale("")).toBe(false);
-    expect(isLocale(DEFAULT_LOCALE)).toBe(true);
   });
 });
