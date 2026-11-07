@@ -1,4 +1,4 @@
-import { FIRST_MONTH_MAX_START_DAY } from "@/lib/constants";
+import { FIRST_MONTH_MAX_START_DAY, LAST_MONTH_END_WINDOW_DAYS } from "@/lib/constants";
 import type { Classified, ExcludedReason } from "@/lib/import/classify";
 import { toCents, type Cents } from "@/lib/money/cents";
 
@@ -33,7 +33,9 @@ export type DroppedMonth =
   /** The reference month or later: not finished yet. */
   | { month: YearMonth; why: "current" }
   /** The file's first month, which starts too late to be complete. */
-  | { month: YearMonth; why: "starts-mid-month"; firstDate: string };
+  | { month: YearMonth; why: "starts-mid-month"; firstDate: string }
+  /** The file's last month before the reference month, which ends too early to be complete. */
+  | { month: YearMonth; why: "ends-mid-month"; lastDate: string };
 
 /**
  * The month an ISO date falls in.
@@ -86,8 +88,12 @@ const add = (a: Cents, b: number): Cents => toCents(a + b);
  * - Months at or after `reference` are unfinished and dropped.
  * - The first month is dropped when its earliest row is after
  *   {@link FIRST_MONTH_MAX_START_DAY}: the export probably starts mid-month.
- * Excluded rows count as transactions for where the file starts, and their
- * totals are kept per month for the explanation view.
+ * - The last month is dropped when its latest row is before its last
+ *   {@link LAST_MONTH_END_WINDOW_DAYS} days and the file has no rows after
+ *   it: the export probably ends mid-month. A single month is judged by its
+ *   start first, so it's reported once.
+ * Excluded rows count as transactions for where the file starts and ends,
+ * and their totals are kept per month for the explanation view.
  * @param items      Every classified row of the file, in any order.
  * @param reference  The first unfinished month: today's month for an upload,
  *                   a fixed month for the sample so it never goes stale.
@@ -100,7 +106,7 @@ export function buildMonths(
 ): { fullMonths: MonthTotals[]; droppedMonths: DroppedMonth[] } {
   const byMonth = new Map<YearMonth, MonthTotals>();
   const currentMonths = new Set<YearMonth>();
-  let firstDate: string | undefined;
+  const dates: string[] = [];
 
   for (const item of items) {
     const { date } = item.row;
@@ -109,10 +115,7 @@ export function buildMonths(
       currentMonths.add(month);
       continue;
     }
-    // Stryker disable next-line EqualityOperator: equivalent; an equal date assigns the same value
-    if (firstDate === undefined || date < firstDate) {
-      firstDate = date;
-    }
+    dates.push(date);
     let totals = byMonth.get(month);
     if (totals === undefined) {
       totals = emptyMonth(month);
@@ -122,35 +125,60 @@ export function buildMonths(
   }
 
   const current = [...currentMonths].sort().map((month): DroppedMonth => ({ month, why: "current" }));
+  // ISO dates sort chronologically as strings.
+  dates.sort();
+  const firstDate = dates[0];
   if (firstDate === undefined) {
     return { fullMonths: [], droppedMonths: current };
   }
-  const { fullMonths, startsMidMonth } = fullRange(byMonth, firstDate);
-  return { fullMonths, droppedMonths: [...startsMidMonth, ...current] };
+  // Never undefined here: `dates` has at least the first date.
+  const lastDate = dates.at(-1) ?? firstDate;
+  // Rows after the last month show the export went past its end, so its end isn't judged.
+  const { fullMonths, cut } = fullRange(byMonth, firstDate, lastDate, current.length === 0);
+  return { fullMonths, droppedMonths: [...cut, ...current] };
 }
 
 /**
- * Lays out the months from the file's first month to the last one with rows,
- * with empty months for the gaps. The first month is left out, and returned in
- * `startsMidMonth`, when its earliest row is after {@link FIRST_MONTH_MAX_START_DAY}.
+ * Lays out the months from the file's first month to its last, with empty
+ * months for the gaps, leaving out an incomplete first or last month (oldest
+ * first in `cut`).
+ * @param firstDate  The file's earliest date before the reference month.
+ * @param lastDate   Its latest date before the reference month.
+ * @param judgeEnd   Whether the last month may end early: false when later
+ *                   rows show the export went past its end.
  */
 function fullRange(
   byMonth: ReadonlyMap<YearMonth, MonthTotals>,
   firstDate: string,
-): { fullMonths: MonthTotals[]; startsMidMonth: DroppedMonth[] } {
-  const startsMidMonth: DroppedMonth[] = [];
+  lastDate: string,
+  judgeEnd: boolean,
+): { fullMonths: MonthTotals[]; cut: DroppedMonth[] } {
+  const cut: DroppedMonth[] = [];
   let month = monthOf(firstDate);
-  if (Number(firstDate.slice(8, 10)) > FIRST_MONTH_MAX_START_DAY) {
-    startsMidMonth.push({ month, why: "starts-mid-month", firstDate });
+  if (dayOf(firstDate) > FIRST_MONTH_MAX_START_DAY) {
+    cut.push({ month, why: "starts-mid-month", firstDate });
     month = addMonths(month, 1);
   }
-  // Stryker disable next-line EqualityOperator: equivalent; map keys are unique, so a and b never tie
-  const last = [...byMonth.keys()].reduce((a, b) => (b > a ? b : a));
+  let last = monthOf(lastDate);
+  if (judgeEnd && last >= month && endsEarly(lastDate)) {
+    cut.push({ month: last, why: "ends-mid-month", lastDate });
+    last = addMonths(last, -1);
+  }
   const fullMonths: MonthTotals[] = [];
   for (; month <= last; month = addMonths(month, 1)) {
     fullMonths.push(byMonth.get(month) ?? emptyMonth(month));
   }
-  return { fullMonths, startsMidMonth };
+  return { fullMonths, cut };
+}
+
+/** The day of the month of an ISO date. */
+const dayOf = (date: string) => Number(date.slice(8, 10));
+
+/** Whether a month's latest date is before the month's last {@link LAST_MONTH_END_WINDOW_DAYS} days. */
+function endsEarly(lastDate: string): boolean {
+  // Day 0 of the next month is the last day of this one.
+  const daysInMonth = new Date(Date.UTC(Number(lastDate.slice(0, 4)), Number(lastDate.slice(5, 7)), 0)).getUTCDate();
+  return dayOf(lastDate) <= daysInMonth - LAST_MONTH_END_WINDOW_DAYS;
 }
 
 /** Adds one classified row to its month's totals. */

@@ -21,6 +21,16 @@ export const MIN_FULL_MONTHS = 3;
 export const FIRST_MONTH_MAX_START_DAY = 7;
 
 /**
+ * The file's last month counts as full only if a transaction falls in its
+ * last this-many days, unless the file has rows in a later month. The mirror
+ * of {@link FIRST_MONTH_MAX_START_DAY}: an export taken before a month ended
+ * and uploaded after it would otherwise count that month as full while its
+ * last days of spending are missing, which makes every plan look better than
+ * it is. Later rows prove the export went past the month's end.
+ */
+export const LAST_MONTH_END_WINDOW_DAYS = 7;
+
+/**
  * Period lengths the user can pick, in full months, counted back from the
  * last full month. A quarter, half a year, a year: long enough to smooth one
  * odd month, short enough to reflect the current situation.
