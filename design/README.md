@@ -20,11 +20,12 @@ The mockups use placeholder copy and numbers. Where they disagree with the code,
 
 ## Not in the mockups: who the app is for
 
-The app is strictly for small loans and instalment purchases (*väikelaenud*, *järelmaks*), up to 5 years. It isn't for mortgages or other long-term loans, which come with their own terms and limits. The mockups never say this, so add it in three places:
+The app is strictly for small loans and instalment purchases (*väikelaenud*, *järelmaks*), up to 5 years. It isn't for mortgages or other long-term loans, which come with their own terms and limits. The mockups never say this, so add it in two places:
 
 - **Landing:** one line under the lead paragraph, before the user picks sample data or an upload.
-- **Purchase form:** a hint under the intro, above the price field.
 - **README:** in the opening paragraph.
+
+The purchase form doesn't repeat it: by step 2 the user has already read it, and the form has enough hints of its own.
 
 Suggested copy (Margus reviews the Estonian):
 
