@@ -141,7 +141,7 @@ export const en = {
     periodLabel: "Period to average over",
     periodOption: (months: number) => `${months} months`,
     periodHint:
-      "The averages use your most recent full months. Every plan month also checks what the same month cost last year.",
+      "Choose how many of your most recent full months the averages use. More months even out unusual ones; fewer follow recent changes, like a new job or a new rent. Whatever you pick, each plan month also checks what the same month cost last year.",
     monthlyAverage: "Monthly average",
     incomeTitle: "Income",
     incomeTotal: "Average income",
@@ -159,7 +159,7 @@ export const en = {
     irregularUsually: (amount: string) => `, usually ${amount}`,
     noMarginTitle: "Nothing is left over on average",
     noMarginBody:
-      "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest groups are at the top of the list above.",
+      "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest spending groups are at the top of the list below.",
     continue: "Continue to the purchase",
   },
   purchase: {

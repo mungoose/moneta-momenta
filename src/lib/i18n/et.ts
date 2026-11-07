@@ -146,7 +146,7 @@ export const et = {
     periodLabel: "Keskmise arvutamise periood",
     periodOption: (months: number) => `${months} kuud`,
     periodHint:
-      "Keskmised arvutatakse viimaste täiskuude põhjal. Iga maksekuu puhul vaatame ka, palju sama kuu eelmisel aastal maksis.",
+      "Vali, mitme viimase täiskuu põhjal keskmised arvutatakse. Pikem periood tasandab erandlikke kuid, lühem arvestab hiljutisi muutusi, nagu uus töökoht või üür. Mida iganes valid, iga maksekuu puhul vaatame ka, palju sama kuu eelmisel aastal maksis.",
     monthlyAverage: "Kuu keskmine",
     incomeTitle: "Sissetulek",
     incomeTotal: "Keskmine sissetulek",
@@ -165,7 +165,7 @@ export const et = {
     irregularUsually: (amount: string) => `, tavaliselt ${amount}`,
     noMarginTitle: "Keskmiselt ei jää midagi üle",
     noMarginBody:
-      "Kulud on sama suured kui sissetulek või suuremad, nii et ükski järelmaks nende numbritega ei mahu. Suurimad grupid on ülal nimekirja alguses.",
+      "Kulud on sama suured kui sissetulek või suuremad, nii et ükski järelmaks nende numbritega ei mahu. Suurimad kulugrupid on allpool nimekirja alguses.",
     continue: "Edasi ostu juurde",
   },
   purchase: {
