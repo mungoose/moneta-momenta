@@ -37,6 +37,13 @@ test("walks through the sample's verdict in four steps, with its numbers", async
   await expect(drawer).toContainText("The €253.71 cushion is 10% of your average income");
 });
 
+test("names the period's one-off costs where it explains the costlier months", async ({ page }) => {
+  const drawer = await openDrawer(page);
+  await expect(drawer).toContainText(
+    "One-off costs, such as Accommodation (July 2026), Travel (July 2026) and Doctor & dentist (June 2026), are part of your usual spending",
+  );
+});
+
 test("shows interest, fees and the upfront payment when the plan has them", async ({ page }) => {
   await page.goto("/en?sample=comfortable&price=1200&n=12&upfront=150&rate=9.9&fee=2.5");
   await page.getByRole("button", { name: BUTTON }).click();

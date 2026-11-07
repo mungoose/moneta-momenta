@@ -147,6 +147,13 @@ export const en = {
     marginTitle: "Usual monthly margin",
     marginExplain: (income: string, spending: string) =>
       `${income} income − ${spending} usual spending. This is the room a new instalment has to fit into.`,
+    irregularTitle: (count: number) => (count === 1 ? "One amount stood out" : `${count} amounts stood out`),
+    irregularBody: "Each had one month far above its usual amount. They're included in the averages above.",
+    irregularSpending: "If a plan reaches the same month of the year, that month counts on what it cost then.",
+    irregularIncome: "One-off income raises the average income. If it won't come again, there's less room than shown.",
+    irregularItem: (name: string, month: string) => `${name} · ${month}`,
+    irregularIncomeItem: (payee: string, month: string) => `${payee} (income) · ${month}`,
+    irregularUsually: (amount: string) => `, usually ${amount}`,
     noMarginTitle: "Nothing is left over on average",
     noMarginBody:
       "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest groups are at the top of the list above.",
@@ -260,6 +267,9 @@ export const en = {
     seasonalRule:
       "For each plan month we look up the same month in your file, up to a year back. If you spent more then than usual, that month counts on what you spent. A cheaper month never makes the plan look better.",
     spentIn: (month: string) => `What you spent in ${month}`,
+    irregularNote: (items: string) =>
+      `One-off costs, such as ${items}, are part of your usual spending and of the month they fell in.`,
+    irregularNoteItem: (category: string, month: string) => `${category} (${month})`,
     seasonalNone: (usual: string) =>
       `No plan month cost more than usual last time, so every month counts on your usual spending of ${usual}.`,
     seasonalOthers: (usual: string) => `Every other month counts on your usual spending of ${usual}.`,

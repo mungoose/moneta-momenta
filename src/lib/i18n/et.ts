@@ -152,6 +152,14 @@ export const et = {
     marginTitle: "Tavaline kuujääk",
     marginExplain: (income: string, spending: string) =>
       `${income} sissetulek − ${spending} tavalised kulud. Sellesse peab uus makse ära mahtuma.`,
+    irregularTitle: (count: number) => (count === 1 ? "Üks summa paistis silma" : `${count} summat paistsid silma`),
+    irregularBody: "Igaühel neist oli üks kuu tavalisest palju suurem. Need on ülal olevates keskmistes sees.",
+    irregularSpending: "Kui plaan jõuab sama kalendrikuuni, arvestame selle kuu puhul tollaste kuludega.",
+    irregularIncome:
+      "Ühekordne tulu tõstab keskmist sissetulekut. Kui seda enam ei tule, on sinu kuujääk väiksem, kui siin näha.",
+    irregularItem: (name: string, month: string) => `${name} · ${month}`,
+    irregularIncomeItem: (payee: string, month: string) => `${payee} (tulu) · ${month}`,
+    irregularUsually: (amount: string) => `, tavaliselt ${amount}`,
     noMarginTitle: "Keskmiselt ei jää midagi üle",
     noMarginBody:
       "Kulud on sama suured kui sissetulek või suuremad, nii et ükski järelmaks nende numbritega ei mahu. Suurimad grupid on ülal nimekirja alguses.",
@@ -266,6 +274,9 @@ export const et = {
     seasonalRule:
       "Iga maksekuu puhul vaatame sinu failist sama kuud kuni aasta tagasi. Kui kulutasid siis tavalisest rohkem, arvestame selle kuu puhul sellega. Odavam kuu ei muuda plaani kunagi paremaks.",
     spentIn: (month: string) => `Kulud: ${month}`,
+    irregularNote: (items: string) =>
+      `Ühekordsed kulud, näiteks ${items}, on sinu tavalistes kuludes sees ja ka selle kuu kuludes, mil need tehti.`,
+    irregularNoteItem: (category: string, month: string) => `${category} (${month})`,
     seasonalNone: (usual: string) =>
       `Ükski maksekuu ei läinud eelmisel korral tavalisest rohkem maksma, seega arvestame igas kuus sinu tavaliste kuludega ${usual}.`,
     seasonalOthers: (usual: string) => `Ülejäänud kuudel arvestame sinu tavaliste kuludega ${usual}.`,

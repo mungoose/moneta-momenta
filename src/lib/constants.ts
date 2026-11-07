@@ -83,6 +83,21 @@ export const MAX_MONTHLY_FEE_CENTS = 100_000;
 export const BUFFER_BPS = 1_000;
 
 /**
+ * A category or income payee is irregular when its peak month is more than
+ * this many times its median month over the period. Twice the median caught
+ * ordinary wobble (a fuel bill 2.07× its median on the sample); three times
+ * leaves the one-offs: a holiday, a dentist bill, a tax refund.
+ */
+export const IRREGULAR_PEAK_RATIO = 3;
+
+/**
+ * The peak must also be at least this far above the median, in cents (€100),
+ * so a €4 category that once costs €15 isn't called out. Below €100 a one-off
+ * barely moves a monthly average.
+ */
+export const IRREGULAR_MIN_GAP_CENTS = 10_000;
+
+/**
  * The first unfinished month for the sample data, so its last full month is
  * October 2026. Fixed rather than today's month, so the sample shows the same
  * result to a reviewer who opens it months later.

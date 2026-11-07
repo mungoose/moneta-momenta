@@ -1,10 +1,12 @@
 import type { YearMonth } from "@/lib/budget/months";
+import type { IrregularItem } from "@/lib/budget/irregular";
 import type { DataSummary, SummaryResult } from "@/lib/budget/summary";
 import { periodOptions } from "@/lib/budget/summary";
 import { PERIOD_OPTIONS } from "@/lib/constants";
 import type { Locale, Messages } from "@/lib/i18n";
 import { formatDay, formatList, formatMonth, formatNumber } from "@/lib/i18n/format";
 import { outdatedEnd } from "@/lib/load";
+import type { Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { DataSource } from "./flow-state";
 import { ArrowRightIcon, InfoIcon, StatusIcon } from "./icons";
@@ -150,6 +152,8 @@ export function Summary({
         </p>
       </section>
 
+      <IrregularItems t={t} locale={locale} items={summary.irregular} />
+
       {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
 
       <div className="mm-actions">
@@ -194,6 +198,52 @@ function dataWarnings(
     warnings.push({ title: s.noIncomeMonthsTitle(months), body: s.noIncomeMonthsBody });
   }
   return warnings;
+}
+
+/**
+ * The period's one-off amounts. Informational: they're already in the
+ * averages, so the copy says what that means for spending and for income.
+ */
+function IrregularItems({ t, locale, items }: { t: Messages; locale: Locale; items: readonly IrregularItem[] }) {
+  if (items.length === 0) {
+    return null;
+  }
+  const s = t.summary;
+  const money = (value: Cents) => formatCents(value, locale);
+  return (
+    <div className="mm-callout mm-callout--info">
+      <InfoIcon className="mm-ico mm-callout__icon" />
+      <div className="mm-callout__content flex-auto">
+        <p className="mm-callout__title">{s.irregularTitle(items.length)}</p>
+        <p>
+          {s.irregularBody}
+          {items.some((item) => item.kind === "spending") && ` ${s.irregularSpending}`}
+          {items.some((item) => item.kind === "income") && ` ${s.irregularIncome}`}
+        </p>
+        <ul className="mm-list mm-num">
+          {items.map((item) => {
+            const month = formatMonth(item.peakMonth, locale);
+            const label =
+              item.kind === "spending"
+                ? s.irregularItem(item.category, month)
+                : s.irregularIncomeItem(item.payee, month);
+            // The file reader refuses text with `\u0000`, so as a separator it can't collide the way ":" would ("a:b" + "c" vs "a" + "b:c").
+            return (
+              <li
+                key={item.kind === "spending" ? `s\u0000${item.group}\u0000${item.category}` : `i\u0000${item.payee}`}
+              >
+                <span>
+                  {label}
+                  {item.median > 0 && s.irregularUsually(money(item.median))}
+                </span>
+                <span className="font-semibold whitespace-nowrap">{money(item.peak)}</span>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
 }
 
 /** A yellow callout: something to check, not something that stops the flow. */
