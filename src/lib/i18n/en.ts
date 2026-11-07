@@ -20,6 +20,7 @@ export const en = {
     home: "Moneta Momenta, back to the start",
     languageSwitch: "Eesti keeles",
     sampleBadge: "Sample data",
+    sampleBadgeShort: "Sample",
     startOver: "Start over",
   },
   footer: "Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.",

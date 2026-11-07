@@ -21,6 +21,7 @@ export const et = {
     home: "Moneta Momenta, tagasi algusesse",
     languageSwitch: "In English",
     sampleBadge: "Näidisandmed",
+    sampleBadgeShort: "Näidis",
     startOver: "Alusta uuesti",
   },
   footer: "Moneta Momenta · Hinnang sinu enda tehingute põhjal. Ei ole finantsnõuanne ega krediidiotsus.",

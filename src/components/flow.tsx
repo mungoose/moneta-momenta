@@ -412,7 +412,12 @@ function Header({
         <div className="flex items-center gap-2">
           {shown && (
             <>
-              {sample && <span className="mm-pill">{t.header.sampleBadge}</span>}
+              {sample && (
+                <span className="mm-pill">
+                  <span className="mm-top__long">{t.header.sampleBadge}</span>
+                  <span className="mm-top__short">{t.header.sampleBadgeShort}</span>
+                </span>
+              )}
               <button type="button" className="mm-btn mm-btn--ghost" onClick={onReset}>
                 {t.header.startOver}
               </button>

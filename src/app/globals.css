@@ -57,11 +57,19 @@
     overflow: hidden;
   }
 
+  /* The header badge's short form, shown only in a narrow column. */
+  .mm-top__short {
+    display: none;
+  }
+
   /* Narrow column fixes where the app's content is longer than the design's placeholders. */
   @container mm (max-width: 600px) {
-    /* Brand, badge, "Start over" and the language switch don't fit one 390px row; the summary already says it's sample data. */
-    .mm-top .mm-pill {
+    /* Brand, "Sample data", "Start over" and the language switch don't fit one 390px row; "Sample" does. */
+    .mm-top__long {
       display: none;
+    }
+    .mm-top__short {
+      display: inline;
     }
     /* At 320px (400% zoom on a laptop) even that row doesn't fit: the buttons wrap under the brand instead of scrolling sideways. */
     .mm-top__in {
