@@ -12,8 +12,8 @@ export const et = {
     description: "Vaata kuude kaupa, kas järelmaks mahub sinu tegelike kulude sisse, enne kui otsustad.",
   },
   header: {
-    appName: "Moneta",
-    home: "Moneta, tagasi algusesse",
+    appName: "Moneta Momenta",
+    home: "Moneta Momenta, tagasi algusesse",
     languageSwitch: "In English",
     sampleBadge: "Näidisandmed",
     startOver: "Alusta uuesti",

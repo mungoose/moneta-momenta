@@ -10,8 +10,8 @@ export const en = {
     description: "See month by month whether an instalment plan fits your real spending, before you commit.",
   },
   header: {
-    appName: "Moneta",
-    home: "Moneta, back to the start",
+    appName: "Moneta Momenta",
+    home: "Moneta Momenta, back to the start",
     languageSwitch: "Eesti keeles",
     sampleBadge: "Sample data",
     startOver: "Start over",
