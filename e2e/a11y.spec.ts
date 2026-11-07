@@ -59,7 +59,7 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     open: async (page) => {
       await page.goto("/en");
       await page.getByRole("button", { name: "Comfortable budget sample" }).click();
-      await page.getByRole("button", { name: "Continue to the purchase" }).click();
+      await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
       await page.getByLabel("Price").fill("abc");
       await page.getByLabel("Upfront payment").fill("abc");
       await page.getByRole("button", { name: "Check affordability" }).click();

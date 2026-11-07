@@ -48,7 +48,7 @@ test("the sample flow sends one event per action, with no figures", async ({ pag
   // Picking the period that's already chosen changes nothing, so it sends nothing.
   await page.getByRole("button", { name: "12 months" }).click();
   await page.getByRole("button", { name: "6 months" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText(RESULT_TITLE);
 

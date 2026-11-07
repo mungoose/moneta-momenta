@@ -25,7 +25,7 @@ test("sample data goes through every step to a verdict", async ({ page }) => {
 
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
   await expect(page).toHaveURL(/\/en\?sample=comfortable$/);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
 
   await expect(heading(page)).toHaveText("What would you like to buy?");
   await page.getByRole("button", { name: "Check affordability" }).click();
@@ -66,7 +66,7 @@ test("the summary lists the period's one-off amounts, and they follow the period
 test("Back returns to the previous step", async ({ page }) => {
   await page.goto("/en");
   await page.getByRole("button", { name: "Comfortable budget sample" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.goBack();
@@ -93,12 +93,20 @@ test("the result's two ways back to the form share one label, and the form's way
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 });
 
+test("step 1 repeats its action after the breakdown", async ({ page }) => {
+  await page.goto("/en?sample=comfortable");
+  const next = page.getByRole("button", { name: "Continue to the purchase" });
+  await expect(next).toHaveCount(2);
+  await next.last().click();
+  await expect(heading(page)).toHaveText("What would you like to buy?");
+});
+
 test("each step has its own browser tab title", async ({ page }) => {
   await page.goto("/en");
   await expect(page).toHaveTitle("Moneta Momenta");
   await page.goto("/en?sample=comfortable");
   await expect(page).toHaveTitle("Your money – Step 1 of 3 – Moneta Momenta");
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(page).toHaveTitle("The purchase – Step 2 of 3 – Moneta Momenta");
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(page).toHaveTitle("Result: Tight – Step 3 of 3 – Moneta Momenta");
@@ -152,7 +160,7 @@ test("the language switch keeps the sample link", async ({ page }) => {
 test("a missing price shows its error and takes focus", async ({ page }) => {
   await page.goto("/en");
   await page.getByRole("button", { name: "Comfortable budget sample" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
 
   const price = page.getByLabel("Price", { exact: true });
   await price.fill("");

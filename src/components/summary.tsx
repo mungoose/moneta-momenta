@@ -87,12 +87,7 @@ export function Summary({
 
       {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
 
-      <div className="mm-actions">
-        <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
-          {s.continue}
-          <ArrowRightIcon />
-        </button>
-      </div>
+      <ContinueButton label={s.continue} onContinue={onContinue} />
 
       <div className="mm-field">
         <span className="mm-label" id="period">
@@ -162,7 +157,22 @@ export function Summary({
       </section>
 
       <IrregularItems t={t} locale={locale} items={summary.irregular} />
+
+      {/* Again at the end: someone who reads the breakdown shouldn't have to scroll back up. */}
+      <ContinueButton label={s.continue} onContinue={onContinue} />
     </>
+  );
+}
+
+/** "Continue to the purchase": shown above the period control and again after the breakdown. */
+function ContinueButton({ label, onContinue }: { label: string; onContinue: () => void }) {
+  return (
+    <div className="mm-actions">
+      <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
+        {label}
+        <ArrowRightIcon />
+      </button>
+    </div>
   );
 }
 

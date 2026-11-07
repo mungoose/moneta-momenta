@@ -79,7 +79,7 @@ async function enterPurchase(page: Page) {
 
 /** Summary → purchase → result, with the sample's offer typed in. */
 async function checkPurchase(page: Page) {
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
   await enterPurchase(page);
   await page.getByRole("button", { name: "Check affordability" }).click();
@@ -108,7 +108,7 @@ test("an uploaded file goes through every step to a verdict", async ({ page }) =
 test("Back and Forward move between the steps of an upload", async ({ page }) => {
   await openLanding(page);
   await upload(page, SAMPLE);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.goBack();
@@ -311,7 +311,7 @@ test("one short month among months that all fit makes the plan tight", async ({ 
     buffer: Buffer.from(`${sample}\n${repair}\n`),
   });
 
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await enterPurchase(page);
   await page.getByRole("button", { name: "6", exact: true }).click();
   await page.getByRole("button", { name: "Check affordability" }).click();
@@ -366,7 +366,7 @@ test("a plan that can't be counted says so on the result step", async ({ page })
   await upload(page, year("huge-income.tsv", row("02/10/2026", "Inflow", "Ready to Assign", "0,00", HUGE)));
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await page.getByLabel("Price", { exact: true }).fill("1200");
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText("Something went wrong");
@@ -416,7 +416,7 @@ test("the language switch keeps no file data and asks for the file again", async
 test("Back into an upload's step after Start over opens the landing", async ({ page }) => {
   await openLanding(page);
   await upload(page, SAMPLE);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.getByRole("button", { name: "Start over" }).click();
