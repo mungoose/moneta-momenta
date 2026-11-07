@@ -310,8 +310,11 @@ test("the language switch keeps no file data and asks for the file again", async
   await upload(page, SAMPLE);
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
-  await page.getByRole("link", { name: "Eesti keeles" }).click();
-  await expect(page).toHaveURL(/\/et\?upload$/);
+  // The switch carries only a flag. It's checked on the link: once the other
+  // page has read the flag, it drops it from the URL, like any landing.
+  const languageSwitch = page.getByRole("link", { name: "Eesti keeles" });
+  await expect(languageSwitch).toHaveAttribute("href", "/et?upload");
+  await languageSwitch.click();
   await expect(page.locator("html")).toHaveAttribute("lang", "et");
   await expect(heading(page)).toHaveText("Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.");
   await expect(
@@ -319,6 +322,7 @@ test("the language switch keeps no file data and asks for the file again", async
       "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
     ),
   ).toBeVisible();
+  await expect(page).toHaveURL(/\/et$/);
 });
 
 test("Back into an upload's step after Start over opens the landing", async ({ page }) => {
