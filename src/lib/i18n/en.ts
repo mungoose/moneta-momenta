@@ -238,6 +238,45 @@ export const en = {
     tryAgain: "Try different terms",
     backToMoney: "Back to your money",
   },
+  explanation: {
+    title: "How we calculated this",
+    close: "Close",
+    intro: "Every figure comes from your transactions and the purchase you entered. Four steps:",
+    marginTitle: "Your usual margin",
+    marginFormula: (income: string, spending: string) => `${income} average income − ${spending} usual spending =`,
+    marginNote: (count: number, from: string, to: string) =>
+      `Monthly averages over ${count} full months, ${from} to ${to}.`,
+    instalmentTitle: "Your monthly instalment",
+    financedFormula: (price: string, upfront: string) => `${price} price − ${upfront} upfront =`,
+    toSpread: "to spread",
+    toSpreadNoUpfront: "to spread, with nothing paid upfront",
+    plusInterest: (interest: string) => `+ ${interest} interest`,
+    plusFees: (fees: string, count: number, fee: string) => `+ ${fees} fees (${count} × ${fee})`,
+    aMonth: "a month",
+    lastDiffers: (last: string) => `The last instalment is ${last}: it takes the cents that don't divide evenly.`,
+    rateNote: (percent: string) =>
+      `The interest at ${percent}% a year comes from a fixed monthly repayment, the way instalment offers are usually quoted.`,
+    seasonalTitle: "Months that cost more last time",
+    seasonalRule:
+      "For each plan month we look up the same month in your file, up to a year back. If you spent more then than usual, that month counts on what you spent. A cheaper month never makes the plan look better.",
+    spentIn: (month: string) => `What you spent in ${month}`,
+    seasonalNone: (usual: string) =>
+      `No plan month cost more than usual last time, so every month counts on your usual spending of ${usual}.`,
+    seasonalOthers: (usual: string) => `Every other month counts on your usual spending of ${usual}.`,
+    leftoverTitle: "What's left each month",
+    leftoverFormula: "Average income − that month's spending − instalment = left over",
+    leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
+      `${month}: ${income} − ${spending} − ${instalment} =`,
+    criticalNote: "That's the month with the least left over, so it decides the verdict.",
+    fitsRange: (buffer: string) => `${buffer} or more left`,
+    tightRange: (from: string, to: string) => `${from} to ${to} left`,
+    noFitRange: (zero: string) => `Less than ${zero} left`,
+    bufferNote: (buffer: string, percent: string) =>
+      `The ${buffer} cushion is ${percent}% of your average income, for costs nobody can predict, like a repair or a doctor's bill.`,
+    limitsTitle: "What this can't know",
+    limitsBody:
+      "Changes that haven't happened yet, like a new job, a rent increase or a new subscription. If your income or costs are about to change, treat this as a rough guide.",
+  },
   unexpectedTitle: "Something went wrong",
   unexpected: "Something went wrong with these numbers. Start over and try again.",
 };

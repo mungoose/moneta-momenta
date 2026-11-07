@@ -37,6 +37,7 @@ const EVERY_EVENT: TelemetryEvent[] = [
   { name: "import_failed", reason: "missing-columns" },
   { name: "period_changed", months: 12 },
   { name: "plan_checked", verdict: "tight", instalments: "custom", priceBucket: "1000–3000", hasInterest: true },
+  { name: "explanation_opened" },
 ];
 
 /** The fields each event may carry besides `name` and `session` (TECH-PLAN §8). */
@@ -45,6 +46,7 @@ const WHITELIST: Record<TelemetryEvent["name"], string[]> = {
   import_failed: ["reason"],
   period_changed: ["months"],
   plan_checked: ["verdict", "instalments", "priceBucket", "hasInterest"],
+  explanation_opened: [],
 };
 
 describe("createTracker", () => {
@@ -101,6 +103,8 @@ describe("createTracker", () => {
       send({ name: "period_changed", months: 7 });
       // @ts-expect-error: the price goes in as a bucket, never in cents
       send({ name: "plan_checked", verdict: "fits", instalments: "12", priceBucket: 120000, hasInterest: false });
+      // @ts-expect-error: opening the explanation carries nothing about the plan
+      send({ name: "explanation_opened", verdict: "fits" });
       // @ts-expect-error: only the defined events exist
       send({ name: "page_viewed" });
     }

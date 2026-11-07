@@ -84,6 +84,19 @@ test("a sample link that opens a result counts only the checks made after it", a
     ]);
 });
 
+test("opening the explanation sends an event each time, with no figures", async ({ page }) => {
+  const sent = telemetry(page);
+  await page.goto("/en?sample=comfortable&price=1200&n=12");
+  const button = page.getByRole("button", { name: "How we calculated this" });
+
+  await button.click();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog")).toBeHidden();
+  await button.click();
+
+  await expect.poll(sent).toEqual([{ name: "explanation_opened" }, { name: "explanation_opened" }]);
+});
+
 test("a failed upload sends the error's code only", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
