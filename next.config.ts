@@ -87,14 +87,16 @@ const nextConfig: NextConfig = {
   /**
    * Any other unknown first segment (`/x.y`, not a file) would match `[locale]`
    * and render its 404 at request time, with inline scripts that contain the
-   * path and so aren't in the CSP. Sent to the prerendered 404 instead, whose
-   * scripts are hashed. `afterFiles` runs after `public/` files, so
-   * `/favicon.ico` still resolves.
+   * path and so aren't in the CSP. Sent instead to a path no route matches, so
+   * it gets the prerendered 404, whose scripts are hashed. Not to `/_not-found`
+   * itself: Vercel serves a rewrite to that page with status 200. The
+   * destination has two segments because one would match `[locale]` again.
+   * `afterFiles` runs after `public/` files, so `/favicon.ico` still resolves.
    */
   async rewrites() {
     return {
       beforeFiles: [],
-      afterFiles: [{ source: "/:locale((?!(?:en|et)$)[^/]+)", destination: "/_not-found" }],
+      afterFiles: [{ source: "/:locale((?!(?:en|et)$)[^/]+)", destination: "/en/_no-page" }],
       fallback: [],
     };
   },
