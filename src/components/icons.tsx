@@ -30,6 +30,26 @@ export function ArrowRightIcon() {
   );
 }
 
+/** Arrow into a tray, for upload buttons. */
+export function UploadIcon() {
+  return (
+    <svg className="mm-ico" {...stroke}>
+      <path d="M10 13V3.5M6 7.5l4-4 4 4" />
+      <path d="M3.5 13v2.5a1 1 0 001 1h11a1 1 0 001-1V13" />
+    </svg>
+  );
+}
+
+/** A page with a folded corner, next to a file name. */
+export function FileIcon() {
+  return (
+    <svg className="mm-ico mm-ico--sm" {...stroke}>
+      <path d="M11.5 2.5H5.5a1 1 0 00-1 1v13a1 1 0 001 1h9a1 1 0 001-1V6.5z" />
+      <path d="M11.5 2.5v4h4" />
+    </svg>
+  );
+}
+
 /** Circled "i" for info callouts. */
 export function InfoIcon({ className = "mm-ico" }: { className?: string }) {
   return (

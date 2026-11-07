@@ -4,7 +4,13 @@
 Format mirrors a real YNAB export: UTF-8, tab separated, CRLF, quoted text
 fields, unquoted decimal-comma amounts, DD/MM/YYYY dates, newest first.
 All names and amounts are invented. Seeded, so output is reproducible.
+
+The date range and output folder are arguments, so the same households can
+be written as upload test files whose export starts or ends mid-month:
+
+    python3 generate_ynab_sample.py --end 2026-10-12 --out-dir /tmp/out
 """
+import argparse
 import random
 from datetime import date, timedelta
 from pathlib import Path
@@ -84,7 +90,7 @@ def fmt_money(cents, sep=","):
     return f"{cents // 100}{sep}{cents % 100:02d}"
 
 
-def generate(p):
+def generate(p, start=START, end=END):
     rng = random.Random(p["seed"])
     rows = []
     card_pending = 0
@@ -110,8 +116,8 @@ def generate(p):
     def fixed(d, payee, cat, euros):
         add("SEB", d, payee, cat, out=round(euros * 100))
 
-    d = START
-    while d <= END:
+    d = start
+    while d <= end:
         m, day = d.month, d.day
 
         if day == 3:
@@ -214,23 +220,30 @@ def write_tsv(rows, path, english=False):
     path.write_bytes("\r\n".join(lines).encode("utf-8"))
 
 
-def summarise(name, rows):
+def summarise(name, rows, start=START, end=END):
     print(f"\n{name}: {len(rows)} rows")
     print("month    income  expenses  surplus")
     surplus_total = 0
-    y, m = START.year, START.month
-    while (y, m) <= (END.year, END.month):
+    months = 0
+    y, m = start.year, start.month
+    while (y, m) <= (end.year, end.month):
         inc = sum(r[9] for r in rows if (r[2].year, r[2].month) == (y, m) and r[4] == "Inflow: Ready to Assign")
         exp = sum(r[8] for r in rows if (r[2].year, r[2].month) == (y, m) and r[4] != "")
         surplus_total += inc - exp
+        months += 1
         print(f"{y}-{m:02d} {inc/100:8.0f} {exp/100:9.0f} {(inc-exp)/100:8.0f}")
         y, m = (y + 1, 1) if m == 12 else (y, m + 1)
-    print(f"average monthly surplus: {surplus_total / 12 / 100:.0f}")
+    print(f"average monthly surplus: {surplus_total / months / 100:.0f}")
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser.add_argument("--start", type=date.fromisoformat, default=START, help="first day, YYYY-MM-DD")
+    parser.add_argument("--end", type=date.fromisoformat, default=END, help="last day, YYYY-MM-DD")
+    parser.add_argument("--out-dir", type=Path, default=OUT_DIR, help="folder to write the files to")
+    args = parser.parse_args()
     for name, params in PROFILES.items():
-        data = generate(params)
-        write_tsv(data, OUT_DIR / f"ynab_sample_{name}.tsv")
-        write_tsv(data, OUT_DIR / f"ynab_sample_en_{name}.tsv", english=True)
-        summarise(name, data)
+        data = generate(params, args.start, args.end)
+        write_tsv(data, args.out_dir / f"ynab_sample_{name}.tsv")
+        write_tsv(data, args.out_dir / f"ynab_sample_en_{name}.tsv", english=True)
+        summarise(name, data, args.start, args.end)

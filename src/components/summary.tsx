@@ -1,9 +1,12 @@
-import type { SummaryResult } from "@/lib/budget/summary";
+import type { YearMonth } from "@/lib/budget/months";
+import type { DataSummary, SummaryResult } from "@/lib/budget/summary";
 import { periodOptions } from "@/lib/budget/summary";
 import { PERIOD_OPTIONS } from "@/lib/constants";
 import type { Locale, Messages } from "@/lib/i18n";
-import { formatMonth, formatNumber } from "@/lib/i18n/format";
+import { formatDay, formatList, formatMonth, formatNumber } from "@/lib/i18n/format";
+import { outdatedEnd } from "@/lib/load";
 import { formatCents } from "@/lib/money/format";
+import type { DataSource } from "./flow-state";
 import { ArrowRightIcon, InfoIcon, StatusIcon } from "./icons";
 
 /** Category names shown under each group, so the group's total is recognisable. */
@@ -14,6 +17,8 @@ export function Summary({
   t,
   locale,
   result,
+  source,
+  reference,
   rowCount,
   fullMonthCount,
   period,
@@ -23,6 +28,8 @@ export function Summary({
   t: Messages;
   locale: Locale;
   result: SummaryResult;
+  source: DataSource;
+  reference: YearMonth;
   rowCount: number;
   fullMonthCount: number;
   period: number;
@@ -47,11 +54,22 @@ export function Summary({
           {s.title}
         </h1>
         {first !== undefined && last !== undefined && (
-          <p className="mm-muted">
-            {s.source(formatNumber(rowCount, locale), formatMonth(first, locale), formatMonth(last, locale))}
+          <p className="mm-muted break-words">
+            {source.kind === "sample"
+              ? s.source(formatNumber(rowCount, locale), formatMonth(first, locale), formatMonth(last, locale))
+              : s.sourceUpload(
+                  source.name,
+                  formatNumber(rowCount, locale),
+                  formatMonth(first, locale),
+                  formatMonth(last, locale),
+                )}
           </p>
         )}
       </section>
+
+      {dataWarnings(t, locale, summary, reference).map(({ title, body }) => (
+        <Warning key={title} title={title} body={body} />
+      ))}
 
       <div className="mm-field">
         <span className="mm-label" id="period">
@@ -132,15 +150,7 @@ export function Summary({
         </p>
       </section>
 
-      {summary.margin <= 0 && (
-        <div className="mm-callout mm-callout--warn">
-          <StatusIcon status="tight" className="mm-ico mm-callout__icon" />
-          <div className="mm-callout__content">
-            <p className="mm-callout__title">{s.noMarginTitle}</p>
-            <p>{s.noMarginBody}</p>
-          </div>
-        </div>
-      )}
+      {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
 
       <div className="mm-actions">
         <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
@@ -149,6 +159,53 @@ export function Summary({
         </button>
       </div>
     </>
+  );
+}
+
+/**
+ * What may make the averages wrong, in the order the user should read it:
+ * missing transactions at the file's edges, missing recent months, months
+ * without income. Warnings, not errors: only the user knows if the data is right.
+ */
+function dataWarnings(
+  t: Messages,
+  locale: Locale,
+  summary: DataSummary,
+  reference: YearMonth,
+): { title: string; body: string }[] {
+  const s = t.summary;
+  const warnings = summary.incomplete.map((edge) => ({
+    title:
+      edge.why === "starts-mid-month"
+        ? s.startsLateTitle(formatDay(edge.firstDate, locale))
+        : s.endsEarlyTitle(formatDay(edge.lastDate, locale)),
+    body: s.incompleteBody(formatMonth(edge.month, locale)),
+  }));
+  const last = summary.fullMonths.at(-1)?.month;
+  const outdated = last === undefined ? null : outdatedEnd(last, reference);
+  if (outdated !== null) {
+    warnings.push({ title: s.outdatedTitle(formatMonth(outdated, locale)), body: s.outdatedBody });
+  }
+  if (summary.noIncomeMonths.length > 0) {
+    const months = formatList(
+      summary.noIncomeMonths.map((m) => formatMonth(m, locale)),
+      locale,
+    );
+    warnings.push({ title: s.noIncomeMonthsTitle(months), body: s.noIncomeMonthsBody });
+  }
+  return warnings;
+}
+
+/** A yellow callout: something to check, not something that stops the flow. */
+function Warning({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="mm-callout mm-callout--warn">
+      <StatusIcon status="tight" className="mm-ico mm-callout__icon" />
+      <div className="mm-callout__content">
+        <p className="mm-callout__title">{title}</p>
+        <p>{body}</p>
+      </div>
+    </div>
   );
 }
 

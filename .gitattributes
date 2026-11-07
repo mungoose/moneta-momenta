@@ -1,1 +1,2 @@
 tests/fixtures/** -text
+e2e/fixtures/** -text

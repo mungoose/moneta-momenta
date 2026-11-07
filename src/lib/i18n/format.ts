@@ -16,6 +16,17 @@ const monthFormatters = Object.fromEntries(
   ]),
 ) as Record<Locale, Record<MonthStyle, Intl.DateTimeFormat>>;
 
+const dayFormatters = Object.fromEntries(
+  LOCALES.map((locale) => [
+    locale,
+    new Intl.DateTimeFormat(INTL_LOCALE[locale], { day: "numeric", month: "long", timeZone: "UTC" }),
+  ]),
+) as Record<Locale, Intl.DateTimeFormat>;
+
+const listFormatters = Object.fromEntries(
+  LOCALES.map((locale) => [locale, new Intl.ListFormat(INTL_LOCALE[locale], { type: "conjunction" })]),
+) as Record<Locale, Intl.ListFormat>;
+
 const numberFormatters = Object.fromEntries(
   LOCALES.map((locale) => [locale, new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 2 })]),
 ) as Record<Locale, Intl.NumberFormat>;
@@ -31,6 +42,30 @@ const numberFormatters = Object.fromEntries(
 export function formatMonth(month: YearMonth, locale: Locale, style: MonthStyle = "long"): string {
   const date = new Date(Date.UTC(Number(month.slice(0, 4)), Number(month.slice(5, 7)) - 1, 1));
   return monthFormatters[locale][style].format(date);
+}
+
+/**
+ * Formats an ISO date as day and month, for sentences where the month and
+ * year are already clear.
+ * @param date    ISO date, `YYYY-MM-DD`.
+ * @param locale  UI locale.
+ * @returns       E.g. `12 October` (en), `12. oktoober` (et).
+ * @example formatDay("2026-10-12", "en") // "12 October"
+ */
+export function formatDay(date: string, locale: Locale): string {
+  const utc = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10))));
+  return dayFormatters[locale].format(utc);
+}
+
+/**
+ * Joins names into a sentence list, with the locale's "and".
+ * @param items   The names, in order.
+ * @param locale  UI locale.
+ * @returns       E.g. `Payee, Category and Inflow` (en), `Payee, Category ja Inflow` (et).
+ * @example formatList(["Date", "Payee"], "en") // "Date and Payee"
+ */
+export function formatList(items: readonly string[], locale: Locale): string {
+  return listFormatters[locale].format(items);
 }
 
 /**

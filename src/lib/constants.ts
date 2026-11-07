@@ -1,9 +1,13 @@
 /**
- * Largest file the import will read, in bytes. A year of a household's
- * transactions is about 65 KB, so 5 MB covers decades of real exports, while
- * a wrongly picked photo or video is refused before the browser decodes it.
+ * Largest file the import will read, in megabytes (MiB). A year of a
+ * household's transactions is about 65 KB, so 5 MB covers decades of real
+ * exports, while a wrongly picked photo or video is refused before the
+ * browser decodes it. The error message shows this number.
  */
-export const MAX_FILE_BYTES = 5 * 1024 * 1024;
+export const MAX_FILE_MB = 5;
+
+/** {@link MAX_FILE_MB} in bytes, the unit the file size check compares. */
+export const MAX_FILE_BYTES = MAX_FILE_MB * 1024 * 1024;
 
 /**
  * Fewest full months the averages are computed from. With fewer, one odd

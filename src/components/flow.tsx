@@ -1,19 +1,21 @@
 "use client";
 
 import { useEffect, useMemo, useReducer, useRef } from "react";
+import { referenceMonth } from "@/lib/budget/months";
 import { summarise, type SummaryResult } from "@/lib/budget/summary";
 import { SAMPLE_REFERENCE_MONTH } from "@/lib/constants";
 import { getMessages, type Locale, type Messages } from "@/lib/i18n";
-import { parseTransactions } from "@/lib/import/parse";
+import { loadFile, loadText, type LoadedData } from "@/lib/load";
 import { assessPlan, type Affordability } from "@/lib/plan/affordability";
 import { checkPlanForm, type PlanFormResult } from "@/lib/plan/form";
 import { readSampleLink, writeSampleLink, type SampleLink, type SampleProfile } from "@/lib/sample-link";
 import {
+  dataKey,
   flowReducer,
   initialFlow,
+  isUploadKey,
   STEPS,
   type FlowAction,
-  type FlowData,
   type FlowState,
   type Step,
 } from "./flow-state";
@@ -22,29 +24,70 @@ import { Landing } from "./landing";
 import { Purchase } from "./purchase";
 import { Result } from "./result";
 import { Summary } from "./summary";
+import { UploadErrorView } from "./upload-error";
 
-/** The step kept in each browser history entry, so Back and Forward move between steps. */
+/**
+ * What each browser history entry keeps, so Back and Forward move between
+ * steps: the step, and the {@link dataKey} of the data it showed. Only the
+ * key: an upload's figures never go into history.
+ */
 interface HistoryStep {
   mmStep?: unknown;
+  mmData?: unknown;
 }
 
 const isStep = (value: unknown): value is Step => STEPS.some((step) => step === value);
 
 /**
- * Fetches a sample file and runs it through the same parser and summary as an upload would.
- * @throws When the fetch fails or the sample can't be summarised (a broken deploy).
+ * Query flag the language switch adds while an upload is shown. The other
+ * locale's page can't have the file, so it opens the landing with the
+ * "upload it again" note. Nothing about the file goes in the URL.
  */
-async function loadSample(locale: Locale, profile: SampleProfile, signal: AbortSignal): Promise<FlowData> {
+const UPLOAD_GONE_PARAM = "upload";
+
+/**
+ * Fetches a sample file and runs it through the same load pipeline as an upload.
+ * @throws When the fetch fails or the sample can't be loaded (a broken deploy).
+ */
+async function loadSample(locale: Locale, profile: SampleProfile, signal: AbortSignal): Promise<LoadedData> {
   const response = await fetch(`/samples/${locale}_${profile}.tsv`, { signal });
   if (!response.ok) {
     throw new Error(`Sample request failed: ${response.status}`);
   }
-  const file = parseTransactions(await response.text());
-  const summary = file.ok ? summarise(file, SAMPLE_REFERENCE_MONTH) : undefined;
-  if (!file.ok || !summary?.ok) {
-    throw new Error("Sample data can't be summarised");
+  const result = loadText(await response.text(), SAMPLE_REFERENCE_MONTH);
+  if (!result.ok) {
+    throw new Error(`Sample data can't be loaded: ${result.error.code}`);
   }
-  return { profile, file, reference: SAMPLE_REFERENCE_MONTH, fullMonthCount: summary.summary.fullMonths.length };
+  return result.data;
+}
+
+/**
+ * The page's query and the language switch's. Only sample data goes into the
+ * URL; while an upload is shown, the switch carries just a flag, so the other
+ * locale can say why the file is gone. The landing keeps a bare URL even
+ * with data loaded (after Back), so reloading it opens the landing.
+ */
+function queries(state: FlowState, plan: PlanFormResult): { query: string; switchQuery: string } {
+  const { data, step, period } = state;
+  if (data === null || step === "landing") {
+    return { query: "", switchQuery: "" };
+  }
+  if (data.source.kind === "upload") {
+    return { query: "", switchQuery: `?${UPLOAD_GONE_PARAM}` };
+  }
+  const query = writeSampleLink({
+    profile: data.source.profile,
+    period,
+    plan: step === "result" && plan.ok ? plan.input : undefined,
+  });
+  return { query, switchQuery: query };
+}
+
+/** Whether a history entry (after a reload, the current one) showed an upload past the landing. */
+function showedUpload(entry: HistoryStep | null): boolean {
+  return (
+    isStep(entry?.mmStep) && entry.mmStep !== "landing" && typeof entry.mmData === "string" && isUploadKey(entry.mmData)
+  );
 }
 
 /** How the URL-sync effect records a render in the browser history. */
@@ -78,8 +121,8 @@ function historyWrite(input: {
 /**
  * The whole affordability check on one page: landing → summary → purchase →
  * result, kept in a reducer. Sample data is mirrored into the URL so a link
- * can open any step; each step change adds a history entry so the browser's
- * Back button goes to the previous step.
+ * can open any step; uploaded data never is. Each step change adds a history
+ * entry so the browser's Back button goes to the previous step.
  */
 export function Flow({ locale }: { locale: Locale }) {
   const t = getMessages(locale);
@@ -94,50 +137,91 @@ export function Flow({ locale }: { locale: Locale }) {
     [data, summary, plan],
   );
 
-  // The landing keeps a bare URL even with data loaded (after Back), so reloading it opens the landing.
-  const query =
-    data && step !== "landing"
-      ? writeSampleLink({ profile: data.profile, period, plan: step === "result" && plan.ok ? plan.input : undefined })
-      : "";
+  const shown = data !== null && step !== "landing";
+  const { query, switchQuery } = queries(state, plan);
 
+  // One load at a time: starting another (sample or upload) makes the earlier one's result be ignored.
   const loadController = useRef<AbortController | null>(null);
-  const start = (profile: SampleProfile, link?: SampleLink) => {
+  const begin = () => {
     loadController.current?.abort();
     const controller = new AbortController();
     loadController.current = controller;
-    dispatch({ type: "load-start", profile });
-    loadSample(locale, profile, controller.signal).then(
+    return controller.signal;
+  };
+
+  const start = (profile: SampleProfile, link?: SampleLink) => {
+    const signal = begin();
+    dispatch({ type: "load-start", loading: { kind: "sample", profile } });
+    loadSample(locale, profile, signal).then(
       (loaded) => {
-        dispatch({ type: "loaded", data: loaded, period: link?.period, plan: link?.plan });
+        dispatch({
+          type: "loaded",
+          data: { ...loaded, source: { kind: "sample", profile } },
+          period: link?.period,
+          plan: link?.plan,
+        });
       },
       () => {
-        if (!controller.signal.aborted) {
+        if (!signal.aborted) {
           dispatch({ type: "load-failed" });
         }
       },
     );
   };
 
-  // Opened from a sample link: load it. The URL stays as it is until the data is in.
+  const upload = (file: File) => {
+    const signal = begin();
+    const name = file.name;
+    dispatch({ type: "load-start", loading: { kind: "upload", name } });
+    // Counted from the user's own month: the unfinished current month is left out.
+    loadFile(file, referenceMonth(new Date())).then(
+      (result) => {
+        if (signal.aborted) {
+          return;
+        }
+        dispatch(
+          result.ok
+            ? { type: "loaded", data: { ...result.data, source: { kind: "upload", name, id: Date.now() } } }
+            : { type: "upload-failed", error: { error: result.error, fileName: name } },
+        );
+      },
+      () => {
+        // A total past the safe-integer range, or the browser failing to read the file.
+        if (!signal.aborted) {
+          dispatch({ type: "upload-failed", error: { error: null, fileName: name } });
+        }
+      },
+    );
+  };
+
+  // On mount: a sample link loads its sample, and the URL stays as it is until the data is in.
+  // A reload or a language switch where an upload was shown gets the "upload it again" note.
   const fromLink = useRef(false);
   useEffect(() => {
-    const link = readSampleLink(new URLSearchParams(window.location.search));
+    const params = new URLSearchParams(window.location.search);
+    const link = readSampleLink(params);
     if (link) {
       fromLink.current = true;
       start(link.profile, link);
+    } else if (params.has(UPLOAD_GONE_PARAM) || showedUpload(window.history.state as HistoryStep | null)) {
+      dispatch({ type: "upload-gone" });
     }
     return () => loadController.current?.abort();
     // Runs once on mount: the link is read from the URL the page was opened with.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Back / Forward: go to the step that history entry recorded.
+  // Back / Forward: go to the step that history entry recorded, if it was made for the data loaded now.
   const fromHistory = useRef(false);
   useEffect(() => {
     const onPop = (event: PopStateEvent) => {
-      const recorded = (event.state as HistoryStep | null)?.mmStep;
+      const recorded = event.state as HistoryStep | null;
       fromHistory.current = true;
-      dispatch({ type: "go", step: isStep(recorded) ? recorded : "landing" });
+      dispatch({
+        type: "go",
+        step: isStep(recorded?.mmStep) ? recorded.mmStep : "landing",
+        entry: typeof recorded?.mmData === "string" ? recorded.mmData : null,
+      });
     };
     window.addEventListener("popstate", onPop);
     return () => {
@@ -161,7 +245,7 @@ export function Flow({ locale }: { locale: Locale }) {
       return;
     }
     const url = `${window.location.pathname}${query}`;
-    const entry: HistoryStep = { mmStep: step };
+    const entry: HistoryStep = { mmStep: step, mmData: dataKey(data) };
     if (write === "push") {
       window.history.pushState(entry, "", url);
     } else {
@@ -182,8 +266,9 @@ export function Flow({ locale }: { locale: Locale }) {
       <Header
         t={t}
         locale={locale}
-        query={query}
-        showSample={data !== null && step !== "landing"}
+        query={switchQuery}
+        shown={shown}
+        sample={data?.source.kind === "sample"}
         onReset={() => {
           dispatch({ type: "reset" });
         }}
@@ -200,6 +285,7 @@ export function Flow({ locale }: { locale: Locale }) {
           onSample={(profile) => {
             start(profile);
           }}
+          onUpload={upload}
         />
       </main>
       <footer className="mm-foot">
@@ -210,20 +296,24 @@ export function Flow({ locale }: { locale: Locale }) {
 }
 
 /**
- * The top bar: brand (back to the start), the sample badge and "Start over"
- * once data is loaded, and the language switch, which keeps the sample query.
+ * The top bar: brand (back to the start), "Start over" (and the sample badge
+ * for sample data) past the landing, and the language switch, which keeps
+ * the sample query.
  */
 function Header({
   t,
   locale,
   query,
-  showSample,
+  shown,
+  sample,
   onReset,
 }: {
   t: Messages;
   locale: Locale;
   query: string;
-  showSample: boolean;
+  /** Data is loaded and a step past the landing is open. */
+  shown: boolean;
+  sample: boolean;
   onReset: () => void;
 }) {
   const otherLocale: Locale = locale === "en" ? "et" : "en";
@@ -243,9 +333,9 @@ function Header({
           {t.header.appName}
         </a>
         <div className="flex items-center gap-2">
-          {showSample && (
+          {shown && (
             <>
-              <span className="mm-pill">{t.header.sampleBadge}</span>
+              {sample && <span className="mm-pill">{t.header.sampleBadge}</span>}
               <button type="button" className="mm-btn mm-btn--ghost" onClick={onReset}>
                 {t.header.startOver}
               </button>
@@ -275,6 +365,7 @@ function StepView({
   assessment,
   dispatch,
   onSample,
+  onUpload,
 }: {
   t: Messages;
   locale: Locale;
@@ -284,10 +375,32 @@ function StepView({
   assessment: Affordability | null;
   dispatch: (action: FlowAction) => void;
   onSample: (profile: SampleProfile) => void;
+  onUpload: (file: File) => void;
 }) {
   const { step, data } = state;
   if (step === "landing") {
-    return <Landing t={t} loading={state.loading} loadFailed={state.loadFailed} onSample={onSample} />;
+    return state.uploadError ? (
+      <UploadErrorView
+        t={t}
+        locale={locale}
+        failure={state.uploadError}
+        loading={state.loading}
+        onSample={() => {
+          onSample("comfortable");
+        }}
+        onUpload={onUpload}
+      />
+    ) : (
+      <Landing
+        t={t}
+        locale={locale}
+        loading={state.loading}
+        loadFailed={state.loadFailed}
+        uploadGone={state.uploadGone}
+        onSample={onSample}
+        onUpload={onUpload}
+      />
+    );
   }
   if (data === null || summary === null) {
     return null;
@@ -298,6 +411,8 @@ function StepView({
         t={t}
         locale={locale}
         result={summary}
+        source={data.source}
+        reference={data.reference}
         rowCount={data.file.rows.length}
         fullMonthCount={data.fullMonthCount}
         period={state.period}

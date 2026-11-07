@@ -29,7 +29,12 @@ export const en = {
     trySample: "Try with sample data",
     tryTight: "Try a tighter budget",
     sampleNote: "The sample is a made-up household's year of transactions.",
+    upload: "Upload a transactions file",
+    uploadHint: (columns: string) =>
+      `A CSV or TSV file with the columns ${columns}. It's read in this browser and never leaves your device.`,
     loading: "Loading the sample…",
+    reading: (file: string) => `Reading ${file}…`,
+    uploadGone: "Your file isn't kept when the page reloads or changes language. Upload it again to continue.",
     loadFailed: "The sample data didn't load. Check your connection and try again.",
     howTitle: "How it works",
     steps: {
@@ -41,10 +46,95 @@ export const en = {
       resultBody: "Each month gets one of three answers, and every number shows where it comes from.",
     },
   },
+  uploadError: {
+    step: "Upload",
+    readTitle: "We couldn't read this file",
+    useTitle: "We can't use this file yet",
+    foundTitle: "What we found",
+    requiredColumns: "Required columns",
+    found: "Found",
+    missing: "Missing",
+    fixTitle: "How to fix it",
+    fixUpload: "Upload the new file. Nothing from this attempt was kept.",
+    template: "Download a template CSV",
+    again: "Upload another file",
+    sample: "Try with sample data",
+    tooLarge: {
+      title: "This file is too large",
+      body: (file: string, max: string) =>
+        `${file} is larger than ${max}. A year of transactions is usually well under 1 MB.`,
+      fix: ["Check that you picked the transactions export, not a photo or an archive."],
+    },
+    notText: {
+      title: "This isn't a text file",
+      body: (file: string) => `${file} isn't a CSV or TSV file. Spreadsheets, PDFs and images can't be read.`,
+      fix: ["Export your transactions as CSV or TSV.", "If the file is open in a spreadsheet, save it as CSV UTF-8."],
+    },
+    empty: {
+      title: "The file has no transactions",
+      body: (file: string) => `${file} has no rows below the column names.`,
+      fix: ["Check the date range of the export and export again."],
+    },
+    missingColumns: {
+      title: "Missing required columns",
+      body: (file: string, missing: string, count: number, required: string) =>
+        `${file} has no ${missing} ${count === 1 ? "column" : "columns"}. The file needs ${required}.`,
+      fix: [
+        "If the data is there under another name, rename that column header to the name above.",
+        "Otherwise, export again with these columns included.",
+      ],
+    },
+    malformed: {
+      title: (line: string) => `Line ${line} doesn't match the columns`,
+      body: "It has a different number of values than the header row, or a quote mark that isn't closed.",
+      fix: [
+        "Open the file in a text editor and look at that line.",
+        "If you edited the file in a spreadsheet, export it again as CSV.",
+      ],
+    },
+    badDate: {
+      title: (line: string) => `Line ${line} has a date we can't read`,
+      body: (value: string) => `“${value}” isn't a date in the DD/MM/YYYY format.`,
+      fix: ["Dates need the day first, then the month and the year, like 31/10/2026."],
+    },
+    badAmount: {
+      title: (line: string) => `Line ${line} has an amount we can't read`,
+      body: (value: string, column: string) => `“${value}” in the ${column} column isn't an amount.`,
+      fix: ["Amounts need two decimals and no minus sign, like 12.50 or 1,250.00. A € sign is fine."],
+    },
+    tooLittleData: {
+      title: (found: number, min: number) =>
+        `Found ${found} full ${found === 1 ? "month" : "months"}; at least ${min} are needed`,
+      body: "The current month isn't counted, because it isn't finished yet.",
+      leftOut: (months: string) => `Left out as unfinished: ${months}.`,
+      fix: ["Export a longer date range. The more full months, the steadier the averages."],
+    },
+    noIncome: {
+      title: "No income found",
+      body: "There's no income in the most recent months. Income rows need the category group Inflow.",
+      fix: ["In your budget, put salary and other income in the Inflow category group, then export again."],
+    },
+    unexpected: {
+      title: "Something went wrong reading this file",
+      body: (file: string) => `${file} passed every check but still couldn't be used.`,
+      fix: ["Try again, or export the file again."],
+    },
+  },
   summary: {
     step: "Step 1 of 3 · Your money",
     title: "Here's what your money usually looks like",
     source: (rows: string, from: string, to: string) => `Sample data: ${rows} transactions, ${from} to ${to}.`,
+    sourceUpload: (file: string, rows: string, from: string, to: string) =>
+      `${file}: ${rows} transactions, ${from} to ${to}.`,
+    startsLateTitle: (day: string) => `Your transactions start on ${day}`,
+    endsEarlyTitle: (day: string) => `Your transactions stop on ${day}`,
+    incompleteBody: (month: string) =>
+      `If some of the spending in ${month} is missing, your usual spending looks lower than it is, and plans look easier to afford.`,
+    outdatedTitle: (month: string) => `Your transactions end in ${month}`,
+    outdatedBody: "The months since then aren't in the file, so the averages may not match your money today.",
+    noIncomeMonthsTitle: (months: string) => `No income in ${months}`,
+    noIncomeMonthsBody:
+      "Those months count as zero income, which lowers the average. If income is missing from the file, check that its category group is Inflow.",
     periodLabel: "Period to average over",
     periodOption: (months: number) => `${months} months`,
     periodHint:
@@ -143,6 +233,8 @@ export const en = {
     basedOn: (month: string) => `Spent in ${month}`,
     phoneMargin: "Margin",
     phoneLeft: "Left",
+    incomplete:
+      "Your file's first or last month may be missing transactions, so this result may look better than it is.",
     tryAgain: "Try different terms",
     backToMoney: "Back to your money",
   },
