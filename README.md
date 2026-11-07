@@ -65,12 +65,13 @@ In this demo the events go to the browser console (`[telemetry]`). In production
 
 ## How it was built
 
-Built with Claude Code from a product brief. The tech plan ([TECH-PLAN.md](TECH-PLAN.md)) came first; Margus approved it and made the product decisions, which are marked ✅ there. The app was then built in small pull requests, each reviewed and merged by Margus ([history](https://github.com/mungoose/moneta-momenta/pulls?q=is%3Apr+is%3Amerged)). The rationale for each change is in its pull request.
+Built with Claude Code from a product brief. The tech plan ([TECH-PLAN.md](TECH-PLAN.md)) came first; Margus approved it and made the product decisions, which are marked ✅ there. The app was then built in small pull requests ([history](https://github.com/mungoose/moneta-momenta/pulls?q=is%3Apr+is%3Amerged)), each explaining why the change was made. The aim was a working result quickly, so the pull requests were read through rather than reviewed line by line. The automated checks below carry the weight; before real production, the core logic and every later change would get a closer review.
 
 - **Test-first core.** `src/lib` is pure TypeScript with no React. Its tests and hand-written edge-case files (split transactions, refunds, transfers, a month with no income, a cut-off export, another bank's CSV …) were written before the code, and the sample's monthly totals were checked against an independent calculation.
 - **Mutation testing.** Stryker changes the core's code and checks that a test fails each time. The score is **100%**: 1,122 mutants, none surviving. Mutation is switched off in 13 places, each with a comment giving the reason: the mutant behaves the same as the original, it only changes an error's diagnostic text, or it sits in a defensive branch no input can reach.
-- **Unit and browser tests.** 550 unit tests. Playwright runs every flow and error state at 1280 and 390 px, with axe accessibility checks and a check that the CSP holds.
-- **Checked by hand:** <!-- TODO(Margus): list what you checked yourself, e.g. the Estonian copy, your own export against your budgeting app's report, the screens on your phone. -->
+- **Unit tests.** 550 Vitest tests over the core: parsing, classification, months and averages, one-off amounts, instalments, the verdict, form input, sample links and telemetry payloads.
+- **End-to-end tests.** Playwright runs against a production build at desktop (1280 px) and phone (390 px) width. It covers the sample flow from landing to verdict, the sample links, every upload error and warning, the explanation drawer (its numbers, keyboard and focus), the language switch, routing and the 404 page. It also checks that each flow sends exactly the expected telemetry events, that every screen passes axe accessibility checks in the light and dark themes, and that the CSP blocks an injected inline script.
+- **CI.** Typecheck, lint, formatting, unit tests, end-to-end tests and the mutation run on every pull request; a mutation score below 80% fails the build.
 
 ## Not built, on purpose
 
