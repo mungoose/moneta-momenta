@@ -11,9 +11,10 @@
  * with that fixed the output is byte-for-byte the same.
  *
  * Afterwards it hashes the shipped pages again and fails unless every inline
- * script is in the `script-src` of every header the build actually wrote
- * (including Vercel's Build Output API, when present), so a mismatch fails the
- * build instead of breaking the site.
+ * script is in the `script-src` the build wrote to the routes manifest, so a
+ * mismatch fails the build instead of breaking the site. A Vercel deployment
+ * serves the same header: its adapter builds its routes from the same
+ * `headers()` config.
  */
 import { spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
@@ -27,12 +28,6 @@ import { join } from "node:path";
  * when a deployment adapter is set, as Vercel does.
  */
 const SERVER_DIR = join(".next", "server");
-
-/**
- * Vercel's Build Output API directory: what a Vercel deployment serves, when
- * its adapter writes it during the build. Absent locally.
- */
-const VERCEL_OUTPUT = join(".vercel", "output");
 
 /**
  * Every `<script>` and its body; an external one (`src`) has an empty body.
@@ -77,15 +72,14 @@ function inlineScriptHashes(files: string[]): string[] {
   return [...hashes].sort();
 }
 
-/** What a failure needs for diagnosis: which HTML files exist where. */
+/** What a failure needs for diagnosis: which HTML files exist under `.next`. */
 function layout(): string {
-  const files = [...htmlFiles(".next"), ...htmlFiles(VERCEL_OUTPUT)];
+  const files = htmlFiles(".next");
   const listed = files.slice(0, 40).map((f) => `  ${f}`);
   return [
-    `HTML files under .next and ${VERCEL_OUTPUT} (${files.length}):`,
+    `HTML files under .next (${files.length}):`,
     ...listed,
     ...(files.length > listed.length ? ["  …"] : []),
-    `${join(VERCEL_OUTPUT, "config.json")} ${existsSync(join(VERCEL_OUTPUT, "config.json")) ? "exists" : "does not exist"}`,
   ].join("\n");
 }
 
@@ -95,43 +89,24 @@ function fail(message: string): never {
   process.exit(1);
 }
 
-/** The `script-src` sources of a policy. */
-function scriptSources(policy: string): string[] {
-  const directive = policy.split(";").find((d) => d.trim().startsWith("script-src ")) ?? "";
-  return directive.trim().split(/\s+/).slice(1);
-}
-
 /**
- * Every Content-Security-Policy value the build shipped: from the routes
- * manifest (`next start`) and, when present, from the Build Output API routes
- * that a Vercel deployment serves. Either file without one fails the build
+ * The `script-src` sources of the Content-Security-Policy the build shipped,
+ * read back from the routes manifest. A manifest without one fails the build
  * rather than skipping the check.
  */
-function shippedPolicies(): string[] {
-  const isCsp = (key: string) => key.toLowerCase() === "content-security-policy";
+function shippedScriptSources(): string[] {
   const manifest = JSON.parse(readFileSync(join(".next", "routes-manifest.json"), "utf8")) as {
     headers?: { headers?: { key: string; value: string }[] }[];
   };
-  const fromManifest = (manifest.headers ?? [])
+  const policies = (manifest.headers ?? [])
     .flatMap((route) => route.headers ?? [])
-    .filter((header) => isCsp(header.key))
+    .filter((header) => header.key.toLowerCase() === "content-security-policy")
     .map((header) => header.value);
-  if (fromManifest.length === 0) {
-    fail("no Content-Security-Policy header in .next/routes-manifest.json.");
+  if (policies.length !== 1 || policies[0] === undefined) {
+    fail(`expected one Content-Security-Policy header in .next/routes-manifest.json, found ${policies.length}.`);
   }
-  const configPath = join(VERCEL_OUTPUT, "config.json");
-  if (!existsSync(configPath)) {
-    return fromManifest;
-  }
-  const config = JSON.parse(readFileSync(configPath, "utf8")) as { routes?: { headers?: Record<string, string> }[] };
-  const fromVercel = (config.routes ?? [])
-    .flatMap((route) => Object.entries(route.headers ?? {}))
-    .filter(([key]) => isCsp(key))
-    .map(([, value]) => value);
-  if (fromVercel.length === 0) {
-    fail(`no Content-Security-Policy header in ${configPath}.`);
-  }
-  return [...fromManifest, ...fromVercel];
+  const directive = policies[0].split(";").find((d) => d.trim().startsWith("script-src ")) ?? "";
+  return directive.trim().split(/\s+/).slice(1);
 }
 
 const STABLE_BUILD_ID = randomUUID();
@@ -145,21 +120,15 @@ if (measured.length === 0) {
 process.stdout.write(`\nCSP: rebuilding with ${measured.length} inline script hashes\n\n`);
 nextBuild({ STABLE_BUILD_ID, CSP_SCRIPT_HASHES: measured.join(" ") });
 
-// Check the pages that ship against the headers that ship, not against the first pass.
-const pages = [...htmlFiles(SERVER_DIR), ...htmlFiles(VERCEL_OUTPUT)];
+// Check the pages that ship against the header that ships, not against the first pass.
+const pages = htmlFiles(SERVER_DIR);
 const shipped = inlineScriptHashes(pages);
 if (shipped.length === 0) {
-  fail(`no inline scripts found after the second build.`);
+  fail(`no inline scripts found under ${SERVER_DIR} after the second build.`);
 }
-const policies = shippedPolicies();
-for (const policy of policies) {
-  const sources = scriptSources(policy);
-  const missing = shipped.filter((hash) => !sources.includes(`'sha256-${hash}'`));
-  if (missing.length > 0) {
-    fail(`${missing.length} inline scripts are not in a shipped script-src and would be blocked.`);
-  }
+const sources = shippedScriptSources();
+const missing = shipped.filter((hash) => !sources.includes(`'sha256-${hash}'`));
+if (missing.length > 0) {
+  fail(`${missing.length} inline scripts are not in the shipped script-src and would be blocked.`);
 }
-process.stdout.write(
-  `CSP: ${shipped.length} inline scripts in ${pages.length} HTML files match ${policies.length} shipped policies` +
-    ` (${existsSync(VERCEL_OUTPUT) ? `including ${VERCEL_OUTPUT}` : `no ${VERCEL_OUTPUT}`})\n`,
-);
+process.stdout.write(`CSP: ${shipped.length} inline scripts in ${pages.length} HTML files match the shipped policy\n`);
