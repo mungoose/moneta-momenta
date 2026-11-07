@@ -209,14 +209,19 @@ function Warning({ title, body }: { title: string; body: string }) {
   );
 }
 
-/** Shown when numbers that passed every check still can't be used. */
+/** Shown when numbers that passed every check still can't be used. It has its own h1, like every step. */
 export function Unexpected({ t }: { t: Messages }) {
   return (
-    <div className="mm-callout mm-callout--error" role="alert">
-      <InfoIcon className="mm-ico mm-callout__icon" />
-      <p className="mm-callout__content" id="step-title" tabIndex={-1}>
-        {t.unexpected}
-      </p>
-    </div>
+    <>
+      <section className="mm-intro">
+        <h1 className="mm-t-h1" id="step-title" tabIndex={-1}>
+          {t.unexpectedTitle}
+        </h1>
+      </section>
+      <div className="mm-callout mm-callout--error" role="alert">
+        <InfoIcon className="mm-ico mm-callout__icon" />
+        <p className="mm-callout__content">{t.unexpected}</p>
+      </div>
+    </>
   );
 }

@@ -15,6 +15,7 @@ The mockups use placeholder copy and numbers. Where they disagree with the code,
 
 - **Accepted file:** the landing hint mentions a bank CSV with Date, Amount and Description columns. The app accepts a transactions export with `Date`, `Payee`, `Category Group`, `Category`, `Outflow` and `Inflow`; bank statements are not supported.
 - **"Tight" threshold:** the tokens board says "€0 to €199.99 left". The app uses a buffer of 10% of average income, so the boundary depends on the data.
+- **Dark mode:** the canvas switches themes with an `mm-dark` class on each screen. In `moneta.css` the dark palette is under `@media (prefers-color-scheme: dark)` instead, so the app follows the system setting with no toggle (a toggle would have to remember the choice, and the app stores nothing). This is the one edit to the delivered file; the values are unchanged.
 - **Upfront payment:** the components board's error says "Upfront can't be more than the price". The app also rejects an upfront equal to the price, because nothing would be left to spread, so the message should say it has to be less than the price.
 
 ## Not in the mockups: who the app is for

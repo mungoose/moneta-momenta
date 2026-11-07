@@ -243,5 +243,6 @@ export const et = {
     tryAgain: "Proovi teisi tingimusi",
     backToMoney: "Tagasi sinu raha juurde",
   },
+  unexpectedTitle: "Midagi läks valesti",
   unexpected: "Nende numbritega läks midagi valesti. Alusta uuesti ja proovi veel kord.",
 } satisfies Messages;

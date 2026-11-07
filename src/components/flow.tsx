@@ -289,7 +289,7 @@ export function Flow({ locale }: { locale: Locale }) {
   }, [step, query, data, state.loading, state.loadFailed]);
 
   return (
-    <div className="mm mm-page">
+    <div className="mm-page">
       <Header
         t={t}
         locale={locale}
