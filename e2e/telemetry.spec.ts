@@ -62,7 +62,7 @@ test("the sample flow sends one event per action, with no figures", async ({ pag
     { name: "flow_started", source: "sample" },
     { name: "period_changed", months: 12 },
     { name: "period_changed", months: 6 },
-    { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
+    { name: "plan_checked", verdict: "tight", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
   ]);
 });
 
@@ -74,13 +74,13 @@ test("a sample link that opens a result counts only the checks made after it", a
   await page.getByRole("button", { name: "Change the purchase" }).click();
   await page.getByLabel("Interest rate").fill("9.9");
   await page.getByRole("button", { name: "Check affordability" }).click();
-  // Interest makes July 2027 come up shorter than the interest-free €6.49.
-  await expect(page.getByRole("heading", { level: 2, name: /July 2027 comes up €11\.93 short/ })).toBeVisible();
+  // Interest makes July 2027 need more from savings than the interest-free €6.49.
+  await expect(page.getByRole("heading", { level: 2, name: /July 2027 needs €11\.93 from savings/ })).toBeVisible();
 
   await expect
     .poll(sent)
     .toEqual([
-      { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
+      { name: "plan_checked", verdict: "tight", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
     ]);
 });
 

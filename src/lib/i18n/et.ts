@@ -218,6 +218,8 @@ export const et = {
     verdictFits: "Maksed mahuvad igasse kuusse",
     verdictTightOne: (month: string) => `Mahub, aga ${month} on napp`,
     verdictTightMany: (count: number) => `Mahub, aga ${count} kuud on napid`,
+    verdictCovered: (month: string, short: string) => `Mahub, aga ${month} vajab säästudest ${short}`,
+    verdictOneShort: (month: string, short: string) => `Ainult ${month} jääb puudu: ${short}`,
     verdictNoFitOne: (month: string, short: string) => `${capital(month)} jääb ${short} puudu`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
       `${count} kuul jääb puudu, kõige rohkem ${month} puhul: ${short}`,
@@ -230,6 +232,9 @@ export const et = {
       `Sul kulus ${pastMonth} jooksul ${spent}, rohkem kui tavaline ${average}, seega arvestame ${planMonth} puhul sellega.`,
     belowBuffer: (buffer: string) =>
       `Kuu on napp, kui üle jääb vähem kui ${buffer}: 10% sinu keskmisest sissetulekust.`,
+    coveredBody: (saved: string, buffer: string) =>
+      `Varasemad kuud jätavad lisaks ${buffer} puhvrile üle ${saved}. Kui see kõrvale panna, katab see puudujäägi.`,
+    oneShortBody: "Kõik teised kuud mahuvad, nii et see on üks kuu, milleks valmistuda: pane enne seda raha kõrvale.",
     payment: "Kuumakse",
     months: "Kuud",
     monthsValue: (fit: number, tight: number, noFit: number) => `${fit} mahub · ${tight} napp · ${noFit} ei mahu`,
@@ -240,7 +245,7 @@ export const et = {
     change: "Muuda ostu",
     monthsTitle: "Kuude kaupa",
     monthsIntro: (buffer: string) =>
-      `Kuujääk on sinu keskmine sissetulek miinus selle kuu oodatavad kulud. Kuu mahub, kui pärast makset jääb üle ${buffer} või rohkem.`,
+      `Kuujääk on sinu keskmine sissetulek miinus selle kuu oodatavad kulud. Kuu mahub, kui pärast makset jääb üle ${buffer} või rohkem. Puudu jääv kuu on napp, kui varasemate kuude sellest suurem jääk selle katab.`,
     colMonth: "Kuu",
     colMargin: "Kuujääk",
     colInstalment: "Makse",
@@ -249,6 +254,7 @@ export const et = {
     basedOn: (month: string) => `Kulud: ${month}`,
     phoneMargin: "Kuujääk",
     phoneLeft: "Üle",
+    fromSavings: "Säästudest",
     incomplete:
       "Faili esimesest või viimasest kuust võib tehinguid puududa, nii et tulemus võib paista parem, kui see on.",
     tryAgain: "Proovi teisi tingimusi",
@@ -287,12 +293,14 @@ export const et = {
     leftoverFormula: "Keskmine sissetulek − selle kuu kulud − makse = jääb üle",
     leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
       `${capital(month)}: ${income} − ${spending} − ${instalment} =`,
-    criticalNote: "Selles kuus jääb kõige vähem üle, nii et see otsustab tulemuse.",
+    criticalNote: "See kuu otsustab tulemuse.",
     fitsRange: (buffer: string) => `Üle jääb ${buffer} või rohkem`,
     tightRange: (from: string, to: string) => `Üle jääb ${from} kuni ${to}`,
     noFitRange: (zero: string) => `Üle jääb vähem kui ${zero}`,
     bufferNote: (buffer: string, percent: string) =>
       `${buffer} puhver on ${percent}% sinu keskmisest sissetulekust ettearvamatute kulude jaoks, nagu remont või arsti arve.`,
+    savingsNote: (buffer: string) =>
+      `Kuid ei hinnata eraldi. Iga mahtuv kuu säästab selle, mis jääb üle lisaks ${buffer} puhvrile. Hilisem puudu jääv kuu on napp, kui säästud selle katavad, ja ei mahu, kui ei kata. Kui ainult üks kuu ei mahu ja kõik teised mahuvad, on kogu plaan napp, mitte tagasi lükatud.`,
     limitsTitle: "Mida see ei tea",
     limitsBody:
       "Muutusi, mida pole veel juhtunud, nagu uus töö, üüri tõus või uus tellimus. Kui sinu sissetulek või kulud on muutumas, pea seda ligikaudseks juhiseks.",

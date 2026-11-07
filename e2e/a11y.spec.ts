@@ -83,8 +83,8 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
   {
     name: "result that doesn't fit",
     open: async (page) => {
-      await page.goto("/en?sample=comfortable&price=1200&n=12");
-      await expect(page.getByRole("heading", { level: 2, name: /July 2027 comes up €6\.49 short/ })).toBeVisible();
+      await page.goto("/en?sample=comfortable&price=3000&n=6");
+      await expect(page.getByRole("heading", { level: 2, name: /2 months come up short/ })).toBeVisible();
     },
   },
   {

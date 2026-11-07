@@ -35,6 +35,7 @@ test("walks through the sample's verdict in four steps, with its numbers", async
   await expect(drawer).toContainText("July 2027: €2,537.13 − €2,443.62 − €100.00 = -€6.49");
   await expect(drawer).toContainText("€0.00 to €253.70 left");
   await expect(drawer).toContainText("The €253.71 cushion is 10% of your average income");
+  await expect(drawer).toContainText("Each month that fits saves what it leaves on top of €253.71.");
 });
 
 test("names the period's one-off costs where it explains the costlier months", async ({ page }) => {

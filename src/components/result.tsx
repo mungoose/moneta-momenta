@@ -14,12 +14,21 @@ const VERDICT_CLASS: Record<Status, string> = {
   "no-fit": "mm-verdict--nofit",
 };
 
-/** The month with the least left over: the one that decides the verdict. */
-function closestMonth(months: readonly PlanMonth[]): PlanMonth | undefined {
-  return months.reduce<PlanMonth | undefined>(
-    (worst, m) => (worst && worst.leftover <= m.leftover ? worst : m),
-    undefined,
-  );
+const SEVERITY: Record<Status, number> = { fits: 0, tight: 1, "no-fit": 2 };
+
+/**
+ * The month that decides the verdict: the worst status, and within it the
+ * least left over. Status comes first because a covered month can be further
+ * below zero than one that doesn't fit.
+ */
+function criticalMonth(months: readonly PlanMonth[]): PlanMonth | undefined {
+  return months.reduce<PlanMonth | undefined>((worst, m) => {
+    if (worst === undefined) {
+      return m;
+    }
+    const bySeverity = SEVERITY[m.status] - SEVERITY[worst.status];
+    return bySeverity > 0 || (bySeverity === 0 && m.leftover < worst.leftover) ? m : worst;
+  }, undefined);
 }
 
 /** Formats money and months for one locale, so the verdict helpers don't each need the locale. */
@@ -37,13 +46,15 @@ type StatusCounts = Record<Status, number>;
 interface VerdictFacts {
   assessment: Affordability;
   counts: StatusCounts;
-  /** The month with the least left over. */
+  /** The month that decides the verdict: the worst status, then the least left over. */
   critical: PlanMonth;
 }
 
 /**
  * The verdict headline. A single tight or failing month is named; several are
- * counted, and a failing plan also says how short the worst month is.
+ * counted, and a failing plan also says how short the worst month is. A tight
+ * plan whose deciding month is short says how much it needs: from savings when
+ * earlier months cover it, or as the one month that comes up short.
  */
 function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month, monthOf }: Formatters): string {
   const { assessment, counts, critical } = facts;
@@ -52,11 +63,17 @@ function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month
     return r.verdictFits;
   }
   const worst = month(critical.month);
-  if (verdict === "tight") {
-    return counts.tight === 1 ? r.verdictTightOne(worst) : r.verdictTightMany(counts.tight);
-  }
   // `0 - x`, not `-x`: unary minus on the branded type isn't type-safe, and it would turn 0 into −0.
   const short = money(toCents(0 - critical.leftover));
+  if (verdict === "tight") {
+    if (critical.status === "no-fit") {
+      return r.verdictOneShort(worst, short);
+    }
+    if (counts.tight === 1) {
+      return critical.covered ? r.verdictCovered(worst, short) : r.verdictTightOne(worst);
+    }
+    return r.verdictTightMany(counts.tight);
+  }
   return counts["no-fit"] === 1
     ? r.verdictNoFitOne(worst, short)
     : r.verdictNoFitMany(counts["no-fit"], monthOf(critical.month), short);
@@ -64,9 +81,10 @@ function verdictTitle(r: Messages["result"], facts: VerdictFacts, { money, month
 
 /**
  * The lines under the headline. A fitting plan gets one line on the buffer and
- * its closest month. Otherwise: how many months fit, the worst month's sum,
- * why that month's spending is higher (when it is seasonal), and the buffer
- * rule when the plan is only tight.
+ * its closest month. Otherwise: how many months fit, the deciding month's sum,
+ * why that month's spending is higher (when it is seasonal), and, when the plan
+ * is only tight, why: the buffer rule, the savings that cover a short month, or
+ * the one short month among fitting ones.
  */
 function verdictReasons(
   r: Messages["result"],
@@ -94,7 +112,13 @@ function verdictReasons(
     );
   }
   if (verdict === "tight") {
-    lines.push(r.belowBuffer(money(buffer)));
+    if (critical.status === "no-fit") {
+      lines.push(r.oneShortBody);
+    } else if (critical.covered) {
+      lines.push(r.coveredBody(money(critical.savedBefore), money(buffer)));
+    } else {
+      lines.push(r.belowBuffer(money(buffer)));
+    }
   }
   return lines;
 }
@@ -130,7 +154,7 @@ export function Result({
   };
   const { money, month } = format;
   const { months, verdict, buffer } = assessment;
-  const critical = closestMonth(months);
+  const critical = criticalMonth(months);
   const first = months[0];
   const last = months.at(-1);
   const payment = schedule.instalments[0];
@@ -308,7 +332,14 @@ function MonthRow({ t, locale, month: m }: { t: Messages; locale: Locale; month:
         {money(m.leftover)}
       </td>
       <td className="c-status">
-        <StatusChip status={m.status} label={t.status[m.status]} small />
+        {m.covered ? (
+          <span className="mm-irr">
+            <StatusChip status={m.status} label={t.status[m.status]} small />
+            <span className="mm-irr__name">{r.fromSavings}</span>
+          </span>
+        ) : (
+          <StatusChip status={m.status} label={t.status[m.status]} small />
+        )}
       </td>
     </tr>
   );
