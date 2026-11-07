@@ -41,7 +41,7 @@ function telemetry(page: Page): () => Promise<unknown[]> {
 test("the sample flow sends one event per action, with no figures", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "comfortable budget" }).click();
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
   await page.getByRole("button", { name: "12 months" }).click();
@@ -62,7 +62,7 @@ test("the sample flow sends one event per action, with no figures", async ({ pag
     { name: "flow_started", source: "sample" },
     { name: "period_changed", months: 12 },
     { name: "period_changed", months: 6 },
-    { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: false },
+    { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
   ]);
 });
 

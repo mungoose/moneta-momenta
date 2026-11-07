@@ -12,13 +12,15 @@ export const et = {
     description: "Vaata kuude kaupa, kas järelmaks mahub sinu tegelike kulude sisse, enne kui otsustad.",
   },
   header: {
-    appName: "Moneta",
-    home: "Moneta, tagasi algusesse",
+    appName: "Moneta Momenta",
+    home: "Moneta Momenta, tagasi algusesse",
     languageSwitch: "In English",
     sampleBadge: "Näidisandmed",
     startOver: "Alusta uuesti",
   },
   footer: "Moneta Momenta · Hinnang sinu enda tehingute põhjal. Ei ole finantsnõuanne ega krediidiotsus.",
+  footerPrivacy:
+    "* Mis sinu failiga juhtub: seda loeb see brauseri vahekaart. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
   scope:
     "Mõeldud väikelaenudele ja järelmaksule kuni 5 aastaks. Ei sobi kodulaenu ega muude pikaajaliste laenude jaoks.",
   status: {
@@ -28,13 +30,14 @@ export const et = {
   },
   landing: {
     title: "Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.",
-    lead: "Moneta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
-    trySample: "Proovi näidisandmetega",
-    tryTight: "Proovi napima eelarvega",
-    sampleNote: "Näidisandmed on väljamõeldud pere ühe aasta tehingud.",
+    lead: "Moneta Momenta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
     upload: "Laadi üles tehingute fail",
-    uploadHint: (columns: string) =>
-      `CSV- või TSV-fail veergudega ${columns}. Fail loetakse selles brauseris ega lahku sinu seadmest.`,
+    uploadHint: (columns: string) => `CSV- või TSV-fail veergudega ${columns}.`,
+    privacy: "NB! Fail loetakse selles brauseris ega lahku sinu seadmest.*",
+    sampleIntro: "Või proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud:",
+    sampleComfortable: "mugav eelarve",
+    sampleOr: "või",
+    sampleTight: "napp eelarve",
     loading: "Laen näidisandmeid…",
     reading: (file: string) => `Loen faili ${file}…`,
     uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
@@ -143,7 +146,7 @@ export const et = {
     periodLabel: "Keskmise arvutamise periood",
     periodOption: (months: number) => `${months} kuud`,
     periodHint:
-      "Keskmised arvutatakse viimaste täiskuude põhjal. Iga maksekuu puhul vaatame ka, palju sama kuu eelmisel aastal maksis.",
+      "Vali, mitme viimase täiskuu põhjal keskmised arvutatakse. Pikem periood tasandab erandlikke kuid, lühem arvestab hiljutisi muutusi, nagu uus töökoht või üür. Mida iganes valid, iga maksekuu puhul vaatame ka, palju sama kuu eelmisel aastal maksis.",
     monthlyAverage: "Kuu keskmine",
     incomeTitle: "Sissetulek",
     incomeTotal: "Keskmine sissetulek",
@@ -162,7 +165,7 @@ export const et = {
     irregularUsually: (amount: string) => `, tavaliselt ${amount}`,
     noMarginTitle: "Keskmiselt ei jää midagi üle",
     noMarginBody:
-      "Kulud on sama suured kui sissetulek või suuremad, nii et ükski järelmaks nende numbritega ei mahu. Suurimad grupid on ülal nimekirja alguses.",
+      "Kulud on sama suured kui sissetulek või suuremad, nii et ükski järelmaks nende numbritega ei mahu. Suurimad kulugrupid on allpool nimekirja alguses.",
     continue: "Edasi ostu juurde",
   },
   purchase: {

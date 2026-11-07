@@ -19,8 +19,8 @@ async function cspOf(page: Page, path: string): Promise<Map<string, string[]>> {
   );
 }
 
-/** The sample button's name in each locale: clicking it is the hydration check. */
-const SAMPLE_BUTTON = { "/en": "Try with sample data", "/et": "Proovi näidisandmetega" };
+/** The sample link's name in each locale: clicking it is the hydration check. */
+const SAMPLE_BUTTON = { "/en": "comfortable budget", "/et": "mugav eelarve" };
 
 for (const [path, sampleButton] of Object.entries(SAMPLE_BUTTON)) {
   test(`${path} allows only same-origin and hashed scripts`, async ({ page }) => {

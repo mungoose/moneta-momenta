@@ -73,6 +73,27 @@ export function Summary({
         <Warning key={title} title={title} body={body} />
       ))}
 
+      <section className="mm-card border-transparent bg-(--mm-accent-subtle)" aria-labelledby="margin">
+        <div className="flex items-baseline justify-between gap-4">
+          <h2 className="mm-t-h2" id="margin">
+            {s.marginTitle}
+          </h2>
+          <p className="mm-t-figure mm-num whitespace-nowrap">{money(summary.margin)}</p>
+        </div>
+        <p className="mm-t-small mm-muted -mt-2">
+          {s.marginExplain(money(summary.avgIncome), money(summary.avgSpending))}
+        </p>
+      </section>
+
+      {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
+
+      <div className="mm-actions">
+        <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
+          {s.continue}
+          <ArrowRightIcon />
+        </button>
+      </div>
+
       <div className="mm-field">
         <span className="mm-label" id="period">
           {s.periodLabel}
@@ -140,28 +161,7 @@ export function Summary({
         </dl>
       </section>
 
-      <section className="mm-card border-transparent bg-(--mm-accent-subtle)" aria-labelledby="margin">
-        <div className="flex items-baseline justify-between gap-4">
-          <h2 className="mm-t-h2" id="margin">
-            {s.marginTitle}
-          </h2>
-          <p className="mm-t-figure mm-num whitespace-nowrap">{money(summary.margin)}</p>
-        </div>
-        <p className="mm-t-small mm-muted -mt-2">
-          {s.marginExplain(money(summary.avgIncome), money(summary.avgSpending))}
-        </p>
-      </section>
-
       <IrregularItems t={t} locale={locale} items={summary.irregular} />
-
-      {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
-
-      <div className="mm-actions">
-        <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
-          {s.continue}
-          <ArrowRightIcon />
-        </button>
-      </div>
     </>
   );
 }

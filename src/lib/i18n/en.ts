@@ -10,13 +10,15 @@ export const en = {
     description: "See month by month whether an instalment plan fits your real spending, before you commit.",
   },
   header: {
-    appName: "Moneta",
-    home: "Moneta, back to the start",
+    appName: "Moneta Momenta",
+    home: "Moneta Momenta, back to the start",
     languageSwitch: "Eesti keeles",
     sampleBadge: "Sample data",
     startOver: "Start over",
   },
   footer: "Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.",
+  footerPrivacy:
+    "* How your file is handled: this browser tab reads it. Its contents are never sent to a server, logged, or saved in browser storage or the page address, and they're gone when you reload or close the page. The app counts only anonymous steps, such as that a result was shown and its rough price range, never amounts, categories, payees or dates.",
   scope: "For small loans and instalment purchases of up to 5 years. Not for mortgages or other long-term loans.",
   status: {
     fits: "Fits",
@@ -25,13 +27,14 @@ export const en = {
   },
   landing: {
     title: "Check if an instalment plan fits your budget, month by month.",
-    lead: "Moneta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
-    trySample: "Try with sample data",
-    tryTight: "Try a tighter budget",
-    sampleNote: "The sample is a made-up household's year of transactions.",
+    lead: "Moneta Momenta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
     upload: "Upload a transactions file",
-    uploadHint: (columns: string) =>
-      `A CSV or TSV file with the columns ${columns}. It's read in this browser and never leaves your device.`,
+    uploadHint: (columns: string) => `A CSV or TSV file with the columns ${columns}.`,
+    privacy: "NB! It's read in this browser and never leaves your device.*",
+    sampleIntro: "Or try it with sample data, a made-up household's year of transactions:",
+    sampleComfortable: "comfortable budget",
+    sampleOr: "or",
+    sampleTight: "tight budget",
     loading: "Loading the sample…",
     reading: (file: string) => `Reading ${file}…`,
     uploadGone: "Your file isn't kept when the page reloads or changes language. Upload it again to continue.",
@@ -138,7 +141,7 @@ export const en = {
     periodLabel: "Period to average over",
     periodOption: (months: number) => `${months} months`,
     periodHint:
-      "The averages use your most recent full months. Every plan month also checks what the same month cost last year.",
+      "Choose how many of your most recent full months the averages use. More months even out unusual ones; fewer follow recent changes, like a new job or a new rent. Whatever you pick, each plan month also checks what the same month cost last year.",
     monthlyAverage: "Monthly average",
     incomeTitle: "Income",
     incomeTotal: "Average income",
@@ -156,7 +159,7 @@ export const en = {
     irregularUsually: (amount: string) => `, usually ${amount}`,
     noMarginTitle: "Nothing is left over on average",
     noMarginBody:
-      "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest groups are at the top of the list above.",
+      "Spending is as high as income or higher, so no instalment plan fits these numbers. The largest spending groups are at the top of the list below.",
     continue: "Continue to the purchase",
   },
   purchase: {

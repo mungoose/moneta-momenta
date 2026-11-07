@@ -18,7 +18,8 @@ const unitFixture = (name: string) => path.join(ROOT, "tests/fixtures", name);
 const e2eFixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 /** The same purchase and verdict as the sample flow: the uploaded sample must give the same answer. */
-const SAMPLE_VERDICT = /July 2027 comes up €6\.49 short/;
+/** The prefilled purchase (€1,200 × 12 at the default 9.9%) on the sample's figures. */
+const SAMPLE_VERDICT = /July 2027 comes up €11\.93 short/;
 
 const LANDING_TITLE = "Check if an instalment plan fits your budget, month by month.";
 const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Upload it again to continue.";
