@@ -1,13 +1,13 @@
 # Moneta Momenta: tech plan
 
-Status: **draft for approval, revision 2**. Nothing is built yet. Decisions Margus has made are marked ✅. The remaining open points are in [§15](#15-open-points).
+Status: **as built.** The Must and Should scope is built and live; the Could items (§12) are not. Decisions Margus has made are marked ✅. The remaining open points are in [§15](#15-open-points).
 
 ---
 
 ## 1. Starting point
 
 - ✅ **Start fresh.** There's no existing app repo to reuse. `moneta-momenta/` holds only `PRODUCT-BRIEF.md` and `sample-dataset/`.
-- The folder isn't a git repo yet. The first build step is `git init`, then a public GitHub repo, so reviewers can read the code and its history.
+- The first build step was `git init`, then a public GitHub repo, so reviewers can read the code and its history.
 
 ## 2. Input: one transaction CSV, described by its format
 
@@ -77,18 +77,18 @@ Excluded rows are counted and totalled per reason, and the explanation view show
 | Concern | Choice | Why |
 |---|---|---|
 | Framework | **Next.js 16, App Router, TypeScript strict** with `noUncheckedIndexedAccess` (version confirmed at scaffold time) | Required. Almost all of it runs client-side; the only server code is the optional LLM route. |
-| Package manager | pnpm | Fast and deterministic on Vercel |
-| CSS | **Tailwind CSS v4** | The most widely used CSS framework right now, and the `create-next-app` default. Tokens live in one `@theme` block. |
+| Package manager | **npm** with a committed lockfile (`npm ci` in CI) | Deterministic on Vercel and in CI, and needs no extra tool on the machine |
+| CSS | **Tailwind CSS v4** | The most widely used CSS framework right now, and the `create-next-app` default. The tokens live in `design/moneta.css`; a small `@theme inline` block exposes the two colours that utilities need. |
 | Components | **Native HTML elements styled by the design's CSS** (`design/moneta.css`) | As built: the design ships the component styles, and native `<button>`, `<input>` and `<dialog>` give keyboard and screen-reader behaviour without a component library. shadcn/ui was scaffolded, never used, and removed. |
-| CSV parsing | **PapaParse** | A battle-tested RFC-4180 parser with delimiter detection. Hand-rolled CSV parsing is where the quoting bugs come from. ~7 kB gz. |
+| CSV parsing | **Hand-written** (`src/lib/import/parse.ts`) | The format is narrow: the header line picks tab or comma, and a quoted field may hold the delimiter, a newline or `""`. The parser must never repair bad quoting the way lenient libraries do, because a silently shifted row puts amounts in the wrong columns; it reports the physical line instead, counting the newlines inside quoted fields. Quoting is where hand-rolled parsers break, so each malformed case has a unit test and the module is mutation-tested like the rest of the core. |
 | Unit tests | **Vitest** | Fast and TS-native |
 | Mutation tests | **StrykerJS** (`@stryker-mutator/core` + `vitest-runner`) | ✅ Requested. Proves the tests actually catch wrong maths, not just execute it. See §11. |
 | E2E | **Playwright** | Smoke flow, plus the real-browser check at desktop and phone width |
 | i18n | **No library.** Typed dictionaries (`et.ts` uses `satisfies Messages`) + `Intl` | ~100 strings and 2 locales. The compiler catches missing Estonian keys. |
-| Charts | None; CSS/SVG month strip | One bar per month doesn't justify a library |
-| LLM (Could) | `@anthropic-ai/sdk`, Claude Haiku 5.5 (`claude-haiku-5-5`), `zod` for validating the output | Cheap and fast for a short structured answer. Check limits and pricing at build time. |
+| Charts | None; the month-by-month table carries the result | One row per month doesn't justify a chart library |
+| LLM (Could, not built) | `@anthropic-ai/sdk`, Claude Haiku 5.5 (`claude-haiku-5-5`), `zod` for validating the output | Cheap and fast for a short structured answer. Check limits and pricing at build time. |
 
-No state library, no form library, no database, no zip library.
+No state library, no form library, no database, no zip library. The only runtime dependencies are `next`, `react` and `react-dom`.
 
 ## 4. Architecture
 
@@ -113,25 +113,30 @@ Browser (transaction data stays here)                Vercel
 ### Module layout
 
 ```
+next.config.ts             # CSP and security headers; redirects / and unknown locales → /en
 src/
   app/[locale]/layout.tsx, page.tsx      # en | et
-  app/page.tsx                           # redirect / → /en
-  app/api/suggest/route.ts               # Could
   lib/
-    money/cents.ts         # Cents type, divRound, parseAmount, sum
-    money/format.ts        # Intl display formatting
+    money/cents.ts         # Cents type, toCents, divRound, parseAmount, sum
+    money/format.ts        # Intl currency formatting
     import/format-spec.ts  # required columns, conventions, help text source
+    import/types.ts        # Row, ImportError, ParseResult
     import/read-file.ts    # File → string (size/binary checks, BOM)
     import/parse.ts        # string → Row[] | ImportError (with line numbers)
     import/classify.ts     # Row → income | spending | excluded(reason)
-    budget/months.ts       # derive months from dates, full vs partial, period
-    budget/summary.ts      # averages, per group/category, irregular
+    budget/months.ts       # derive months from dates, full vs dropped, incomplete edges
+    budget/summary.ts      # period, averages, per group/category, warnings
+    budget/irregular.ts    # one-off peaks per spending category and income payee
+    plan/form.ts           # purchase form text → PlanInput, field errors
     plan/schedule.ts       # instalments: exact-sum rule, interest, fee
     plan/affordability.ts  # per plan month rows, status, verdict
+    load.ts                # one pipeline for samples and uploads: read → parse → summarise
+    guard.ts               # turns a total past the safe-integer range into a value, not a crash
+    sample-link.ts         # sample deep links: ?sample=…&period=…&price=…
     telemetry.ts           # typed anonymous events → sink (console for the demo)
     constants.ts           # every product threshold, named and commented
-    i18n/{en,et}.ts
-  components/              # Landing, DataSummary, PurchaseForm, Result, Explanation, ErrorState, ui/*
+    i18n/{en,et}.ts, i18n/format.ts      # dictionaries; Intl month, day, list, number formatting
+  components/              # flow (reducer + steps), landing, summary, purchase, result, explanation, upload-error, step-boundary, icons
 public/samples/            # the 4 TSVs (go through the real parser, like an upload)
 tests/fixtures/            # tiny hand-written edge-case files
 tests/unit/
@@ -155,8 +160,10 @@ e2e/
 
 ## 5. Data model
 
+The core's main types, as built. The JSDoc in each file is the full version.
+
 ```ts
-type Cents = number & { readonly __brand: 'Cents' }   // integer; Number.isSafeInteger checked at the boundary
+type Cents = number & { readonly __brand: 'Cents' }   // integer; toCents checks Number.isSafeInteger
 type YearMonth = string                                // 'YYYY-MM'
 
 interface Row { line: number; date: string /* ISO */; payee: string; group: string; category: string;
@@ -168,26 +175,40 @@ type Classified =
   | { kind: 'spending'; row: Row; group: string; category: string; net: Cents }
   | { kind: 'excluded'; row: Row; reason: ExcludedReason }
 
+interface ExcludedTotal { count: number; total: Cents }    // total = Σ (outflow + inflow) of the rows
+
 interface MonthTotals { month: YearMonth; income: Cents; spending: Cents;
                         groups: Map<string, Map<string, Cents>>;   // group → category → net spending
                         incomeByPayee: Map<string, Cents>;
-                        excluded: Record<ExcludedReason, { count: number; total: Cents }> }
+                        excluded: Record<ExcludedReason, ExcludedTotal> }
 
 interface DataSummary {
-  fullMonths: YearMonth[]; droppedMonths: { month: YearMonth; why: 'current' }[];
-  incomplete: ({ month: YearMonth; why: 'starts-mid-month'; firstDate: string } | { month: YearMonth; why: 'ends-mid-month'; lastDate: string })[];
-  period: YearMonth[]; avgIncome: Cents; avgSpending: Cents; margin: Cents;
+  fullMonths: MonthTotals[];                   // every full month in the file, oldest first (the seasonal lookup reads these)
+  droppedMonths: { month: YearMonth; why: 'current' }[];
+  period: YearMonth[];                         // the most recent full months the averages are over
+  avgIncome: Cents; avgSpending: Cents; margin: Cents;
   byGroup: { group: string; avg: Cents; categories: { category: string; avg: Cents }[] }[];
   irregular: (({ kind: 'spending'; group: string; category: string } | { kind: 'income'; payee: string })
               & { peak: Cents; peakMonth: YearMonth; median: Cents })[];
-  excluded: Record<ExcludedReason, { count: number; total: Cents }>;
+  excluded: Record<ExcludedReason, ExcludedTotal>;
+  noIncomeMonths: YearMonth[];                 // period months with no income: a warning
+  incomplete: ({ month: YearMonth; why: 'starts-mid-month'; firstDate: string }
+             | { month: YearMonth; why: 'ends-mid-month'; lastDate: string })[];
   decimal: ',' | '.';
 }
 
 interface PlanInput { price: Cents; upfront: Cents; count: number; annualRateBps: number; monthlyFee: Cents }
-interface PlanMonth { month: YearMonth; expectedSpending: Cents; spendingSource: 'average' | 'seasonal';
-                      margin: Cents; instalment: Cents; leftover: Cents; status: 'fits' | 'tight' | 'no-fit' }
+interface Schedule { financed: Cents; interest: Cents; fees: Cents; total: Cents; instalments: Cents[] }
+
+type Status = 'fits' | 'tight' | 'no-fit'
+type PlanMonth = { month: YearMonth; instalment: Cents; expectedSpending: Cents;
+                   margin: Cents; leftover: Cents; status: Status }
+               & ({ spendingSource: 'average' }
+                | { spendingSource: 'seasonal'; seasonalMonth: YearMonth })   // the past month used: "Last July you spent…"
+interface Affordability { buffer: Cents; months: PlanMonth[]; verdict: Status }
 ```
+
+A file's problems come back as values, not exceptions: `parseTransactions` reports an `ImportError`, `summarise` a `BudgetError` (`too-little-data`, `no-income`), and `load.ts` joins them as `LoadError`. Telemetry may record only the `code`.
 
 Every row keeps its `line` number, so errors can say exactly where the problem is (for example, "line 214: '12,3' isn't a valid amount").
 
@@ -310,7 +331,7 @@ Other cases:
 > 2. Screens, each at 1280 and 390: Landing (one-line value prop, primary "Try with sample data", secondary "Upload a transactions file"); Data summary (period selector 3/6/12, income, spending by category group, margin, irregular items note); Purchase form (price, upfront, instalments 3/6/12/custom, interest rate, monthly fee); Result (verdict card + month-by-month table, where July doesn't fit); "How we calculated this" detail; one error state ("Missing required columns").
 > 3. Components: button, segmented control, money input, stat row, month row (table row on desktop, two-line row on phone), verdict card, callout, drawer.
 
-**Handed back to Claude Code:** the token values plus screenshots or exported HTML. I map the tokens into Tailwind's `@theme` and shadcn variants. The goal is consistency, not pixel-perfect reproduction. If the design isn't ready when the UI work starts, I use shadcn defaults with a neutral palette and swap the tokens in later.
+**As built:** the design came back as `design/`, with its own stylesheet (`design/moneta.css`) holding the tokens and component classes (`.mm-*`). The UI uses that stylesheet on native elements, so no component library or token mapping was needed. Where the mockups' placeholder copy or numbers differ from the rules here (for example a fixed "tight" threshold instead of §6's buffer), the code follows the rules; `design/README.md` lists the known differences.
 
 ## 10. i18n
 
@@ -442,7 +463,7 @@ These are my recommendations; change any you disagree with.
 
 1. **First instalment:** due the month after purchase. Some products charge at checkout; that could be a toggle later.
 2. **Interest:** an annual rate via the annuity formula, plus a separate monthly fee. No APR is shown, because it's a regulated disclosure and claiming one edges toward financial advice.
-3. **Irregular income:** keep the brief's average for income, but list irregular income next to irregular spending so the user sees how much of the average is a one-off. Using the median would be safer but harder to explain.
+3. ✅ **Irregular income (done):** income stays at the brief's average, and irregular income is listed next to irregular spending so the user sees how much of the average is a one-off (§6). Using the median would be safer but harder to explain.
 4. **Upfront payment** isn't checked against anything. That needs a cash balance, which is the Could "cash buffer" item.
-5. **Tight sample profile:** its 6-month margin is about €5, so every plan comes out "doesn't fit". It works well as a second demo ("Try a tighter budget"). To show "tight", use a ~€600 × 12 purchase on the comfortable profile with a 3-month period: July should land in "tight". I'll confirm the exact example once the code runs.
+5. ✅ **Tight sample profile (done):** its 6-month margin is about €5, so every plan comes out "doesn't fit". It works well as a second demo ("Try a tighter budget"). The "tight" example is €1,200 × 12 on the comfortable profile with the 12-month period (`/en?sample=comfortable&period=12&price=1200&n=12`); an E2E spec pins it.
 6. **Starting Balance exclusion** is kept because the brief lists it. It's one rule and one fixture. If you'd rather keep the format spec minimal, it can go, and the help text would instead say "don't include opening balances in Inflow".
