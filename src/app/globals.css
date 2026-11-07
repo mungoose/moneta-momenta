@@ -132,6 +132,15 @@
   .mm {
     --mm-font: var(--font-sans), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   }
+  /*
+   * The design gives a focus ring only to buttons, segmented options and money inputs. Links and anything else
+   * focusable get the same accent ring instead of the grey fallback, which is under 3:1. `:where` gives it zero
+   * specificity, so any design rule wins: its own rings, and the money input's `outline: 0` (its wrapper shows the ring).
+   */
+  :where(.mm :focus-visible) {
+    outline: 2px solid var(--mm-accent);
+    outline-offset: 2px;
+  }
   /* Step headings take focus on each step change for screen readers; a ring there would only look like a bug. */
   .mm [tabindex="-1"]:focus {
     outline: none;
@@ -142,6 +151,11 @@
     /* Brand, badge, "Start over" and the language switch don't fit one 390px row; the summary already says it's sample data. */
     .mm-top .mm-pill {
       display: none;
+    }
+    /* At 320px (400% zoom on a laptop) even that row doesn't fit: the buttons wrap under the brand instead of scrolling sideways. */
+    .mm-top__in {
+      flex-wrap: wrap;
+      row-gap: 0;
     }
     /* A seasonal month's detail ("Spent in Jul 2026" + "Margin €93.51 − €100.00") is too long for one line: stack it. */
     .mm-months .c-irr {
@@ -164,5 +178,7 @@
   }
   html {
     @apply font-sans;
+    /* The design's palette follows the system setting (design/moneta.css), so native controls and scrollbars do too. */
+    color-scheme: light dark;
   }
 }

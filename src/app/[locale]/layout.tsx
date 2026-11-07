@@ -31,7 +31,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
 
   return (
     <html lang={locale} className={`${inter.variable} h-full antialiased`}>
-      <body className="min-h-full bg-background text-foreground">{children}</body>
+      {/* The design's root class sits on body so its background also fills the overscroll area, in both themes. */}
+      <body className="mm min-h-full">{children}</body>
     </html>
   );
 }
