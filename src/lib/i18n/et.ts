@@ -210,7 +210,7 @@ export const et = {
     paymentFee: (fee: string) => `Sisaldab ${fee} kuutasu`,
     paymentLast: (last: string) => `Viimane makse on ${last}`,
     submit: "Kontrolli taskukohasust",
-    back: "Tagasi",
+    back: "Tagasi sinu raha juurde",
     errors: {
       requiredPrice: "Sisesta hind.",
       requiredCount: "Sisesta kuude arv.",
@@ -280,7 +280,6 @@ export const et = {
     fromSavings: "Säästudest",
     incomplete:
       "Faili esimesest või viimasest kuust võib tehinguid puududa, nii et tulemus võib paista parem, kui see on.",
-    tryAgain: "Proovi teisi tingimusi",
     backToMoney: "Tagasi sinu raha juurde",
   },
   explanation: {

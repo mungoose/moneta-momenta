@@ -167,13 +167,14 @@ export const en = {
     incomeTotal: "Average income",
     spendingTitle: "Spending by category group",
     spendingTotal: "Usual spending",
-    marginTitle: "Usual monthly margin",
+    marginTitle: "Usually left over each month",
     marginExplain: (income: string, spending: string) =>
-      `${income} income − ${spending} usual spending. This is the room a new instalment has to fit into.`,
+      `${income} income − ${spending} usual spending. A new instalment has to come out of this.`,
     irregularTitle: (count: number) => (count === 1 ? "One amount stood out" : `${count} amounts stood out`),
     irregularBody: "Each had one month far above its usual amount. They're included in the averages above.",
     irregularSpending: "If a plan reaches the same month of the year, that month counts on what it cost then.",
-    irregularIncome: "One-off income raises the average income. If it won't come again, there's less room than shown.",
+    irregularIncome:
+      "One-off income raises the average income. If it won't come again, you have less left over than shown.",
     irregularItem: (name: string, month: string) => `${name} · ${month}`,
     irregularIncomeItem: (payee: string, month: string) => `${payee} (income) · ${month}`,
     irregularUsually: (amount: string) => `, usually ${amount}`,
@@ -206,7 +207,7 @@ export const en = {
     paymentFee: (fee: string) => `Includes the ${fee} fee`,
     paymentLast: (last: string) => `The last one is ${last}`,
     submit: "Check affordability",
-    back: "Back",
+    back: "Back to your money",
     errors: {
       requiredPrice: "Enter the price.",
       requiredCount: "Enter the number of months.",
@@ -246,12 +247,12 @@ export const en = {
       `Every month leaves at least ${buffer} after the instalment. The closest is ${month}, with ${left} left.`,
     fitShare: (fit: number, total: number) => `The plan fits in ${fit} of ${total} months.`,
     monthSum: (month: string, margin: string, instalment: string, left: string) =>
-      `${month}: ${margin} margin − ${instalment} instalment = ${left} left over.`,
+      `${month}: ${margin} before the instalment − ${instalment} instalment = ${left} left over.`,
     seasonal: (pastMonth: string, spent: string, average: string, planMonth: string) =>
       `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so we expect ${planMonth} to cost that much too.`,
     belowBuffer: (buffer: string) => `A month is tight when less than ${buffer} is left: 10% of your average income.`,
     coveredBody: (saved: string, buffer: string) =>
-      `The months before it leave ${saved} on top of the ${buffer} cushion. Put that aside and it covers the gap.`,
+      `The months before it leave ${saved} on top of the ${buffer} buffer. Put that aside and it covers the gap.`,
     oneShortBody: "Every other month fits, so this is one month to plan for: set money aside before it.",
     payment: "Monthly payment",
     months: "Months",
@@ -264,26 +265,25 @@ export const en = {
     change: "Change the purchase",
     monthsTitle: "Month by month",
     monthsIntro: (buffer: string) =>
-      `Margin is your average income minus what that month is expected to cost. Months that fit save what they leave over the ${buffer} buffer, for later months that come up short. Each month gets one of three answers:`,
+      `Before instalment is your average income minus what that month is expected to cost. Months that fit save what they leave over the ${buffer} buffer, for later months that come up short. Each month gets one of three answers:`,
     colMonth: "Month",
-    colMargin: "Margin",
+    colMargin: "Before instalment",
     colInstalment: "Instalment",
     colLeft: "Left over",
     colStatus: "Status",
     basedOn: (month: string) => `Uses ${month} costs`,
-    phoneMargin: "Margin",
+    phoneMargin: "Before",
     phoneLeft: "Left",
     fromSavings: "From savings",
     incomplete:
       "Your file's first or last month may be missing transactions, so this result may look better than it is.",
-    tryAgain: "Try different terms",
     backToMoney: "Back to your money",
   },
   explanation: {
     title: "How we calculated this",
     close: "Close",
     intro: "Every figure comes from your transactions and the purchase you entered. Four steps:",
-    marginTitle: "Your usual margin",
+    marginTitle: "What you usually have left",
     marginFormula: (income: string, spending: string) => `${income} average income − ${spending} usual spending =`,
     marginNote: (count: number, from: string, to: string) =>
       `Monthly averages over ${count} full months, ${from} to ${to}.`,
@@ -313,7 +313,7 @@ export const en = {
       `${month}: ${income} − ${spending} − ${instalment} =`,
     criticalNote: "That's the month that decides the verdict.",
     bufferNote: (buffer: string, percent: string) =>
-      `The ${buffer} cushion is ${percent}% of your average income, for costs nobody can predict, like a repair or a doctor's bill.`,
+      `The ${buffer} buffer is ${percent}% of your average income, kept for costs nobody can predict, like a repair or a doctor's bill.`,
     savingsNote: (buffer: string) =>
       `Months aren't judged alone. Each month that fits saves what it leaves over ${buffer}, and a later month that comes up short can draw on those savings. Each month gets one of three answers:`,
     limitsTitle: "What this can't know",

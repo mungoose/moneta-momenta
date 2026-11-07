@@ -304,7 +304,7 @@ export function Result({
 
       <div className="mm-actions">
         <button type="button" className="mm-btn mm-btn--primary" onClick={onChange}>
-          {r.tryAgain}
+          {r.change}
         </button>
         <button type="button" className="mm-btn mm-btn--secondary" onClick={onBack}>
           {r.backToMoney}

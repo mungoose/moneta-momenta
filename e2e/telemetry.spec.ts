@@ -71,7 +71,7 @@ test("a sample link that opens a result counts only the checks made after it", a
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(heading(page)).toHaveText(RESULT_TITLE);
 
-  await page.getByRole("button", { name: "Change the purchase" }).click();
+  await page.getByRole("button", { name: "Change the purchase" }).first().click();
   await page.getByLabel("Interest rate").fill("9.9");
   await page.getByRole("button", { name: "Check affordability" }).click();
   // Interest makes July 2027 need more from savings than the interest-free €6.49.

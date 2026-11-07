@@ -23,7 +23,7 @@ test("walks through the sample's verdict in four steps, with its numbers", async
   const drawer = await openDrawer(page);
 
   await expect(drawer.getByRole("heading", { level: 3 })).toHaveText([
-    "Your usual margin",
+    "What you usually have left",
     "Your monthly instalment",
     "Months that cost more last time",
     "What's left each month",
@@ -36,7 +36,7 @@ test("walks through the sample's verdict in four steps, with its numbers", async
   await expect(drawer).toContainText(
     "€0.00 to €253.70 left over, or below €0.00 when savings from earlier months cover the gap.",
   );
-  await expect(drawer).toContainText("The €253.71 cushion is 10% of your average income");
+  await expect(drawer).toContainText("The €253.71 buffer is 10% of your average income");
   await expect(drawer).toContainText("Each month that fits saves what it leaves over €253.71");
 });
 

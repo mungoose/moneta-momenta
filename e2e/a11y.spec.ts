@@ -131,7 +131,7 @@ test("a 320px window (400% zoom on a laptop) never scrolls sideways", async ({ p
   await expect(page.getByRole("table")).toBeVisible();
   expect(await overflow()).toBe(0);
 
-  await page.getByRole("button", { name: "Muuda ostu" }).click();
+  await page.getByRole("button", { name: "Muuda ostu" }).first().click();
   await expect(page.getByLabel("Hind")).toBeVisible();
   expect(await overflow()).toBe(0);
 });

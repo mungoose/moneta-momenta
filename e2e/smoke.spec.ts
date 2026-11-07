@@ -59,7 +59,7 @@ test("the summary lists the period's one-off amounts, and they follow the period
 
   // The last 3 months have nothing unusual, so there's no callout.
   await page.getByRole("button", { name: "3 months" }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Usual monthly margin" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Usually left over each month" })).toBeVisible();
   await expect(callout).toHaveCount(0);
 });
 
@@ -79,6 +79,18 @@ test("Back returns to the previous step", async ({ page }) => {
   await page.goBack();
   await expect(heading(page)).toHaveText("Check if an instalment plan fits your budget, month by month.");
   await expect(page).toHaveURL(/\/en$/);
+});
+
+test("the result's two ways back to the form share one label, and the form's way back names the step", async ({
+  page,
+}) => {
+  await page.goto("/en?sample=comfortable&price=1200&n=12");
+  const change = page.getByRole("button", { name: "Change the purchase" });
+  await expect(change).toHaveCount(2);
+  await change.last().click();
+  await expect(heading(page)).toHaveText("What would you like to buy?");
+  await page.getByRole("button", { name: "Back to your money" }).click();
+  await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 });
 
 test("each step has its own browser tab title", async ({ page }) => {
