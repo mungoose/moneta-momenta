@@ -4,7 +4,7 @@ import type { DataSummary, SummaryResult } from "@/lib/budget/summary";
 import { periodOptions } from "@/lib/budget/summary";
 import { PERIOD_OPTIONS } from "@/lib/constants";
 import type { Locale, Messages } from "@/lib/i18n";
-import { formatDay, formatList, formatMonth, formatNumber } from "@/lib/i18n/format";
+import { formatList, formatMonth, formatNumber, formatOfMonth, formatOnDay } from "@/lib/i18n/format";
 import { outdatedEnd } from "@/lib/load";
 import type { Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
@@ -181,9 +181,9 @@ function dataWarnings(
   const warnings = summary.incomplete.map((edge) => ({
     title:
       edge.why === "starts-mid-month"
-        ? s.startsLateTitle(formatDay(edge.firstDate, locale))
-        : s.endsEarlyTitle(formatDay(edge.lastDate, locale)),
-    body: s.incompleteBody(formatMonth(edge.month, locale)),
+        ? s.startsLateTitle(formatOnDay(edge.firstDate, locale))
+        : s.endsEarlyTitle(formatOnDay(edge.lastDate, locale)),
+    body: s.incompleteBody(formatOfMonth(edge.month, locale)),
   }));
   const last = summary.fullMonths.at(-1)?.month;
   const outdated = last === undefined ? null : outdatedEnd(last, reference);

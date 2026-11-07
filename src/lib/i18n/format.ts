@@ -16,12 +16,8 @@ const monthFormatters = Object.fromEntries(
   ]),
 ) as Record<Locale, Record<MonthStyle, Intl.DateTimeFormat>>;
 
-const dayFormatters = Object.fromEntries(
-  LOCALES.map((locale) => [
-    locale,
-    new Intl.DateTimeFormat(INTL_LOCALE[locale], { day: "numeric", month: "long", timeZone: "UTC" }),
-  ]),
-) as Record<Locale, Intl.DateTimeFormat>;
+/** Day and month in English; Estonian builds its inflected form from {@link ET_MONTH_GENITIVE} instead. */
+const enDayFormatter = new Intl.DateTimeFormat(INTL_LOCALE.en, { day: "numeric", month: "long", timeZone: "UTC" });
 
 const listFormatters = Object.fromEntries(
   LOCALES.map((locale) => [locale, new Intl.ListFormat(INTL_LOCALE[locale], { type: "conjunction" })]),
@@ -45,16 +41,57 @@ export function formatMonth(month: YearMonth, locale: Locale, style: MonthStyle 
 }
 
 /**
- * Formats an ISO date as day and month, for sentences where the month and
- * year are already clear.
+ * Estonian month names in the genitive, January first. `Intl` only gives the
+ * nominative ("oktoober"), but Estonian inflects a month inside a sentence:
+ * "11. oktoobril" (on 11 October), "oktoobri kulud" (October's spending).
+ */
+const ET_MONTH_GENITIVE = [
+  "jaanuari",
+  "veebruari",
+  "märtsi",
+  "aprilli",
+  "mai",
+  "juuni",
+  "juuli",
+  "augusti",
+  "septembri",
+  "oktoobri",
+  "novembri",
+  "detsembri",
+] as const;
+
+/** The Estonian genitive of a month, from its 1-based number. */
+function etGenitive(monthNumber: number): string {
+  return ET_MONTH_GENITIVE[monthNumber - 1] ?? "";
+}
+
+/**
+ * Formats an ISO date for "on <date>" in a sentence ("Your transactions stop on …").
  * @param date    ISO date, `YYYY-MM-DD`.
  * @param locale  UI locale.
- * @returns       E.g. `12 October` (en), `12. oktoober` (et).
- * @example formatDay("2026-10-12", "en") // "12 October"
+ * @returns       E.g. `11 October` (en), `11. oktoobril` (et, the adessive case).
+ * @example formatOnDay("2026-10-11", "et") // "11. oktoobril"
  */
-export function formatDay(date: string, locale: Locale): string {
+export function formatOnDay(date: string, locale: Locale): string {
+  if (locale === "et") {
+    return `${Number(date.slice(8, 10))}. ${etGenitive(Number(date.slice(5, 7)))}l`;
+  }
   const utc = new Date(Date.UTC(Number(date.slice(0, 4)), Number(date.slice(5, 7)) - 1, Number(date.slice(8, 10))));
-  return dayFormatters[locale].format(utc);
+  return enDayFormatter.format(utc);
+}
+
+/**
+ * Formats a month for "of <month>" in a sentence ("some of the spending in …").
+ * @param month   The month.
+ * @param locale  UI locale.
+ * @returns       E.g. `October 2026` (en), `2026. aasta oktoobri` (et, the genitive case).
+ * @example formatOfMonth("2026-10", "et") // "2026. aasta oktoobri"
+ */
+export function formatOfMonth(month: YearMonth, locale: Locale): string {
+  if (locale === "et") {
+    return `${month.slice(0, 4)}. aasta ${etGenitive(Number(month.slice(5, 7)))}`;
+  }
+  return formatMonth(month, locale);
 }
 
 /**

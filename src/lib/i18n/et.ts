@@ -134,7 +134,7 @@ export const et = {
     startsLateTitle: (day: string) => `Sinu tehingud algavad ${day}`,
     endsEarlyTitle: (day: string) => `Sinu tehingud lõpevad ${day}`,
     incompleteBody: (month: string) =>
-      `Kui osa kuu ${month} kuludest on puudu, paistavad su tavalised kulud väiksemad, kui need on, ja maksed tunduvad kergemini jõukohased.`,
+      `Kui osa ${month} kuludest on puudu, paistavad su tavalised kulud väiksemad, kui need on, ja maksed tunduvad kergemini jõukohased.`,
     outdatedTitle: (month: string) => `Sinu tehingud lõpevad kuuga ${month}`,
     outdatedBody: "Hilisemaid kuid failis pole, nii et keskmised ei pruugi vastata sinu tänasele olukorrale.",
     noIncomeMonthsTitle: (months: string) => `Sissetulekuta kuud: ${months}`,

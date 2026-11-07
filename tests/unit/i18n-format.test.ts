@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatDay, formatList, formatMonth, formatNumber, formatPercent } from "@/lib/i18n/format";
+import { formatList, formatMonth, formatNumber, formatOfMonth, formatOnDay, formatPercent } from "@/lib/i18n/format";
 
 describe("formatMonth", () => {
   it.each([
@@ -17,14 +17,47 @@ describe("formatMonth", () => {
   });
 });
 
-describe("formatDay", () => {
+describe("formatOnDay", () => {
   it.each([
-    ["2026-10-12", "en", "12 October"],
-    ["2026-10-12", "et", "12. oktoober"],
+    ["2026-10-11", "en", "11 October"],
     ["2025-11-01", "en", "1 November"],
-    ["2026-12-31", "et", "31. detsember"],
+    ["2026-12-31", "en", "31 December"],
+    ["2026-10-11", "et", "11. oktoobril"],
+    ["2025-11-19", "et", "19. novembril"],
+    ["2026-01-01", "et", "1. jaanuaril"],
+    ["2026-03-31", "et", "31. märtsil"],
+    ["2026-05-08", "et", "8. mail"],
   ] as const)("%s in %s → %s", (date, locale, text) => {
-    expect(formatDay(date, locale)).toBe(text);
+    expect(formatOnDay(date, locale)).toBe(text);
+  });
+
+  it("has an Estonian form for every month", () => {
+    const days = Array.from({ length: 12 }, (_, i) => formatOnDay(`2026-${String(i + 1).padStart(2, "0")}-15`, "et"));
+    expect(days).toEqual([
+      "15. jaanuaril",
+      "15. veebruaril",
+      "15. märtsil",
+      "15. aprillil",
+      "15. mail",
+      "15. juunil",
+      "15. juulil",
+      "15. augustil",
+      "15. septembril",
+      "15. oktoobril",
+      "15. novembril",
+      "15. detsembril",
+    ]);
+  });
+});
+
+describe("formatOfMonth", () => {
+  it.each([
+    ["2026-10", "en", "October 2026"],
+    ["2026-10", "et", "2026. aasta oktoobri"],
+    ["2027-07", "et", "2027. aasta juuli"],
+    ["2025-12", "et", "2025. aasta detsembri"],
+  ] as const)("%s in %s → %s", (month, locale, text) => {
+    expect(formatOfMonth(month, locale)).toBe(text);
   });
 });
 
