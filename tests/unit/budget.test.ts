@@ -62,6 +62,22 @@ const threeMonths = (...extra: string[][]) =>
     spend("01/08/2026", "100,00"),
   );
 
+/** The first day of `month` as file text, `01/MM/YYYY`. */
+const firstOf = (month: string) => `01/${month.slice(5)}/${month.slice(0, 4)}`;
+
+/** A `DD/MM/YYYY` date as ISO, `YYYY-MM-DD`. */
+const isoOf = (date: string) => date.split("/").reverse().join("-");
+
+/** Aug–Oct 2026, every month starting on day 1, but the rows stop on 12 October. */
+const endingOn12October = () => [
+  spend("12/10/2026", "100,00"),
+  salary("01/10/2026"),
+  salary("25/09/2026"),
+  spend("01/09/2026", "100,00"),
+  salary("25/08/2026"),
+  spend("01/08/2026", "100,00"),
+];
+
 const NO_EXCLUDED = {
   transfer: { count: 0, total: 0 },
   "opening-balance": { count: 0, total: 0 },
@@ -128,43 +144,109 @@ describe("buildMonths", () => {
     expect(fullMonths.map((m) => m.month)).toEqual(["2026-08", "2026-09", "2026-10"]);
   });
 
-  it("drops a first month that starts after day 7, saying when the file starts", () => {
-    const { fullMonths, droppedMonths } = months(fixture("starts-mid-month.tsv"));
-    expect(fullMonths.map((m) => m.month)).toEqual(["2026-08", "2026-09", "2026-10"]);
-    expect(droppedMonths).toEqual([{ month: "2026-07", why: "starts-mid-month", firstDate: "2026-07-18" }]);
+  it("keeps a first month that starts after day 7, flagging it with the file's first date", () => {
+    const { fullMonths, droppedMonths, incomplete } = months(fixture("starts-mid-month.tsv"));
+    expect(fullMonths.map((m) => m.month)).toEqual(["2026-07", "2026-08", "2026-09", "2026-10"]);
+    expect(droppedMonths).toEqual([]);
+    expect(incomplete).toEqual([{ month: "2026-07", why: "starts-mid-month", firstDate: "2026-07-18" }]);
   });
 
-  it("keeps a first month that starts on day 7, and drops one that starts on day 8", () => {
-    expect(months(threeMonths(spend("07/07/2026", "1,00"))).fullMonths[0]?.month).toBe("2026-07");
-    expect(months(threeMonths(spend("08/07/2026", "1,00"))).droppedMonths).toEqual([
+  it("doesn't flag a first month that starts on day 7, and flags one that starts on day 8", () => {
+    expect(months(threeMonths(spend("07/07/2026", "1,00"))).incomplete).toEqual([]);
+    expect(months(threeMonths(spend("08/07/2026", "1,00"))).incomplete).toEqual([
       { month: "2026-07", why: "starts-mid-month", firstDate: "2026-07-08" },
     ]);
   });
 
   it("judges the first month by its earliest row, wherever that row is in the file", () => {
     const text = threeMonths(spend("20/07/2026", "1,00"), spend("02/07/2026", "1,00"), spend("15/07/2026", "1,00"));
-    expect(months(text).fullMonths[0]?.month).toBe("2026-07");
+    expect(months(text).incomplete).toEqual([]);
   });
 
   it("counts excluded rows as transactions when finding where the file starts", () => {
     const transfer = ["01/07/2026", "Transfer : Savings", "", "", "10,00", "0,00"];
-    expect(months(threeMonths(spend("20/07/2026", "1,00"), transfer)).fullMonths[0]?.month).toBe("2026-07");
+    expect(months(threeMonths(spend("20/07/2026", "1,00"), transfer)).incomplete).toEqual([]);
   });
 
   it("only checks the start day of the first month, not of later ones", () => {
-    // October's first row is on the 25th; it's still a full month.
+    // October's first row is on the 25th; only the file's edges are judged.
     const text = tsv(salary("25/10/2026"), salary("25/09/2026"), salary("01/08/2026"));
-    expect(months(text).fullMonths.map((m) => m.month)).toEqual(["2026-08", "2026-09", "2026-10"]);
+    expect(months(text).incomplete).toEqual([]);
+  });
+
+  it("keeps a last month whose rows stop before its last 7 days, flagging it with the file's last date", () => {
+    const { fullMonths, droppedMonths, incomplete } = months(fixture("ends-mid-month.tsv"));
+    expect(fullMonths.map((m) => m.month)).toEqual(["2026-07", "2026-08", "2026-09", "2026-10"]);
+    expect(droppedMonths).toEqual([]);
+    expect(incomplete).toEqual([{ month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" }]);
+  });
+
+  it.each([
+    // [last row, reference, flagged]: the window is the month's last 7 days, whatever its length.
+    ["25/10/2026", "2026-11", false],
+    ["24/10/2026", "2026-11", true],
+    ["24/09/2026", "2026-10", false],
+    ["23/09/2026", "2026-10", true],
+    ["22/02/2027", "2027-03", false],
+    ["21/02/2027", "2027-03", true],
+    ["23/02/2028", "2028-03", false],
+    ["22/02/2028", "2028-03", true],
+  ])("last row on %s, reference %s: the last month is flagged: %s", (last, reference, flagged) => {
+    const lastMonth = addMonths(reference, -1);
+    // Every month starts on day 1, so only the end is in question.
+    const starts = [0, -1, -2, -3].map((back) => salary(firstOf(addMonths(lastMonth, back))));
+    const { fullMonths, incomplete } = months(tsv(spend(last, "1,00"), ...starts), reference);
+    expect(fullMonths.at(-1)?.month).toBe(lastMonth);
+    expect(incomplete).toEqual(flagged ? [{ month: lastMonth, why: "ends-mid-month", lastDate: isoOf(last) }] : []);
+  });
+
+  it("doesn't flag a last month that stops early when the file has later rows: the export went past its end", () => {
+    const { fullMonths, droppedMonths, incomplete } = months(tsv(spend("02/11/2026", "1,00"), ...endingOn12October()));
+    expect(fullMonths.map((m) => m.month)).toEqual(["2026-08", "2026-09", "2026-10"]);
+    expect(droppedMonths).toEqual([{ month: "2026-11", why: "current" }]);
+    expect(incomplete).toEqual([]);
+  });
+
+  it("judges the last month by its latest row, wherever that row is in the file, excluded rows included", () => {
+    const transfer = ["30/10/2026", "Transfer : Savings", "", "", "10,00", "0,00"];
+    expect(months(tsv(...endingOn12October(), transfer)).incomplete).toEqual([]);
+    expect(months(tsv(spend("29/10/2026", "1,00"), ...endingOn12October())).incomplete).toEqual([]);
+    expect(months(tsv(...endingOn12October())).incomplete).toEqual([
+      { month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" },
+    ]);
+  });
+
+  it("flags both edges of a single month when it starts late and ends early, the start first", () => {
+    expect(months(tsv(spend("12/10/2026", "1,00"), salary("10/10/2026")))).toEqual({
+      fullMonths: [expect.objectContaining({ month: "2026-10" })],
+      droppedMonths: [],
+      incomplete: [
+        { month: "2026-10", why: "starts-mid-month", firstDate: "2026-10-10" },
+        { month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" },
+      ],
+    });
+    expect(months(tsv(spend("12/10/2026", "1,00"), salary("01/10/2026"))).incomplete).toEqual([
+      { month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" },
+    ]);
+  });
+
+  it("lists a flagged start before a flagged end", () => {
+    const text = tsv(spend("12/10/2026", "1,00"), salary("01/10/2026"), salary("10/09/2026"));
+    expect(months(text).incomplete).toEqual([
+      { month: "2026-09", why: "starts-mid-month", firstDate: "2026-09-10" },
+      { month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" },
+    ]);
   });
 
   it("reports a first month at or after the reference month as current, not as starting mid-month", () => {
-    const { fullMonths, droppedMonths } = months(tsv(spend("20/11/2026", "1,00")));
+    const { fullMonths, droppedMonths, incomplete } = months(tsv(spend("20/11/2026", "1,00")));
     expect(fullMonths).toEqual([]);
     expect(droppedMonths).toEqual([{ month: "2026-11", why: "current" }]);
+    expect(incomplete).toEqual([]);
   });
 
   it("gives no months for no rows", () => {
-    expect(buildMonths([], "2026-11")).toEqual({ fullMonths: [], droppedMonths: [] });
+    expect(buildMonths([], "2026-11")).toEqual({ fullMonths: [], droppedMonths: [], incomplete: [] });
   });
 
   it("totals spending per group and category; a refund can take a category below zero", () => {
@@ -280,6 +362,20 @@ describe("summarise", () => {
     const s = summary(fixture("partial-current.tsv"));
     expect([s.avgIncome, s.avgSpending]).toEqual([200000, 10000]);
     expect(s.droppedMonths).toEqual([{ month: "2026-11", why: "current" }]);
+  });
+
+  it("keeps an edge month that may be incomplete in the averages, and lists it only while it's in the period", () => {
+    const s = summary(fixture("ends-mid-month.tsv"), "2026-11", 3);
+    expect(s.period).toEqual(["2026-08", "2026-09", "2026-10"]);
+    expect([s.avgIncome, s.avgSpending]).toEqual([200000, 10000]);
+    expect(s.droppedMonths).toEqual([]);
+    expect(s.incomplete).toEqual([{ month: "2026-10", why: "ends-mid-month", lastDate: "2026-10-12" }]);
+
+    const started = fixture("starts-mid-month.tsv");
+    expect(summary(started, "2026-11", 4).incomplete).toEqual([
+      { month: "2026-07", why: "starts-mid-month", firstDate: "2026-07-18" },
+    ]);
+    expect(summary(started, "2026-11", 3).incomplete).toEqual([]);
   });
 
   it("averages a month without income as a zero and lists it", () => {
@@ -452,6 +548,7 @@ describe("golden: sample files", () => {
     const s = summary(sample(name));
     expect(totals(s)).toEqual(expected);
     expect(s.droppedMonths).toEqual([]);
+    expect(s.incomplete).toEqual([]);
   });
 
   it("comfortable, last 6 months (May–Oct 2026): €2,537.13 − €2,023.19 = €513.94", () => {

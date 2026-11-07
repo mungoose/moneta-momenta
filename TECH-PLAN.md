@@ -171,7 +171,8 @@ type Classified =
 interface MonthTotals { month: YearMonth; income: Cents; spending: Cents; byCategory: Record<string, Cents> }
 
 interface DataSummary {
-  fullMonths: YearMonth[]; droppedMonths: { month: YearMonth; why: 'current' | 'starts-mid-month' }[];
+  fullMonths: YearMonth[]; droppedMonths: { month: YearMonth; why: 'current' }[];
+  incomplete: ({ month: YearMonth; why: 'starts-mid-month'; firstDate: string } | { month: YearMonth; why: 'ends-mid-month'; lastDate: string })[];
   period: YearMonth[]; avgIncome: Cents; avgSpending: Cents; margin: Cents;
   byGroup: { group: string; avg: Cents; categories: { category: string; avg: Cents }[] }[];
   irregular: { name: string; kind: 'income' | 'spending'; avg: Cents; median: Cents; peakMonth: YearMonth; peak: Cents }[];
@@ -193,7 +194,10 @@ Every row keeps its `line` number, so errors can say exactly where the problem i
 **Months: ✅ derived only from transaction dates.** The file has no month-start or month-end markers, and the app doesn't need any.
 - Each row's month is taken from its `Date`. The months in range run from the earliest to the latest transaction month, with no gaps. A month inside that range with no rows counts as a real zero, which is the "month with no income" case. It shows a warning.
 - **Last month.** Any month ≥ the *reference month* is unfinished and dropped. The reference month is today's month for uploads and a fixed `2026-11` for the sample, so the sample never goes stale for a reviewer who opens it later.
-- **First month.** The export's timeframe may start mid-month. The earliest month counts as full only if its first transaction falls on or before day `FIRST_MONTH_MAX_START_DAY = 7`. Otherwise it's dropped with a note: "Your file starts on 18 March, so March is left out." This is a heuristic based only on dates. Day 7 works because most households have several transactions in any given week. The constant is named so the rule is easy to change.
+- **Edge months are flagged, never dropped.** The export's timeframe may start or end mid-month, but from dates alone a cut export looks the same as a quiet week (a work trip paid by an employer's card, a hospital stay). Dropping the month would throw away real data on a guess, and with a short history would force "too little data" on someone whose file is fine. So the month still counts, and the summary gets a warning while the month is in the period. The warning names the direction of the error: missing spending makes the averages too low, so plans look easier to afford than they are.
+  - **First month:** flagged when its first transaction is after day `FIRST_MONTH_MAX_START_DAY = 7`.
+  - **Last month before the reference month:** flagged when no transaction falls in its last `LAST_MONTH_END_WINDOW_DAYS = 7` days (25–31 October, 22–28 February). This is the export taken on 28 October and uploaded in November. Rows in a later month (the current one) prove the export went past its end, and then it isn't checked.
+  - A one-month file can get both flags. Excluded rows (transfers, card payments) count as transactions for both checks. Both are date-only heuristics; the constants are named so the rules are easy to change.
 - ✅ **Minimum: `MIN_FULL_MONTHS = 3`.** Fewer gives the "too little data" error. Three months gives the average a better chance of absorbing one-off oddities.
 - **Period options:** last 3 / 6 / 12 full months. Options longer than the data are disabled. The default is 6, or all of them when only 3–5 exist, with a visible note.
 
@@ -235,6 +239,7 @@ The **verdict** is the worst month's status. It's always shown next to its input
 | No income found | Σ income over period = 0 | "No income found. Income rows need the category group **Inflow**." plus a rename tip |
 | Zero or negative margin | `margin ≤ 0` | Shows the numbers, says no instalment plan fits them, and points to the largest categories |
 | Month without income | income 0 in some month | A warning, not a blocker |
+| First or last month may be incomplete | `summary.incomplete` | A warning, not a blocker: "Your transactions stop on 12 October. If some of October's spending is missing, your usual spending looks lower than it is, and plans look easier to afford." |
 | Invalid purchase input | form validation | An inline message on the field |
 | LLM down / no key / invalid answer | | The deterministic suggestions are shown instead, without an error banner |
 
@@ -305,7 +310,7 @@ Fixtures in `tests/fixtures/` are 5–30 rows each, and each is named after its 
 | `refund.tsv` | category net = outflow − inflow; a negative net is allowed |
 | `no-income-month.tsv` | the gap month exists with income 0; warning raised |
 | `three-months.tsv` / `two-months.tsv` | 3 → works, with a "fewer than 6" note; 2 → too-little-data error |
-| `partial-current.tsv`, `starts-mid-month.tsv` | reference month dropped; first month dropped when it starts after day 7 |
+| `partial-current.tsv`, `starts-mid-month.tsv`, `ends-mid-month.tsv` | reference month dropped; first month flagged when it starts after day 7; last month flagged when it ends before its last 7 days |
 | `empty.tsv`, `header-only.tsv` | empty error |
 | `other-bank.csv` (a statement-style CSV) | missing-columns error listing exactly the missing ones |
 | `dot-decimal.csv` (comma-delimited, `€1,234.56`), `utf8-bom.tsv`, `lf-endings.tsv` | parse to the same cents as the base fixture |
@@ -334,6 +339,13 @@ Desktop 1280 × 800 is the primary project. The same specs also run at 390 × 84
 1. `/en` → Try sample → summary shows 6 months → €1,200 × 12 → verdict *doesn't fit*, July marked → open the explanation; the numbers are visible.
 2. Upload `other-bank.csv` → missing-columns error.
 3. `/et`: Estonian copy, and `1200` is formatted as `1200,00 €` (Estonian doesn't group 4-digit numbers; `1234567,89` → `1 234 567,89 €`, with no-break spaces).
+4. Upload a realistic file whose first or last month is incomplete → the summary shows the "may be missing transactions" warning, and the flow still reaches a verdict.
+
+**Incomplete-month datasets (to do, with the upload PR).** The unit fixtures (`starts-mid-month.tsv`, `ends-mid-month.tsv`) cover the rule, but they have about 10 rows each. To see the warning on realistic data, generate two more sets with `sample-dataset/generate_ynab_sample.py`. It's seeded, so the output is reproducible.
+- **Ends early:** the comfortable profile with its data stopping on 12 October 2026 → October flagged as ending mid-month.
+- **Starts late:** data starting on 18 November 2025 → November flagged as starting mid-month. The flag only shows while that month is in the period, so the test picks 12 months, or the file is shortened to under 6 full months so the first month is in the default period.
+
+The generator needs two small changes first: it hard-codes `START`/`END`, and it writes to `~/Desktop`. Both should become arguments, so the script can write the sets straight into `tests/fixtures/` or `e2e/fixtures/`. These files are upload fixtures, not samples: they don't go in `public/samples/`, and the landing page doesn't offer them. The spec uploads them with `setInputFiles` and fixes the clock with `page.clock`. Uploads count from today's month, so a fixed clock keeps the expected months stable; it also keeps a planned "data ends long before today" warning from appearing as time passes.
 
 ### CI and deploy
 

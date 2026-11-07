@@ -2,7 +2,14 @@ import { DEFAULT_PERIOD_MONTHS, MIN_FULL_MONTHS, PERIOD_OPTIONS } from "@/lib/co
 import { classify, type ExcludedReason } from "@/lib/import/classify";
 import type { ParsedFile } from "@/lib/import/types";
 import { divRound, sum, toCents, type Cents, type DecimalSeparator } from "@/lib/money/cents";
-import { buildMonths, type DroppedMonth, type ExcludedTotal, type MonthTotals, type YearMonth } from "./months";
+import {
+  buildMonths,
+  type DroppedMonth,
+  type ExcludedTotal,
+  type IncompleteMonth,
+  type MonthTotals,
+  type YearMonth,
+} from "./months";
 
 /** A category's average monthly net spending over the period. */
 export interface CategoryAverage {
@@ -45,12 +52,18 @@ export interface DataSummary {
   excluded: Record<ExcludedReason, ExcludedTotal>;
   /** Period months without any income; a warning, not an error. */
   noIncomeMonths: YearMonth[];
+  /**
+   * The file's first or last month, when it's in the period and may be
+   * missing transactions; a warning, not an error. Missing spending makes the
+   * averages too low, so plans look easier to afford than they are.
+   */
+  incomplete: IncompleteMonth[];
   decimal: DecimalSeparator;
 }
 
 /** Why a parsed file can't be summarised. */
 export type BudgetError =
-  /** Fewer than {@link MIN_FULL_MONTHS} full months. `droppedMonths` says which months were left out and why. */
+  /** Fewer than {@link MIN_FULL_MONTHS} full months. `droppedMonths` lists the unfinished months left out. */
   | { code: "too-little-data"; fullMonths: number; droppedMonths: DroppedMonth[] }
   /** The period's income totals zero or less: usually income isn't in the income group. */
   | { code: "no-income" };
@@ -93,7 +106,7 @@ export function defaultPeriodLength(fullMonthCount: number): number {
  *                      the safe-integer range.
  */
 export function summarise(file: ParsedFile, reference: YearMonth, periodLength?: number): SummaryResult {
-  const { fullMonths, droppedMonths } = buildMonths(file.rows.map(classify), reference);
+  const { fullMonths, droppedMonths, incomplete } = buildMonths(file.rows.map(classify), reference);
   if (fullMonths.length < MIN_FULL_MONTHS) {
     return { ok: false, error: { code: "too-little-data", fullMonths: fullMonths.length, droppedMonths } };
   }
@@ -124,6 +137,7 @@ export function summarise(file: ParsedFile, reference: YearMonth, periodLength?:
       byGroup: groupAverages(months, average),
       excluded: excludedTotals(months),
       noIncomeMonths: months.filter((m) => m.income === 0).map((m) => m.month),
+      incomplete: incomplete.filter((edge) => months.some((m) => m.month === edge.month)),
       decimal: file.decimal,
     },
   };

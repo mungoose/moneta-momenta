@@ -12,13 +12,25 @@ export const MAX_FILE_BYTES = 5 * 1024 * 1024;
 export const MIN_FULL_MONTHS = 3;
 
 /**
- * The file's first month counts as full only if its first transaction is on
- * or before this day. An export's date range often starts mid-month, and the
- * file has no month markers, so this is a date-only heuristic: most
- * households have several transactions in any given week, so a first row
- * after day 7 almost always means the month's start is missing.
+ * The file's first month is flagged as possibly incomplete when its first
+ * transaction is after this day. An export's date range often starts
+ * mid-month, and the file has no month markers, so this is a date-only
+ * heuristic: most households have several transactions in any given week,
+ * so a first row after day 7 usually means the month's start is missing. The
+ * month still counts, because a quiet week has real causes too; the user
+ * gets a warning instead.
  */
 export const FIRST_MONTH_MAX_START_DAY = 7;
+
+/**
+ * The file's last month is flagged as possibly incomplete when no
+ * transaction falls in its last this-many days, unless the file has rows in
+ * a later month. The mirror of {@link FIRST_MONTH_MAX_START_DAY}: an export
+ * taken before a month ended and uploaded after it has that month's last days
+ * of spending missing, which makes every plan look better than it is. Later
+ * rows prove the export went past the month's end.
+ */
+export const LAST_MONTH_END_WINDOW_DAYS = 7;
 
 /**
  * Period lengths the user can pick, in full months, counted back from the
