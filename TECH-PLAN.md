@@ -79,7 +79,7 @@ Excluded rows are counted and totalled per reason, and the explanation view show
 | Framework | **Next.js 16, App Router, TypeScript strict** with `noUncheckedIndexedAccess` (version confirmed at scaffold time) | Required. Almost all of it runs client-side; the only server code is the optional LLM route. |
 | Package manager | pnpm | Fast and deterministic on Vercel |
 | CSS | **Tailwind CSS v4** | The most widely used CSS framework right now, and the `create-next-app` default. Tokens live in one `@theme` block. |
-| Components | **shadcn/ui** (Radix primitives, copied into `src/components/ui`) | Accessible inputs, segmented controls and dialogs. Only the ~8 components needed are added. |
+| Components | **Native HTML elements styled by the design's CSS** (`design/moneta.css`) | As built: the design ships the component styles, and native `<button>`, `<input>` and `<dialog>` give keyboard and screen-reader behaviour without a component library. shadcn/ui was scaffolded, never used, and removed. |
 | CSV parsing | **PapaParse** | A battle-tested RFC-4180 parser with delimiter detection. Hand-rolled CSV parsing is where the quoting bugs come from. ~7 kB gz. |
 | Unit tests | **Vitest** | Fast and TS-native |
 | Mutation tests | **StrykerJS** (`@stryker-mutator/core` + `vitest-runner`) | ✅ Requested. Proves the tests actually catch wrong maths, not just execute it. See §11. |

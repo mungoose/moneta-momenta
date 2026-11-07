@@ -8,7 +8,7 @@ Instalment affordability check: upload a transactions CSV (or use the sample), e
 ## Stack
 
 - Next.js 16 (App Router, Cache Components on) + React 19 + TypeScript strict (`noUncheckedIndexedAccess`)
-- Tailwind CSS v4 + shadcn/ui (radix-nova preset; `cn` from the `cn` package)
+- Tailwind CSS v4 + the design's own CSS (`design/moneta.css`) on native elements; no component library
 - Vitest (unit, Node env), StrykerJS (mutation), Playwright (E2E, desktop 1280 + phone 390)
 - npm (no pnpm on this machine), Node 26 (`.nvmrc`; `nvm use`), deployed on Vercel via GitHub integration
 
@@ -34,7 +34,7 @@ When reading Stryker output, look only at the `[Survived]` mutants and the score
 
 - `src/lib/`: the pure core (no React, no DOM). `money/`, `import/`, `budget/`, `plan/`, `telemetry.ts`, `constants.ts`, `i18n/`.
 - `src/app/[locale]/`: pages for `en` and `et`. `/` redirects to `/en` (`next.config.ts`).
-- `src/components/`: UI. `ui/` holds shadcn components.
+- `src/components/`: UI.
 - `public/samples/`: sample TSVs served to the browser. These are copies of `sample-dataset/` (the generator's output); the files are renamed without a product name.
 - `tests/unit/`, `tests/fixtures/` (tiny hand-written edge-case files), `e2e/`
 
