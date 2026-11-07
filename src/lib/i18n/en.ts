@@ -25,7 +25,7 @@ export const en = {
   },
   landing: {
     title: "Check if an instalment plan fits your budget, month by month.",
-    lead: "Moneta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
+    lead: "Moneta Momenta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
     trySample: "Try with sample data",
     tryTight: "Try a tighter budget",
     sampleNote: "The sample is a made-up household's year of transactions.",

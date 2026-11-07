@@ -28,7 +28,7 @@ export const et = {
   },
   landing: {
     title: "Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.",
-    lead: "Moneta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
+    lead: "Moneta Momenta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
     trySample: "Proovi näidisandmetega",
     tryTight: "Proovi napima eelarvega",
     sampleNote: "Näidisandmed on väljamõeldud pere ühe aasta tehingud.",
