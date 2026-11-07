@@ -233,6 +233,7 @@ export const et = {
     title: (price: string, count: number) => `${price}, ${count} makset`,
     termsUpfront: (amount: string) => `${amount} sissemakse`,
     termsRate: (percent: string) => `${percent}% intressi aastas`,
+    termsInterestFree: "Intressivaba",
     termsFee: (amount: string) => `${amount} kuutasu`,
     termsMonths: (from: string, to: string) => `${from} kuni ${to}`,
     verdictFits: "Maksed mahuvad igasse kuusse",

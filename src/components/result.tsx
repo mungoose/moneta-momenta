@@ -181,7 +181,8 @@ export function Result({
 
   const terms = [
     input.upfront > 0 ? r.termsUpfront(money(input.upfront)) : null,
-    input.annualRateBps > 0 ? r.termsRate(formatPercent(input.annualRateBps, locale)) : null,
+    // Said either way: a missing rate would leave the user unsure whether interest was counted.
+    input.annualRateBps > 0 ? r.termsRate(formatPercent(input.annualRateBps, locale)) : r.termsInterestFree,
     input.monthlyFee > 0 ? r.termsFee(money(input.monthlyFee)) : null,
     r.termsMonths(month(first.month), month(last.month)),
   ].filter((part) => part !== null);

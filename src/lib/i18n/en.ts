@@ -230,6 +230,7 @@ export const en = {
     title: (price: string, count: number) => `${price} over ${count} instalments`,
     termsUpfront: (amount: string) => `${amount} upfront`,
     termsRate: (percent: string) => `${percent}% interest a year`,
+    termsInterestFree: "Interest-free",
     termsFee: (amount: string) => `${amount} monthly fee`,
     termsMonths: (from: string, to: string) => `${from} to ${to}`,
     verdictFits: "The plan fits every month",

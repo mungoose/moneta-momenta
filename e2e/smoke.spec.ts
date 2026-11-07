@@ -117,6 +117,8 @@ test("each step has its own browser tab title", async ({ page }) => {
 test("a sample link opens its result directly", async ({ page }) => {
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
+  // With no rate in the link the plan is interest-free, and the terms say so rather than leaving it out.
+  await expect(page.getByText("Interest-free · December 2026 to November 2027")).toBeVisible();
 });
 
 test("a budget with no room above the buffer says no terms can fit", async ({ page }) => {
