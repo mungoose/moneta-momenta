@@ -1,7 +1,7 @@
 import { defaultPeriodLength, periodOptions } from "@/lib/budget/summary";
-import { DEFAULT_PERIOD_MONTHS, INSTALMENT_PRESETS } from "@/lib/constants";
+import { DEFAULT_PERIOD_MONTHS, DEFAULT_RATE_BPS, INSTALMENT_PRESETS } from "@/lib/constants";
 import type { LoadedData, LoadError } from "@/lib/load";
-import { checkPlanForm, type PlanForm } from "@/lib/plan/form";
+import { checkPlanForm, formatRateInput, type PlanForm } from "@/lib/plan/form";
 import type { SampleProfile } from "@/lib/sample-link";
 
 /** The flow's screens, in order. */
@@ -94,7 +94,13 @@ export type FlowAction =
   | { type: "reset" };
 
 /** The purchase prefilled for the sample: big enough that July 2027 doesn't fit on the default period. */
-const SAMPLE_FORM: PlanForm = { price: "1200", upfront: "0", count: "12", rate: "0", fee: "0" };
+const SAMPLE_FORM: PlanForm = {
+  price: "1200",
+  upfront: "0",
+  count: "12",
+  rate: formatRateInput(DEFAULT_RATE_BPS),
+  fee: "0",
+};
 
 /** The flow before anything is loaded. */
 export const initialFlow: FlowState = {

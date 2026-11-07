@@ -51,6 +51,14 @@ export const PERIOD_OPTIONS = [3, 6, 12] as const;
 export const DEFAULT_PERIOD_MONTHS = 6;
 
 /**
+ * Interest rate the purchase form starts with, in basis points (9.9% a year).
+ * Small-loan and instalment offers in Estonia run from about 4.9% to 14.9% a
+ * year; starting midway shows that interest counts, where 0% would make every
+ * plan look cheaper than most real offers. Links without a rate still mean 0%.
+ */
+export const DEFAULT_RATE_BPS = 990;
+
+/**
  * Highest purchase price the plan accepts, in cents (€1,000,000). Far above
  * any household instalment purchase; it keeps every total well inside the
  * safe-integer range, so a typo gets a field message instead of a crash.

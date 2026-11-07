@@ -62,7 +62,7 @@ test("the sample flow sends one event per action, with no figures", async ({ pag
     { name: "flow_started", source: "sample" },
     { name: "period_changed", months: 12 },
     { name: "period_changed", months: 6 },
-    { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: false },
+    { name: "plan_checked", verdict: "no-fit", instalments: "12", priceBucket: "1000–3000", hasInterest: true },
   ]);
 });
 
