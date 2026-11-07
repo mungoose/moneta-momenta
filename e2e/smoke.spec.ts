@@ -83,7 +83,10 @@ test("a missing price shows its error and takes focus", async ({ page }) => {
 });
 
 test("unknown locale is a 404", async ({ page }) => {
-  allowErrors(/status of 404/);
+  // An unknown locale renders at request time, so its inline scripts (which
+  // contain the path) can't be hashed at build time and the CSP blocks them.
+  // The 404 is complete as server HTML and has nothing to hydrate.
+  allowErrors(/status of 404/, /violates the following Content Security Policy directive 'script-src/);
   const response = await page.goto("/lv");
   expect(response?.status()).toBe(404);
 });
