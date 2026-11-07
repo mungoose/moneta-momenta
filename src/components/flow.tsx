@@ -467,9 +467,7 @@ function StepView({
         locale={locale}
         failure={state.uploadError}
         loading={state.loading}
-        onSample={() => {
-          onSample("comfortable");
-        }}
+        onSample={onSample}
         onUpload={onUpload}
       />
     ) : (

@@ -25,7 +25,7 @@ export const et = {
   },
   footer: "Moneta Momenta · Hinnang sinu enda tehingute põhjal. Ei ole finantsnõuanne ega krediidiotsus.",
   footerPrivacy:
-    "* Mis sinu failiga juhtub: seda loeb see brauseri vahekaart. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
+    "Sinu tehingud ei lahku sellest brauserist. Rakendus loendab ainult anonüümseid samme, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
   scope:
     "Mõeldud väikelaenudele ja järelmaksule kuni 5 aastaks. Ei sobi kodulaenu ega muude pikaajaliste laenude jaoks.",
   status: {
@@ -45,16 +45,20 @@ export const et = {
   landing: {
     title: "Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.",
     lead: "Moneta Momenta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
-    upload: "Laadi üles tehingute fail",
+    upload: "Vali tehingute fail",
     uploadHint: (columns: string) => `CSV- või TSV-fail veergudega ${columns}.`,
-    privacy: "NB! Fail loetakse selles brauseris ega lahku sinu seadmest.*",
-    sampleIntro: "Või proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud:",
-    sampleComfortable: "mugav eelarve",
-    sampleOr: "või",
-    sampleTight: "napp eelarve",
+    source:
+      "Selline fail tuleb eelarverakendusest, mis jagab kulud kategooriatesse. Tavaline pangaväljavõte ei sobi, sest selles pole kategooriaid.",
+    privacy: "Fail jääb sinu seadmesse. See leht loeb seda ega saada midagi välja.",
+    privacyMore: "Kuidas sinu faili käsitletakse",
+    privacyDetails:
+      "Sinu faili loeb see brauseri vahekaart. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
+    sampleIntro: "Faili pole käepärast? Proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud.",
+    sampleComfortable: "Mugava eelarve näidis",
+    sampleTight: "Napi eelarve näidis",
     loading: "Laen näidisandmeid…",
     reading: (file: string) => `Loen faili ${file}…`,
-    uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
+    uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks vali see uuesti.",
     loadFailed: "Näidisandmed ei laadinud. Kontrolli ühendust ja proovi uuesti.",
     howTitle: "Kuidas see töötab",
     steps: {
@@ -67,7 +71,7 @@ export const et = {
     },
   },
   uploadError: {
-    step: "Üleslaadimine",
+    step: "Samm 1/3 · Sinu raha",
     readTitle: "Me ei saanud seda faili lugeda",
     useTitle: "Seda faili ei saa veel kasutada",
     foundTitle: "Mida leidsime",
@@ -75,10 +79,10 @@ export const et = {
     found: "Olemas",
     missing: "Puudu",
     fixTitle: "Kuidas parandada",
-    fixUpload: "Laadi uus fail üles. Sellest katsest ei jäänud midagi alles.",
-    template: "Laadi alla CSV näidisfail",
-    again: "Laadi üles teine fail",
-    sample: "Proovi näidisandmetega",
+    fixUpload: "Vali uus fail. Sellest katsest ei jäänud midagi alles.",
+    template: "Laadi alla CSV näidisfail (alla 1 KB)",
+    again: "Vali teine fail",
+    yourColumns: (columns: string) => `Sinu failis on veerud: ${columns}.`,
     tooLarge: {
       title: "See fail on liiga suur",
       body: (file: string, max: string) => `${file} on suurem kui ${max}. Aasta tehingud mahuvad tavaliselt alla 1 MB.`,
@@ -99,11 +103,11 @@ export const et = {
     },
     missingColumns: {
       title: "Nõutud veerud puuduvad",
-      body: (file: string, missing: string, count: number, required: string) =>
-        `${file} failis ${count === 1 ? "puudub veerg" : "puuduvad veerud"} ${missing}. Failis peavad olema veerud ${required}.`,
+      body: (file: string, missing: string, count: number) =>
+        `${file} failis ${count === 1 ? "puudub veerg" : "puuduvad veerud"} ${missing}.`,
       fix: [
-        "Kui andmed on olemas teise nime all, nimeta see veerg ülaltoodud nimega ümber.",
-        "Muul juhul ekspordi uuesti nii, et need veerud oleksid kaasas.",
+        "Kui andmed on olemas teise nime all, nimeta see veerg nõutud nimega ümber.",
+        "Kui failis pole üldse kategooriaid, on see tõenäoliselt pangaväljavõte. Ekspordi andmed hoopis eelarverakendusest, mis jagab kulud kategooriatesse.",
       ],
     },
     malformed: {

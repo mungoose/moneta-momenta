@@ -24,7 +24,7 @@ export const en = {
   },
   footer: "Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.",
   footerPrivacy:
-    "* How your file is handled: this browser tab reads it. Its contents are never sent to a server, logged, or saved in browser storage or the page address, and they're gone when you reload or close the page. The app counts only anonymous steps, such as that a result was shown and its rough price range, never amounts, categories, payees or dates.",
+    "Your transactions never leave this browser. The app counts only anonymous steps, never amounts, categories, payees or dates.",
   scope: "For small loans and instalment purchases of up to 5 years. Not for mortgages or other long-term loans.",
   status: {
     fits: "Fits",
@@ -44,16 +44,20 @@ export const en = {
   landing: {
     title: "Check if an instalment plan fits your budget, month by month.",
     lead: "Moneta Momenta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
-    upload: "Upload a transactions file",
+    upload: "Choose a transactions file",
     uploadHint: (columns: string) => `A CSV or TSV file with the columns ${columns}.`,
-    privacy: "NB! It's read in this browser and never leaves your device.*",
-    sampleIntro: "Or try it with sample data, a made-up household's year of transactions:",
-    sampleComfortable: "comfortable budget",
-    sampleOr: "or",
-    sampleTight: "tight budget",
+    source:
+      "It's the kind of export a budgeting app that sorts your spending into categories gives you. A plain bank statement won't work: it has no categories.",
+    privacy: "Your file stays on this device. This page reads it and sends nothing.",
+    privacyMore: "How your file is handled",
+    privacyDetails:
+      "This browser tab reads your file. Its contents are never sent to a server, logged, or saved in browser storage or the page address, and they're gone when you reload or close the page. The app counts only anonymous steps, such as that a result was shown and its rough price range, never amounts, categories, payees or dates.",
+    sampleIntro: "No file to hand? Try it with sample data, a made-up household's year of transactions.",
+    sampleComfortable: "Comfortable budget sample",
+    sampleTight: "Tight budget sample",
     loading: "Loading the sample…",
     reading: (file: string) => `Reading ${file}…`,
-    uploadGone: "Your file isn't kept when the page reloads or changes language. Upload it again to continue.",
+    uploadGone: "Your file isn't kept when the page reloads or changes language. Choose it again to continue.",
     loadFailed: "The sample data didn't load. Check your connection and try again.",
     howTitle: "How it works",
     steps: {
@@ -66,7 +70,7 @@ export const en = {
     },
   },
   uploadError: {
-    step: "Upload",
+    step: "Step 1 of 3 · Your money",
     readTitle: "We couldn't read this file",
     useTitle: "We can't use this file yet",
     foundTitle: "What we found",
@@ -74,10 +78,10 @@ export const en = {
     found: "Found",
     missing: "Missing",
     fixTitle: "How to fix it",
-    fixUpload: "Upload the new file. Nothing from this attempt was kept.",
-    template: "Download a template CSV",
-    again: "Upload another file",
-    sample: "Try with sample data",
+    fixUpload: "Choose the new file. Nothing from this attempt was kept.",
+    template: "Download a template CSV (under 1 KB)",
+    again: "Choose another file",
+    yourColumns: (columns: string) => `Your file has: ${columns}.`,
     tooLarge: {
       title: "This file is too large",
       body: (file: string, max: string) =>
@@ -96,11 +100,11 @@ export const en = {
     },
     missingColumns: {
       title: "Missing required columns",
-      body: (file: string, missing: string, count: number, required: string) =>
-        `${file} has no ${missing} ${count === 1 ? "column" : "columns"}. The file needs ${required}.`,
+      body: (file: string, missing: string, count: number) =>
+        `${file} has no ${missing} ${count === 1 ? "column" : "columns"}.`,
       fix: [
-        "If the data is there under another name, rename that column header to the name above.",
-        "Otherwise, export again with these columns included.",
+        "If the data is there under another name, rename that column header to the required name.",
+        "If your file has no categories at all, it's probably a bank statement. Export from a budgeting app that sorts your spending into categories instead.",
       ],
     },
     malformed: {

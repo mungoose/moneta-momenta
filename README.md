@@ -17,7 +17,7 @@ Each link below opens the result for a sample household straight away:
 
 ## How it works
 
-1. **Your data.** Upload a transactions file, or try one of the two samples (a made-up Estonian household's year). The file is read in the browser and never leaves it; the footer says how it's handled.
+1. **Your data.** Choose a transactions file, or try one of the two samples (a made-up Estonian household's year). The file is read in the browser and never leaves it; how it's handled is spelled out right under the file button.
 2. **Your money.** The app shows the full months it used, your average income, your average spending by category group and what's usually left over. You can average over the last 3, 6 or 12 months.
 3. **The purchase.** Price, an optional upfront payment, 3 / 6 / 12 or any number from 2 to 60 instalments, an interest rate (it starts at 9.9% a year, midway between typical small-loan offers; 0 for interest-free) and an optional monthly fee. Sample links without a rate mean 0%.
 4. **The result.** A verdict, a month-by-month table, and "How we calculated this", which shows every number behind the verdict.

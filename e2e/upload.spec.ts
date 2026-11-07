@@ -23,7 +23,7 @@ const e2eFixture = (name: string) => path.join(__dirname, "fixtures", name);
 const SAMPLE_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 const LANDING_TITLE = "Check if an instalment plan fits your budget, month by month.";
-const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Upload it again to continue.";
+const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Choose it again to continue.";
 
 const HEADER = [
   "Account",
@@ -57,7 +57,7 @@ function tsv(name: string, rows: string[]) {
 type Upload = string | { name: string; mimeType: string; buffer: Buffer };
 
 /** Picks a file through the button, the way a user does: the button opens the hidden input's file picker. */
-async function upload(page: Page, file: Upload, button = "Upload a transactions file") {
+async function upload(page: Page, file: Upload, button = "Choose a transactions file") {
   const chooser = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: button }).click();
   await (await chooser).setFiles(file);
@@ -215,7 +215,7 @@ for (const { name, file, h1, title, body, template } of ERRORS) {
     if (body) {
       await expect(alert(page)).toContainText(body);
     }
-    await expect(page.getByText("Upload the new file. Nothing from this attempt was kept.")).toBeVisible();
+    await expect(page.getByText("Choose the new file. Nothing from this attempt was kept.")).toBeVisible();
     await expect(page.getByRole("link", { name: "Download a template CSV" })).toHaveCount(template ? 1 : 0);
     // The error screen isn't a step: the URL stays the landing's.
     await expect(page).toHaveURL(/\/en$/);
@@ -231,6 +231,7 @@ test("missing columns are listed one by one, and a fixed file then loads", async
   await expect(alert(page)).toContainText(
     "other-bank.csv has no Payee, Category Group, Category, Outflow and Inflow columns.",
   );
+  await expect(page.getByText("Your file has: Date, Description, Amount and Balance.")).toBeVisible();
   const columns = page.locator(".mm-colcheck li");
   await expect(columns).toHaveText([
     /Date\s*Found/,
@@ -245,7 +246,7 @@ test("missing columns are listed one by one, and a fixed file then loads", async
     "/transactions-template.csv",
   );
 
-  await upload(page, SAMPLE, "Upload another file");
+  await upload(page, SAMPLE, "Choose another file");
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 });
 
@@ -254,7 +255,7 @@ test("the error screen offers the sample instead", async ({ page }) => {
   await upload(page, unitFixture("bad-date.tsv"));
   await expect(heading(page)).toHaveText("We couldn't read this file");
 
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
   await expect(page).toHaveURL(/\/en\?sample=comfortable$/);
 });
@@ -396,9 +397,7 @@ test("the language switch keeps no file data and asks for the file again", async
   await expect(page.locator("html")).toHaveAttribute("lang", "et");
   await expect(heading(page)).toHaveText("Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.");
   await expect(
-    page.getByText(
-      "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
-    ),
+    page.getByText("Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks vali see uuesti."),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/et$/);
 });
@@ -420,9 +419,9 @@ test("Back into an upload's step after Start over opens the landing", async ({ p
 
 test("the Estonian upload error lists the columns in Estonian copy", async ({ page }) => {
   await openLanding(page, "et");
-  await upload(page, unitFixture("other-bank.csv"), "Laadi üles tehingute fail");
+  await upload(page, unitFixture("other-bank.csv"), "Vali tehingute fail");
 
   await expect(heading(page)).toHaveText("Me ei saanud seda faili lugeda");
   await expect(alert(page)).toContainText("Nõutud veerud puuduvad");
-  await expect(page.getByRole("button", { name: "Laadi üles teine fail" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Vali teine fail" })).toBeVisible();
 });

@@ -7,10 +7,8 @@ import type { ImportError } from "@/lib/import/types";
 import type { LoadError } from "@/lib/load";
 import type { Loading, UploadError } from "./flow-state";
 import { FileIcon, StatusIcon } from "./icons";
-import { LoadingStatus, UploadButton } from "./landing";
-
-/** Where the error screen's template link points; the file lives in `public/`. */
-const TEMPLATE_PATH = "/transactions-template.csv";
+import type { SampleProfile } from "@/lib/sample-link";
+import { LoadingStatus, SampleButtons, TemplateLink, UploadButton } from "./landing";
 
 /** What the error screen says: the problem, then the steps to fix it. */
 interface Explanation {
@@ -56,14 +54,7 @@ function explainRead(t: Messages, error: ImportError, file: string, locale: Loca
     case "missing-columns":
       return {
         title: u.missingColumns.title,
-        body: [
-          u.missingColumns.body(
-            file,
-            formatList(error.missing, locale),
-            error.missing.length,
-            formatList(REQUIRED_COLUMNS, locale),
-          ),
-        ],
+        body: [u.missingColumns.body(file, formatList(error.missing, locale), error.missing.length)],
         fix: u.missingColumns.fix,
       };
     case "malformed":
@@ -94,9 +85,9 @@ export function uploadErrorTitle(t: Messages, error: LoadError | null): string {
 const isUnusable = (error: LoadError | null) => error?.code === "too-little-data" || error?.code === "no-income";
 
 /**
- * Shown on the landing step when an upload can't be used: what's wrong, how
- * to fix it, and the ways on. It isn't a step of its own, so it adds no
- * history entry.
+ * Shown on the landing step when an upload can't be used: what's wrong, the
+ * ways on (another file, or a sample) right under it, then the details and
+ * how to fix it. It isn't a step of its own, so it adds no history entry.
  */
 export function UploadErrorView({
   t,
@@ -110,7 +101,7 @@ export function UploadErrorView({
   locale: Locale;
   failure: UploadError;
   loading: Loading | null;
-  onSample: () => void;
+  onSample: (profile: SampleProfile) => void;
   onUpload: (file: File) => void;
 }) {
   const u = t.uploadError;
@@ -136,14 +127,29 @@ export function UploadErrorView({
       <div className="mm-callout mm-callout--error" role="alert">
         <StatusIcon status="no-fit" className="mm-ico mm-callout__icon" />
         <div className="mm-callout__content">
-          <p className="mm-callout__title">{title}</p>
+          <h2 className="mm-callout__title">{title}</h2>
           {body.map((text) => (
             <p key={text}>{text}</p>
           ))}
         </div>
       </div>
 
-      {error?.code === "missing-columns" && <ColumnCheck t={t} fileName={fileName} missing={error.missing} />}
+      <div className="flex flex-col gap-4">
+        <div className="mm-actions">
+          <UploadButton
+            label={u.again}
+            className="mm-btn mm-btn--primary"
+            disabled={loading !== null}
+            onUpload={onUpload}
+          />
+        </div>
+        <SampleButtons t={t} disabled={loading !== null} onSample={onSample} />
+        <LoadingStatus t={t} loading={loading} />
+      </div>
+
+      {error?.code === "missing-columns" && (
+        <ColumnCheck t={t} locale={locale} fileName={fileName} missing={error.missing} found={error.found} />
+      )}
 
       <section className="mm-card gap-3" aria-labelledby="fix">
         <h2 className="mm-t-h2" id="fix">
@@ -156,31 +162,28 @@ export function UploadErrorView({
         </ol>
         {!unusable && (
           <p className="mm-t-small">
-            <a className="mm-link" href={TEMPLATE_PATH} download>
-              {u.template}
-            </a>
+            <TemplateLink t={t} />
           </p>
         )}
       </section>
-
-      <div className="mm-actions">
-        <UploadButton
-          label={u.again}
-          className="mm-btn mm-btn--primary"
-          disabled={loading !== null}
-          onUpload={onUpload}
-        />
-        <button type="button" className="mm-btn mm-btn--secondary" disabled={loading !== null} onClick={onSample}>
-          {u.sample}
-        </button>
-      </div>
-      <LoadingStatus t={t} loading={loading} />
     </>
   );
 }
 
-/** The required columns, each marked found or missing in the file. */
-function ColumnCheck({ t, fileName, missing }: { t: Messages; fileName: string; missing: RequiredColumn[] }) {
+/** The required columns, each marked found or missing in the file, and the file's own columns to compare. */
+function ColumnCheck({
+  t,
+  locale,
+  fileName,
+  missing,
+  found,
+}: {
+  t: Messages;
+  locale: Locale;
+  fileName: string;
+  missing: RequiredColumn[];
+  found: string[];
+}) {
   const u = t.uploadError;
   return (
     <section className="mm-card" aria-labelledby="cols">
@@ -208,6 +211,9 @@ function ColumnCheck({ t, fileName, missing }: { t: Messages; fileName: string; 
           );
         })}
       </ul>
+      {found.length > 0 && (
+        <p className="mm-t-small mm-muted break-words">{u.yourColumns(formatList(found, locale))}</p>
+      )}
     </section>
   );
 }

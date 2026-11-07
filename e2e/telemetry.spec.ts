@@ -41,7 +41,7 @@ function telemetry(page: Page): () => Promise<unknown[]> {
 test("the sample flow sends one event per action, with no figures", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
   await page.getByRole("button", { name: "12 months" }).click();
@@ -101,7 +101,7 @@ test("a failed upload sends the error's code only", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
   const chooser = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "Upload a transactions file" }).click();
+  await page.getByRole("button", { name: "Choose a transactions file" }).click();
   await (await chooser).setFiles(OTHER_BANK);
   await expect(heading(page)).toHaveText("We couldn't read this file");
 
