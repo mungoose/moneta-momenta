@@ -19,7 +19,7 @@ test("root redirects to the English landing", async ({ page }) => {
 
 test("sample data goes through every step to a verdict", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "comfortable budget" }).click();
 
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
   await expect(page).toHaveURL(/\/en\?sample=comfortable$/);
@@ -36,7 +36,7 @@ test("sample data goes through every step to a verdict", async ({ page }) => {
 
 test("the summary lists the period's one-off amounts, and they follow the period", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "comfortable budget" }).click();
   const callout = page.locator(".mm-callout--info");
 
   // 6 months, May–October 2026: the summer trip and a dentist bill, all spending.
@@ -63,7 +63,7 @@ test("the summary lists the period's one-off amounts, and they follow the period
 
 test("Back returns to the previous step", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "comfortable budget" }).click();
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
@@ -110,7 +110,7 @@ test("the language switch keeps the sample link", async ({ page }) => {
 
 test("a missing price shows its error and takes focus", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "comfortable budget" }).click();
   await page.getByRole("button", { name: "Continue to the purchase" }).click();
 
   const price = page.getByLabel("Price", { exact: true });

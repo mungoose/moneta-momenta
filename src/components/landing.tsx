@@ -5,7 +5,7 @@ import { REQUIRED_COLUMNS } from "@/lib/import/format-spec";
 import type { Status } from "@/lib/plan/affordability";
 import type { SampleProfile } from "@/lib/sample-link";
 import type { Loading } from "./flow-state";
-import { ArrowRightIcon, InfoIcon, StatusChip, UploadIcon } from "./icons";
+import { InfoIcon, StatusChip, UploadIcon } from "./icons";
 
 const STATUSES: Status[] = ["fits", "tight", "no-fit"];
 
@@ -105,37 +105,35 @@ export function Landing({
           </div>
         )}
         <div className="mm-actions mt-2">
-          <button
-            type="button"
-            className="mm-btn mm-btn--primary mm-btn--lg"
-            disabled={busy}
-            onClick={() => {
-              onSample("comfortable");
-            }}
-          >
-            {t.landing.trySample}
-            <ArrowRightIcon />
-          </button>
           <UploadButton
             label={t.landing.upload}
-            className="mm-btn mm-btn--secondary mm-btn--lg"
+            className="mm-btn mm-btn--primary mm-btn--lg"
             disabled={busy}
             onUpload={onUpload}
           />
         </div>
-        <p className="mm-t-small mm-muted">{t.landing.uploadHint(formatList(REQUIRED_COLUMNS, locale))}</p>
+        <div className="mm-t-small mm-muted flex flex-col gap-1">
+          <p>{t.landing.uploadHint(formatList(REQUIRED_COLUMNS, locale))}</p>
+          <p className="font-semibold text-(--mm-text)">{t.landing.privacy}</p>
+        </div>
         <p className="mm-t-small mm-muted">
-          {t.landing.sampleNote}{" "}
-          <button
-            type="button"
-            className="mm-link disabled:opacity-60"
+          {t.landing.sampleIntro}{" "}
+          <SampleLink
+            label={t.landing.sampleComfortable}
+            disabled={busy}
+            onClick={() => {
+              onSample("comfortable");
+            }}
+          />{" "}
+          {t.landing.sampleOr}{" "}
+          <SampleLink
+            label={t.landing.sampleTight}
             disabled={busy}
             onClick={() => {
               onSample("tight");
             }}
-          >
-            {t.landing.tryTight}
-          </button>
+          />
+          .
         </p>
         <LoadingStatus t={t} loading={loading} />
         {loadFailed && (
@@ -163,6 +161,15 @@ export function Landing({
         </ol>
       </section>
     </>
+  );
+}
+
+/** A sample profile offered in running text, styled as a link because it's the secondary way in. */
+function SampleLink({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
+  return (
+    <button type="button" className="mm-link disabled:opacity-60" disabled={disabled} onClick={onClick}>
+      {label}
+    </button>
   );
 }
 

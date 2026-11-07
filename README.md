@@ -16,7 +16,7 @@ Each link below opens the result for a sample household straight away:
 
 ## How it works
 
-1. **Your data.** Try the sample (a made-up Estonian household's year) or upload a transactions file. The file is read in the browser and never leaves it.
+1. **Your data.** Upload a transactions file, or try one of the two samples (a made-up Estonian household's year). The file is read in the browser and never leaves it; the footer says how it's handled.
 2. **Your money.** The app shows the full months it used, your average income, your average spending by category group and what's usually left over. You can average over the last 3, 6 or 12 months.
 3. **The purchase.** Price, an optional upfront payment, 3 / 6 / 12 or any number from 2 to 60 instalments, and an optional interest rate or monthly fee.
 4. **The result.** A verdict, a month-by-month table, and "How we calculated this", which shows every number behind the verdict.

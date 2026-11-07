@@ -319,7 +319,10 @@ export function Flow({ locale }: { locale: Locale }) {
         </StepBoundary>
       </main>
       <footer className="mm-foot">
-        <div className="mm-col">{t.footer}</div>
+        <div className="mm-col flex flex-col gap-2">
+          <p>{t.footer}</p>
+          <p>{t.footerPrivacy}</p>
+        </div>
       </footer>
     </div>
   );
