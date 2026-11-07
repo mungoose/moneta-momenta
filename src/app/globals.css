@@ -57,6 +57,15 @@
     overflow: hidden;
   }
 
+  /*
+   * The column is 760px wide, which runs prose to 90–115 characters a line. Capping paragraphs and list items keeps
+   * them under 80, where the eye finds the next line easily. Tables, cards, buttons and lists of amounts (`.mm-num`,
+   * whose figures line up on the right edge) still use the full column.
+   */
+  .mm main :where(p, .mm-list:not(.mm-num) > li) {
+    max-width: 58ch;
+  }
+
   /* The header badge's short form, shown only in a narrow column. */
   .mm-top__short {
     display: none;
