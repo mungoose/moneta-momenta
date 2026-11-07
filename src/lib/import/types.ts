@@ -29,9 +29,6 @@ export type ImportError =
   | { code: "bad-date"; line: number; value: string }
   | { code: "bad-amount"; line: number; column: "Outflow" | "Inflow"; value: string };
 
-/** The kind of an {@link ImportError}. */
-export type ImportErrorCode = ImportError["code"];
-
 /** A successfully parsed file. */
 export interface ParsedFile {
   ok: true;
