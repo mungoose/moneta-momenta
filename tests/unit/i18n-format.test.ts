@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { formatMonth, formatNumber, formatPercent } from "@/lib/i18n/format";
+import { formatDay, formatList, formatMonth, formatNumber, formatPercent } from "@/lib/i18n/format";
 
 describe("formatMonth", () => {
   it.each([
@@ -14,6 +14,28 @@ describe("formatMonth", () => {
 
   it("defaults to the long style", () => {
     expect(formatMonth("2026-11", "en")).toBe("November 2026");
+  });
+});
+
+describe("formatDay", () => {
+  it.each([
+    ["2026-10-12", "en", "12 October"],
+    ["2026-10-12", "et", "12. oktoober"],
+    ["2025-11-01", "en", "1 November"],
+    ["2026-12-31", "et", "31. detsember"],
+  ] as const)("%s in %s → %s", (date, locale, text) => {
+    expect(formatDay(date, locale)).toBe(text);
+  });
+});
+
+describe("formatList", () => {
+  it.each([
+    [["Inflow"], "en", "Inflow"],
+    [["Date", "Payee"], "en", "Date and Payee"],
+    [["Payee", "Category", "Inflow"], "en", "Payee, Category and Inflow"],
+    [["Payee", "Category", "Inflow"], "et", "Payee, Category ja Inflow"],
+  ] as const)("%j in %s → %s", (items, locale, text) => {
+    expect(formatList(items, locale)).toBe(text);
   });
 });
 

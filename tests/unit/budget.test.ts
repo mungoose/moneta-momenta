@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { addMonths, buildMonths, monthOf, type MonthTotals } from "@/lib/budget/months";
+import { addMonths, buildMonths, monthOf, referenceMonth, type MonthTotals } from "@/lib/budget/months";
 import { defaultPeriodLength, periodOptions, summarise, type DataSummary } from "@/lib/budget/summary";
 import { classify } from "@/lib/import/classify";
 import { parseTransactions } from "@/lib/import/parse";
@@ -102,6 +102,20 @@ describe("monthOf / addMonths", () => {
     ["1000-01", -1, "0999-12"],
   ])("%s + %i months = %s", (month, count, expected) => {
     expect(addMonths(month, count)).toBe(expected);
+  });
+});
+
+describe("referenceMonth", () => {
+  // The tests run with TZ=Europe/Tallinn (vitest.config.mts), two or three hours ahead of UTC,
+  // so a UTC-based answer would differ in the first hours of a month.
+  it.each([
+    [new Date(2026, 10, 7, 12, 0), "2026-11"],
+    [new Date(2026, 0, 15), "2026-01"],
+    [new Date(2026, 11, 31, 23, 59), "2026-12"],
+    [new Date(2027, 0, 1, 0, 30), "2027-01"],
+    [new Date(2026, 9, 1, 1, 0), "2026-10"],
+  ])("%s is in %s, in the user's own time zone", (now, expected) => {
+    expect(referenceMonth(now)).toBe(expected);
   });
 });
 

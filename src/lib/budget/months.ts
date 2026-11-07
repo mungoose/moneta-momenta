@@ -57,6 +57,19 @@ export function monthOf(date: string): YearMonth {
 }
 
 /**
+ * The first unfinished month for an upload: the month the user is in now,
+ * by their own clock. Local, not UTC: in Tallinn just after midnight on
+ * 1 November it's already November, while UTC is still in October, and an
+ * October counted as finished would be missing its last hours.
+ * @param now  The current time.
+ * @returns    Its local calendar month, `YYYY-MM`.
+ * @example referenceMonth(new Date(2026, 10, 7)) // "2026-11"
+ */
+export function referenceMonth(now: Date): YearMonth {
+  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+}
+
+/**
  * Moves a month forwards or backwards.
  * @param month  `YYYY-MM`, year 0000–9999.
  * @param count  Months to add; negative goes back.

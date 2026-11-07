@@ -12,5 +12,7 @@ export default defineConfig({
   test: {
     environment: "node",
     include: ["tests/unit/**/*.test.ts"],
+    // A zone ahead of UTC, so code that should use the user's local date but uses UTC fails.
+    env: { TZ: "Europe/Tallinn" },
   },
 });

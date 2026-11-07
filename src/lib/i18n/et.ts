@@ -32,7 +32,12 @@ export const et = {
     trySample: "Proovi näidisandmetega",
     tryTight: "Proovi napima eelarvega",
     sampleNote: "Näidisandmed on väljamõeldud pere ühe aasta tehingud.",
+    upload: "Laadi üles tehingute fail",
+    uploadHint: (columns: string) =>
+      `CSV- või TSV-fail veergudega ${columns}. Fail loetakse selles brauseris ega lahku sinu seadmest.`,
     loading: "Laen näidisandmeid…",
+    reading: (file: string) => `Loen faili ${file}…`,
+    uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
     loadFailed: "Näidisandmed ei laadinud. Kontrolli ühendust ja proovi uuesti.",
     howTitle: "Kuidas see töötab",
     steps: {
@@ -44,10 +49,97 @@ export const et = {
       resultBody: "Iga kuu saab ühe kolmest vastusest ja iga numbri juures on näha, kust see tuleb.",
     },
   },
+  uploadError: {
+    step: "Üleslaadimine",
+    readTitle: "Me ei saanud seda faili lugeda",
+    useTitle: "Seda faili ei saa veel kasutada",
+    foundTitle: "Mida leidsime",
+    requiredColumns: "Nõutud veerud",
+    found: "Olemas",
+    missing: "Puudu",
+    fixTitle: "Kuidas parandada",
+    fixUpload: "Laadi uus fail üles. Sellest katsest ei jäänud midagi alles.",
+    template: "Laadi alla CSV näidisfail",
+    again: "Laadi üles teine fail",
+    sample: "Proovi näidisandmetega",
+    tooLarge: {
+      title: "See fail on liiga suur",
+      body: (file: string, max: string) => `${file} on suurem kui ${max}. Aasta tehingud mahuvad tavaliselt alla 1 MB.`,
+      fix: ["Kontrolli, et valisid tehingute ekspordi, mitte foto või arhiivi."],
+    },
+    notText: {
+      title: "See ei ole tekstifail",
+      body: (file: string) => `${file} ei ole CSV- ega TSV-fail. Tabelarvutuse faile, PDF-e ja pilte ei saa lugeda.`,
+      fix: [
+        "Ekspordi oma tehingud CSV- või TSV-failina.",
+        "Kui fail on tabelarvutuses avatud, salvesta see CSV UTF-8 vormingus.",
+      ],
+    },
+    empty: {
+      title: "Failis pole tehinguid",
+      body: (file: string) => `${file} failis pole veerunimede all ühtegi rida.`,
+      fix: ["Kontrolli ekspordi kuupäevavahemikku ja ekspordi uuesti."],
+    },
+    missingColumns: {
+      title: "Nõutud veerud puuduvad",
+      body: (file: string, missing: string, count: number, required: string) =>
+        `${file} failis ${count === 1 ? "puudub veerg" : "puuduvad veerud"} ${missing}. Failis peavad olema veerud ${required}.`,
+      fix: [
+        "Kui andmed on olemas teise nime all, nimeta see veerg ülaltoodud nimega ümber.",
+        "Muul juhul ekspordi uuesti nii, et need veerud oleksid kaasas.",
+      ],
+    },
+    malformed: {
+      title: (line: string) => `Rida ${line} ei vasta veergudele`,
+      body: "Sellel on päisereast erinev arv väärtusi või sulgemata jutumärk.",
+      fix: [
+        "Ava fail tekstiredaktoris ja vaata seda rida.",
+        "Kui muutsid faili tabelarvutuses, ekspordi see uuesti CSV-na.",
+      ],
+    },
+    badDate: {
+      title: (line: string) => `Real ${line} on kuupäev, mida me ei saa lugeda`,
+      body: (value: string) => `„${value}“ ei ole kuupäev kujul PP/KK/AAAA.`,
+      fix: ["Kuupäevas peab olema enne päev, siis kuu ja aasta, näiteks 31/10/2026."],
+    },
+    badAmount: {
+      title: (line: string) => `Real ${line} on summa, mida me ei saa lugeda`,
+      body: (value: string, column: string) => `„${value}“ veerus ${column} ei ole summa.`,
+      fix: ["Summal peab olema kaks komakohta ja ei tohi olla miinusmärki, näiteks 12,50 või 1 250,00. €-märk sobib."],
+    },
+    tooLittleData: {
+      title: (found: number, min: number) =>
+        `Leidsime ${found} ${found === 1 ? "täiskuu" : "täiskuud"}, vaja on vähemalt ${min}`,
+      body: "Jooksvat kuud ei arvestata, sest see pole veel läbi.",
+      leftOut: (months: string) => `Lõpetamata kuuna jäi välja: ${months}.`,
+      fix: ["Ekspordi pikem kuupäevavahemik. Mida rohkem täiskuid, seda kindlamad on keskmised."],
+    },
+    noIncome: {
+      title: "Sissetulekut ei leitud",
+      body: "Viimastel kuudel pole sissetulekut. Sissetuleku ridade kategooriagrupp peab olema Inflow.",
+      fix: ["Pane eelarves palk ja muu sissetulek kategooriagruppi Inflow ja ekspordi uuesti."],
+    },
+    unexpected: {
+      title: "Faili lugemisel läks midagi valesti",
+      body: (file: string) => `${file} läbis kõik kontrollid, kuid seda ei saanud ikkagi kasutada.`,
+      fix: ["Proovi uuesti või ekspordi fail uuesti."],
+    },
+  },
   summary: {
     step: "Samm 1/3 · Sinu raha",
     title: "Nii näeb sinu raha tavaliselt välja",
     source: (rows: string, from: string, to: string) => `Näidisandmed: ${rows} tehingut, ${from} kuni ${to}.`,
+    sourceUpload: (file: string, rows: string, from: string, to: string) =>
+      `${file}: ${rows} tehingut, ${from} kuni ${to}.`,
+    startsLateTitle: (day: string) => `Sinu tehingud algavad ${day}`,
+    endsEarlyTitle: (day: string) => `Sinu tehingud lõpevad ${day}`,
+    incompleteBody: (month: string) =>
+      `Kui osa kuu ${month} kuludest on puudu, paistavad su tavalised kulud väiksemad, kui need on, ja maksed tunduvad kergemini jõukohased.`,
+    outdatedTitle: (month: string) => `Sinu tehingud lõpevad kuuga ${month}`,
+    outdatedBody: "Hilisemaid kuid failis pole, nii et keskmised ei pruugi vastata sinu tänasele olukorrale.",
+    noIncomeMonthsTitle: (months: string) => `Sissetulekuta kuud: ${months}`,
+    noIncomeMonthsBody:
+      "Neid kuid arvestatakse nullise sissetulekuga, mis vähendab keskmist. Kui sissetulek on failist puudu, kontrolli, et selle kategooriagrupp oleks Inflow.",
     periodLabel: "Keskmise arvutamise periood",
     periodOption: (months: number) => `${months} kuud`,
     periodHint:
@@ -146,6 +238,8 @@ export const et = {
     basedOn: (month: string) => `Kulud: ${month}`,
     phoneMargin: "Kuujääk",
     phoneLeft: "Üle",
+    incomplete:
+      "Faili esimesest või viimasest kuust võib tehinguid puududa, nii et tulemus võib paista parem, kui see on.",
     tryAgain: "Proovi teisi tingimusi",
     backToMoney: "Tagasi sinu raha juurde",
   },

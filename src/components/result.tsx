@@ -5,7 +5,7 @@ import { sum, toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { Affordability, PlanMonth, Status } from "@/lib/plan/affordability";
 import type { PlanInput, Schedule } from "@/lib/plan/schedule";
-import { StatusChip } from "./icons";
+import { StatusChip, StatusIcon } from "./icons";
 
 const VERDICT_CLASS: Record<Status, string> = {
   fits: "mm-verdict--fits",
@@ -150,6 +150,12 @@ export function Result({
           {r.title(money(input.price), input.count)}
         </h1>
         <p className="mm-muted mm-num">{terms.join(" · ")}</p>
+        {summary.incomplete.length > 0 && (
+          <p className="mm-t-small mm-muted flex items-start gap-2">
+            <StatusIcon status="tight" className="mm-ico mm-ico--sm mt-0.5 shrink-0 text-(--mm-tight)" />
+            {r.incomplete}
+          </p>
+        )}
       </section>
 
       <section className={`mm-verdict ${VERDICT_CLASS[verdict]}`} aria-labelledby="verdict">

@@ -5,6 +5,7 @@ import { parseDate, parseTransactions } from "@/lib/import/parse";
 import { readFile } from "@/lib/import/read-file";
 import type { Row } from "@/lib/import/types";
 import { MAX_FILE_BYTES } from "@/lib/constants";
+import { REQUIRED_COLUMNS } from "@/lib/import/format-spec";
 
 const fixture = (name: string) => readFileSync(new URL(`../fixtures/${name}`, import.meta.url), "utf8");
 const sample = (name: string) => readFileSync(new URL(`../../public/samples/${name}.tsv`, import.meta.url), "utf8");
@@ -357,6 +358,20 @@ describe("sample files", () => {
     }
     // 575 data rows (the file has no trailing newline); 26 in the Inflow group, 24 transfers.
     expect(counts).toEqual({ income: 26, transfer: 24, spending: 575 - 26 - 24 });
+  });
+});
+
+describe("template file", () => {
+  // The error screen offers this file for download; it must stay in step with the format.
+  const template = readFileSync(new URL("../../public/transactions-template.csv", import.meta.url), "utf8");
+
+  it("has exactly the required columns, in their documented order", () => {
+    expect(template.split("\r\n")[0]).toBe(REQUIRED_COLUMNS.join(","));
+  });
+
+  it("parses, with income and spending rows", () => {
+    const kinds = new Set(parsed(template).rows.map((row) => classify(row).kind));
+    expect(kinds).toEqual(new Set(["income", "spending"]));
   });
 });
 

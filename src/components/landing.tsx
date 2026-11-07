@@ -1,24 +1,95 @@
-import type { ReactNode } from "react";
-import type { Messages } from "@/lib/i18n";
+import { useRef, type ReactNode } from "react";
+import type { Locale, Messages } from "@/lib/i18n";
+import { formatList } from "@/lib/i18n/format";
+import { REQUIRED_COLUMNS } from "@/lib/import/format-spec";
 import type { Status } from "@/lib/plan/affordability";
 import type { SampleProfile } from "@/lib/sample-link";
-import { ArrowRightIcon, InfoIcon, StatusChip } from "./icons";
+import type { Loading } from "./flow-state";
+import { ArrowRightIcon, InfoIcon, StatusChip, UploadIcon } from "./icons";
 
 const STATUSES: Status[] = ["fits", "tight", "no-fit"];
+
+/**
+ * What the file picker offers. Only a hint for the picker: the content
+ * check decides, so a text export with another extension still works.
+ */
+const UPLOAD_ACCEPT = ".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain";
+
+/**
+ * A button that opens the file picker and hands over the picked file. The
+ * input itself is hidden; the button is what keyboard and screen reader users reach.
+ */
+export function UploadButton({
+  label,
+  className,
+  disabled,
+  onUpload,
+}: {
+  label: string;
+  className: string;
+  disabled: boolean;
+  onUpload: (file: File) => void;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  return (
+    <>
+      <button type="button" className={className} disabled={disabled} onClick={() => input.current?.click()}>
+        <UploadIcon />
+        {label}
+      </button>
+      <input
+        ref={input}
+        type="file"
+        accept={UPLOAD_ACCEPT}
+        hidden
+        onChange={(event) => {
+          const file = event.currentTarget.files?.[0];
+          // Cleared, so picking the same file again (after fixing it) fires a change.
+          event.currentTarget.value = "";
+          if (file) {
+            onUpload(file);
+          }
+        }}
+      />
+    </>
+  );
+}
+
+/** The live status line while a sample loads or a file is read. */
+export function LoadingStatus({ t, loading }: { t: Messages; loading: Loading | null }) {
+  let text = "";
+  if (loading?.kind === "sample") {
+    text = t.landing.loading;
+  } else if (loading?.kind === "upload") {
+    text = t.landing.reading(loading.name);
+  }
+  return (
+    <p className="mm-t-small mm-muted empty:hidden" aria-live="polite">
+      {text}
+    </p>
+  );
+}
 
 /** The first screen: what the check does, who it's for, and the way in. */
 export function Landing({
   t,
+  locale,
   loading,
   loadFailed,
+  uploadGone,
   onSample,
+  onUpload,
 }: {
   t: Messages;
-  loading: SampleProfile | null;
+  locale: Locale;
+  loading: Loading | null;
   loadFailed: boolean;
+  uploadGone: boolean;
   onSample: (profile: SampleProfile) => void;
+  onUpload: (file: File) => void;
 }) {
   const steps = t.landing.steps;
+  const busy = loading !== null;
   return (
     <>
       <section className="mm-intro gap-5">
@@ -27,11 +98,17 @@ export function Landing({
         </h1>
         <p className="mm-t-lead mm-muted">{t.landing.lead}</p>
         <p className="mm-t-small mm-muted">{t.scope}</p>
+        {uploadGone && (
+          <div className="mm-callout mm-callout--info">
+            <InfoIcon className="mm-ico mm-callout__icon" />
+            <p className="mm-callout__content">{t.landing.uploadGone}</p>
+          </div>
+        )}
         <div className="mm-actions mt-2">
           <button
             type="button"
             className="mm-btn mm-btn--primary mm-btn--lg"
-            disabled={loading !== null}
+            disabled={busy}
             onClick={() => {
               onSample("comfortable");
             }}
@@ -39,20 +116,28 @@ export function Landing({
             {t.landing.trySample}
             <ArrowRightIcon />
           </button>
+          <UploadButton
+            label={t.landing.upload}
+            className="mm-btn mm-btn--secondary mm-btn--lg"
+            disabled={busy}
+            onUpload={onUpload}
+          />
+        </div>
+        <p className="mm-t-small mm-muted">{t.landing.uploadHint(formatList(REQUIRED_COLUMNS, locale))}</p>
+        <p className="mm-t-small mm-muted">
+          {t.landing.sampleNote}{" "}
           <button
             type="button"
-            className="mm-btn mm-btn--secondary mm-btn--lg"
-            disabled={loading !== null}
+            className="mm-link disabled:opacity-60"
+            disabled={busy}
             onClick={() => {
               onSample("tight");
             }}
           >
             {t.landing.tryTight}
           </button>
-        </div>
-        <p className="mm-t-small mm-muted" aria-live="polite">
-          {loading === null ? t.landing.sampleNote : t.landing.loading}
         </p>
+        <LoadingStatus t={t} loading={loading} />
         {loadFailed && (
           <div className="mm-callout mm-callout--error" role="alert">
             <InfoIcon className="mm-ico mm-callout__icon" />
