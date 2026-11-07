@@ -25,6 +25,16 @@ export const en = {
     tight: "Tight",
     "no-fit": "Doesn't fit",
   },
+  /** The one definition of the three answers, shown under the month table and in the explanation. */
+  statusRules: {
+    fits: (buffer: string) => `${buffer} or more left over.`,
+    tight: (zero: string, belowBuffer: string) =>
+      `${zero} to ${belowBuffer} left over, or below ${zero} when savings from earlier months cover the gap.`,
+    tightNoBuffer: (zero: string) => `Below ${zero} left over, but savings from earlier months cover the gap.`,
+    noFit: (zero: string) => `Below ${zero} left over, and savings from earlier months don't cover the gap.`,
+    verdict:
+      "The result is the worst month's answer, with one exception: when a single month doesn't fit and every other month fits, the result is Tight. One month like that is something you can plan for.",
+  },
   landing: {
     title: "Check if an instalment plan fits your budget, month by month.",
     lead: "Moneta Momenta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
@@ -239,13 +249,13 @@ export const en = {
     change: "Change the purchase",
     monthsTitle: "Month by month",
     monthsIntro: (buffer: string) =>
-      `Margin is your average income minus what that month is expected to cost. A month fits when ${buffer} or more is left over after the instalment. A month that comes up short is tight when what earlier months left on top of that covers it.`,
+      `Margin is your average income minus what that month is expected to cost. Months that fit save what they leave over the ${buffer} buffer, for later months that come up short. Each month gets one of three answers:`,
     colMonth: "Month",
     colMargin: "Margin",
     colInstalment: "Instalment",
     colLeft: "Left over",
     colStatus: "Status",
-    basedOn: (month: string) => `Spent in ${month}`,
+    basedOn: (month: string) => `Uses ${month} costs`,
     phoneMargin: "Margin",
     phoneLeft: "Left",
     fromSavings: "From savings",
@@ -287,13 +297,10 @@ export const en = {
     leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
       `${month}: ${income} − ${spending} − ${instalment} =`,
     criticalNote: "That's the month that decides the verdict.",
-    fitsRange: (buffer: string) => `${buffer} or more left`,
-    tightRange: (from: string, to: string) => `${from} to ${to} left`,
-    noFitRange: (zero: string) => `Less than ${zero} left`,
     bufferNote: (buffer: string, percent: string) =>
       `The ${buffer} cushion is ${percent}% of your average income, for costs nobody can predict, like a repair or a doctor's bill.`,
     savingsNote: (buffer: string) =>
-      `Months aren't judged alone. Each month that fits saves what it leaves on top of ${buffer}. A later month that comes up short is tight if those savings cover it, and doesn't fit if they don't. And when just one month doesn't fit while every other month fits, the plan as a whole is tight, not refused.`,
+      `Months aren't judged alone. Each month that fits saves what it leaves over ${buffer}, and a later month that comes up short can draw on those savings. Each month gets one of three answers:`,
     limitsTitle: "What this can't know",
     limitsBody:
       "Changes that haven't happened yet, like a new job, a rent increase or a new subscription. If your income or costs are about to change, treat this as a rough guide.",

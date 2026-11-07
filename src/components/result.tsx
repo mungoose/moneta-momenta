@@ -5,7 +5,7 @@ import { sum, toCents, type Cents } from "@/lib/money/cents";
 import { formatCents } from "@/lib/money/format";
 import type { Affordability, PlanMonth, Status } from "@/lib/plan/affordability";
 import type { PlanInput, Schedule } from "@/lib/plan/schedule";
-import { Explanation } from "./explanation";
+import { Explanation, StatusRules } from "./explanation";
 import { StatusChip, StatusIcon } from "./icons";
 
 const VERDICT_CLASS: Record<Status, string> = {
@@ -257,6 +257,7 @@ export function Result({
             {r.monthsTitle}
           </h2>
           <p className="mm-t-small mm-muted">{r.monthsIntro(money(buffer))}</p>
+          <StatusRules t={t} buffer={buffer} locale={locale} />
         </div>
         <div className="mm-tablebox">
           <table className="mm-months" aria-labelledby="months">

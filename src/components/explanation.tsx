@@ -107,7 +107,7 @@ export function Explanation({
             <div className="mm-callout mm-callout--warn">
               <StatusIcon status="tight" className="mm-ico mm-callout__icon" />
               <div className="mm-callout__content">
-                <p className="mm-callout__title">{e.limitsTitle}</p>
+                <h3 className="mm-callout__title">{e.limitsTitle}</h3>
                 <p>{e.limitsBody}</p>
               </div>
             </div>
@@ -227,7 +227,6 @@ function SeasonalStep({ t, summary, assessment, money, month, locale }: Explanat
 function LeftoverStep({ t, summary, assessment, critical, money, month, locale }: ExplanationFacts) {
   const e = t.explanation;
   const { buffer } = assessment;
-  const zero = money(toCents(0));
   return (
     <Step n={4} title={e.leftoverTitle}>
       <p className="mm-formula">{e.leftoverFormula}</p>
@@ -241,25 +240,44 @@ function LeftoverStep({ t, summary, assessment, critical, money, month, locale }
         <strong className={critical.leftover < 0 ? "mm-neg" : undefined}>{money(critical.leftover)}</strong>
       </p>
       <p className="mm-t-small mm-muted">{e.criticalNote}</p>
-      <ul className="mm-list">
-        <li>
-          <StatusChip status="fits" label={t.status.fits} small />
-          <span className="mm-t-small mm-num">{e.fitsRange(money(buffer))}</span>
-        </li>
-        {/* With a zero buffer no month can be tight, and "€0.00 to −€0.01" would make no sense. */}
-        {buffer > 0 && (
-          <li>
-            <StatusChip status="tight" label={t.status.tight} small />
-            <span className="mm-t-small mm-num">{e.tightRange(zero, money(toCents(buffer - 1)))}</span>
-          </li>
-        )}
-        <li>
-          <StatusChip status="no-fit" label={t.status["no-fit"]} small />
-          <span className="mm-t-small mm-num">{e.noFitRange(zero)}</span>
-        </li>
-      </ul>
       <p className="mm-t-small mm-muted">{e.bufferNote(money(buffer), formatPercent(BUFFER_BPS, locale))}</p>
       <p className="mm-t-small mm-muted">{e.savingsNote(money(buffer))}</p>
+      <StatusRules t={t} buffer={buffer} locale={locale} />
+      <p className="mm-t-small mm-muted">{t.statusRules.verdict}</p>
     </Step>
+  );
+}
+
+/**
+ * The one definition of Fits, Tight and Doesn't fit, as `assessPlan` applies
+ * it. The month table and the explanation both show this list, so the two
+ * can't drift apart.
+ * @param props.buffer  The plan's buffer: the least a month must leave to fit.
+ */
+export function StatusRules({ t, buffer, locale }: { t: Messages; buffer: Cents; locale: Locale }) {
+  const rules = t.statusRules;
+  const money = (value: Cents) => formatCents(value, locale);
+  const zero = money(toCents(0));
+  // The design's list rows push their two parts to opposite edges, which suits amounts; rules read better with
+  // every sentence starting at the same edge, after a column wide enough for the longest chip.
+  const row = "grid grid-cols-[8rem_1fr] items-baseline justify-items-start";
+  return (
+    <ul className="mm-list">
+      <li className={row}>
+        <StatusChip status="fits" label={t.status.fits} small />
+        <span className="mm-t-small mm-num">{rules.fits(money(buffer))}</span>
+      </li>
+      <li className={row}>
+        <StatusChip status="tight" label={t.status.tight} small />
+        <span className="mm-t-small mm-num">
+          {/* With a zero buffer only a covered short month is tight: "€0.00 to −€0.01" would make no sense. */}
+          {buffer > 0 ? rules.tight(zero, money(toCents(buffer - 1))) : rules.tightNoBuffer(zero)}
+        </span>
+      </li>
+      <li className={row}>
+        <StatusChip status="no-fit" label={t.status["no-fit"]} small />
+        <span className="mm-t-small mm-num">{rules.noFit(zero)}</span>
+      </li>
+    </ul>
   );
 }

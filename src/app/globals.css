@@ -68,7 +68,7 @@
       flex-wrap: wrap;
       row-gap: 0;
     }
-    /* A seasonal month's detail ("Spent in Jul 2026" + "Margin €93.51 − €100.00") is too long for one line: stack it. */
+    /* A seasonal month's detail ("Uses Jul 2026 costs" + "Margin €93.51 − €100.00") is too long for one line: stack it. */
     .mm-months .c-irr {
       white-space: normal;
     }

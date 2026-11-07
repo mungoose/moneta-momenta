@@ -286,7 +286,7 @@ test("a file that starts late is flagged once its first month is in the period",
   await expect(page.getByText("Your transactions start on 19 November")).toBeVisible();
 });
 
-test("one short month among months that all fit makes the plan tight, not refused", async ({ page }) => {
+test("one short month among months that all fit makes the plan tight", async ({ page }) => {
   // The sample plus a €300 repair in December 2025: December 2026 counts on
   // that month and comes up short, with nothing saved yet to cover it. The
   // repair is outside the 6-month period, so the averages don't change. The
