@@ -4,15 +4,27 @@ const isDev = process.env.NODE_ENV === "development";
 
 /**
  * sha256 sources for the inline scripts Next writes into each prerendered page.
- * `scripts/build.mts` (`npm run build`) measures them in a first build and sets
- * this for the second. A production build without it gets `script-src 'self'`
- * only, which blocks those scripts: the pages render but never hydrate, so a
- * build that skipped the script fails loudly instead of shipping a weaker CSP.
+ * `scripts/build.mts` (`npm run build`) measures them in a first build, run with
+ * `CSP_MEASURE=1`, and sets this for the second.
  */
 const scriptHashes = (process.env.CSP_SCRIPT_HASHES ?? "")
   .split(" ")
   .filter(Boolean)
   .map((hash) => `'sha256-${hash}'`);
+
+/**
+ * Throws when a production build would ship `script-src 'self'` with no hashes.
+ * Such a build passes and deploys, but the CSP blocks Next's inline scripts so
+ * the pages never hydrate. Checked in `headers()` because Next calls it only
+ * while building (it bakes the result into the routes manifest); `next start`
+ * and `next typegen` load this file too and must not fail.
+ * @throws Error  When neither hashes nor the measuring flag are set outside dev.
+ */
+function assertScriptHashes(): void {
+  if (!isDev && scriptHashes.length === 0 && process.env.CSP_MEASURE !== "1") {
+    throw new Error("CSP: no inline script hashes. Build with `npm run build` (scripts/build.mts), not `next build`.");
+  }
+}
 
 /**
  * Content-Security-Policy, kept static so pages stay prerendered (nonces would
@@ -63,7 +75,21 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [{ source: "/", destination: "/en", permanent: false }];
   },
+  /**
+   * An unknown first segment (`/lv`) would match `[locale]` and render its 404
+   * at request time, with inline scripts that contain the path and so aren't
+   * in the CSP. Sent to the prerendered 404 instead, whose scripts are hashed.
+   * `afterFiles` runs after `public/` files, so `/favicon.ico` still resolves.
+   */
+  async rewrites() {
+    return {
+      beforeFiles: [],
+      afterFiles: [{ source: "/:locale((?!(?:en|et)$)[^/]+)", destination: "/_not-found" }],
+      fallback: [],
+    };
+  },
   async headers() {
+    assertScriptHashes();
     return [
       {
         source: "/(.*)",

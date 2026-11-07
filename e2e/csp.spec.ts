@@ -47,15 +47,32 @@ for (const [path, sampleButton] of Object.entries(SAMPLE_BUTTON)) {
 test("injected inline script does not run", async ({ page }) => {
   allowErrors(/violates the following Content Security Policy directive/);
   await page.goto("/en");
-  const ran = await page.evaluate(async () => {
+  const result = await page.evaluate(async () => {
     const w = window as unknown as { injected?: boolean };
+    const violations: string[] = [];
+    document.addEventListener("securitypolicyviolation", (e) => {
+      violations.push(`${e.effectiveDirective} ${e.blockedURI}`);
+    });
     const div = document.createElement("div");
     // An upload's text rendered as HTML would look like this.
     div.innerHTML = `<img src="data:," onerror="window.injected = true"><a href="javascript:window.injected=true">x</a>`;
+    // Positive control: the image does fail to load, so its handler would run without the CSP.
+    const imageFailed = new Promise<boolean>((resolve) => {
+      div.querySelector("img")?.addEventListener("error", () => {
+        resolve(true);
+      });
+    });
     document.body.append(div);
     div.querySelector("a")?.click();
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return w.injected === true;
+    const failed = await imageFailed;
+    // Violation events are queued as tasks; wait until both arrive (or give up).
+    for (let i = 0; i < 20 && violations.length < 2; i++) {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+    }
+    return { injected: w.injected === true, imageFailed: failed, violations: violations.sort() };
   });
-  expect(ran).toBe(false);
+  expect(result.imageFailed).toBe(true);
+  expect(result.injected).toBe(false);
+  // Both payloads were blocked by script-src, not skipped for some other reason.
+  expect(result.violations).toEqual(["script-src-attr inline", "script-src-elem inline"]);
 });
