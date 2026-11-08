@@ -27,7 +27,7 @@ import { Purchase } from "./purchase";
 import { Result } from "./result";
 import { StepBoundary } from "./step-boundary";
 import { Summary, Unexpected } from "./summary";
-import { UploadErrorView } from "./upload-error";
+import { uploadErrorTitle, UploadErrorView } from "./upload-error";
 
 /**
  * What each browser history entry keeps, so Back and Forward move between
@@ -91,6 +91,45 @@ function showedUpload(entry: HistoryStep | null): boolean {
   return (
     isStep(entry?.mmStep) && entry.mmStep !== "landing" && typeof entry.mmData === "string" && isUploadKey(entry.mmData)
   );
+}
+
+/**
+ * The browser tab title for what's on screen, so tabs, history and screen
+ * readers can tell the steps, the result and an error apart.
+ */
+function documentTitle(
+  t: Messages,
+  state: FlowState,
+  summary: Guarded<SummaryResult> | null,
+  assessment: Guarded<Affordability> | null,
+): string {
+  const view = viewTitle(t, state, summary, assessment);
+  return view === null ? t.meta.title : `${view} – ${t.meta.title}`;
+}
+
+/** The current view's own title, or `null` for the landing, which has the app name alone. */
+function viewTitle(
+  t: Messages,
+  state: FlowState,
+  summary: Guarded<SummaryResult> | null,
+  assessment: Guarded<Affordability> | null,
+): string | null {
+  if (state.step === "landing") {
+    return state.uploadError ? uploadErrorTitle(t, state.uploadError.error) : null;
+  }
+  if (summary === null) {
+    return null;
+  }
+  if (!summary.ok || !summary.value.ok) {
+    return t.unexpectedTitle;
+  }
+  if (state.step === "summary") {
+    return t.titles.summary;
+  }
+  if (state.step === "purchase") {
+    return t.titles.purchase;
+  }
+  return assessment?.ok ? t.titles.result(t.status[assessment.value.verdict]) : t.unexpectedTitle;
 }
 
 /** How the URL-sync effect records a render in the browser history. */
@@ -238,6 +277,11 @@ export function Flow({ locale }: { locale: Locale }) {
     }
   }, [state.checks, plan, assessment]);
 
+  const title = documentTitle(t, state, summary, assessment);
+  useEffect(() => {
+    document.title = title;
+  }, [title]);
+
   // Back / Forward: go to the step that history entry recorded, if it was made for the data loaded now.
   const fromHistory = useRef(false);
   useEffect(() => {
@@ -368,7 +412,12 @@ function Header({
         <div className="flex items-center gap-2">
           {shown && (
             <>
-              {sample && <span className="mm-pill">{t.header.sampleBadge}</span>}
+              {sample && (
+                <span className="mm-pill">
+                  <span className="mm-top__long">{t.header.sampleBadge}</span>
+                  <span className="mm-top__short">{t.header.sampleBadgeShort}</span>
+                </span>
+              )}
               <button type="button" className="mm-btn mm-btn--ghost" onClick={onReset}>
                 {t.header.startOver}
               </button>
@@ -423,9 +472,7 @@ function StepView({
         locale={locale}
         failure={state.uploadError}
         loading={state.loading}
-        onSample={() => {
-          onSample("comfortable");
-        }}
+        onSample={onSample}
         onUpload={onUpload}
       />
     ) : (

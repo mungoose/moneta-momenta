@@ -11,16 +11,22 @@ export const et = {
     title: "Moneta Momenta",
     description: "Vaata kuude kaupa, kas järelmaks mahub sinu tegelike kulude sisse, enne kui otsustad.",
   },
+  titles: {
+    summary: "Sinu raha – samm 1/3",
+    purchase: "Ost – samm 2/3",
+    result: (status: string) => `Tulemus: ${status} – samm 3/3`,
+  },
   header: {
     appName: "Moneta Momenta",
     home: "Moneta Momenta, tagasi algusesse",
     languageSwitch: "In English",
     sampleBadge: "Näidisandmed",
+    sampleBadgeShort: "Näidis",
     startOver: "Alusta uuesti",
   },
   footer: "Moneta Momenta · Hinnang sinu enda tehingute põhjal. Ei ole finantsnõuanne ega krediidiotsus.",
   footerPrivacy:
-    "* Mis sinu failiga juhtub: seda loeb see brauseri vahekaart. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
+    "Sinu tehingud ei lahku sellest brauserist. Rakendus loendab ainult anonüümseid samme, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
   scope:
     "Mõeldud väikelaenudele ja järelmaksule kuni 5 aastaks. Ei sobi kodulaenu ega muude pikaajaliste laenude jaoks.",
   status: {
@@ -28,19 +34,32 @@ export const et = {
     tight: "Napp",
     "no-fit": "Ei mahu",
   },
+  statusRules: {
+    fits: (buffer: string) => `Üle jääb ${buffer} või rohkem.`,
+    tight: (zero: string, belowBuffer: string) =>
+      `Üle jääb ${zero} kuni ${belowBuffer} või alla ${zero}, kui varasemate kuude säästud puudujäägi katavad.`,
+    tightNoBuffer: (zero: string) => `Üle jääb alla ${zero}, aga varasemate kuude säästud katavad puudujäägi.`,
+    noFit: (zero: string) => `Üle jääb alla ${zero} ja varasemate kuude säästud puudujääki ei kata.`,
+    verdict:
+      "Tulemus on halvima kuu põhjal, ühe erandiga: kui ainult üks kuu ei mahu ja kõik teised mahuvad, on tulemus „Napp“. Sellise kuu jaoks saab ette valmistuda.",
+  },
   landing: {
     title: "Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.",
     lead: "Moneta Momenta loeb sinu varasemad tehingud, arvutab, palju sul tavaliselt üle jääb, ja näitab, kuidas uus makse igasse kuusse mahub, ka neisse, kus on suured aastamaksed.",
-    upload: "Laadi üles tehingute fail",
+    upload: "Vali tehingute fail",
     uploadHint: (columns: string) => `CSV- või TSV-fail veergudega ${columns}.`,
-    privacy: "NB! Fail loetakse selles brauseris ega lahku sinu seadmest.*",
-    sampleIntro: "Või proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud:",
-    sampleComfortable: "mugav eelarve",
-    sampleOr: "või",
-    sampleTight: "napp eelarve",
+    source:
+      "Selline fail tuleb eelarverakendusest, mis jagab kulud kategooriatesse. Tavaline pangaväljavõte ei sobi, kui selles pole kategooriaid.",
+    privacy: "Fail jääb sinu seadmesse. See leht loeb seda ega saada midagi välja.",
+    privacyMore: "Kuidas sinu faili käsitletakse",
+    privacyDetails:
+      "Sinu faili loeb see brauseri vaheleht. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
+    sampleIntro: "Faili pole käepärast? Proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud.",
+    sampleComfortable: "Mugava eelarve näidis",
+    sampleTight: "Napi eelarve näidis",
     loading: "Laen näidisandmeid…",
     reading: (file: string) => `Loen faili ${file}…`,
-    uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
+    uploadGone: "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks vali see uuesti.",
     loadFailed: "Näidisandmed ei laadinud. Kontrolli ühendust ja proovi uuesti.",
     howTitle: "Kuidas see töötab",
     steps: {
@@ -53,7 +72,7 @@ export const et = {
     },
   },
   uploadError: {
-    step: "Üleslaadimine",
+    step: "Samm 1/3 · Sinu raha",
     readTitle: "Me ei saanud seda faili lugeda",
     useTitle: "Seda faili ei saa veel kasutada",
     foundTitle: "Mida leidsime",
@@ -61,10 +80,10 @@ export const et = {
     found: "Olemas",
     missing: "Puudu",
     fixTitle: "Kuidas parandada",
-    fixUpload: "Laadi uus fail üles. Sellest katsest ei jäänud midagi alles.",
-    template: "Laadi alla CSV näidisfail",
-    again: "Laadi üles teine fail",
-    sample: "Proovi näidisandmetega",
+    fixUpload: "Vali uus fail. Sellest katsest ei jäänud midagi alles.",
+    template: "Laadi alla CSV näidisfail (alla 1 KB)",
+    again: "Vali teine fail",
+    yourColumns: (columns: string) => `Sinu failis on veerud: ${columns}.`,
     tooLarge: {
       title: "See fail on liiga suur",
       body: (file: string, max: string) => `${file} on suurem kui ${max}. Aasta tehingud mahuvad tavaliselt alla 1 MB.`,
@@ -85,11 +104,11 @@ export const et = {
     },
     missingColumns: {
       title: "Nõutud veerud puuduvad",
-      body: (file: string, missing: string, count: number, required: string) =>
-        `${file} failis ${count === 1 ? "puudub veerg" : "puuduvad veerud"} ${missing}. Failis peavad olema veerud ${required}.`,
+      body: (file: string, missing: string, count: number) =>
+        `${file} failis ${count === 1 ? "puudub veerg" : "puuduvad veerud"} ${missing}.`,
       fix: [
-        "Kui andmed on olemas teise nime all, nimeta see veerg ülaltoodud nimega ümber.",
-        "Muul juhul ekspordi uuesti nii, et need veerud oleksid kaasas.",
+        "Kui andmed on olemas teise nime all, nimeta see veerg nõutud nimega ümber.",
+        "Kui failis pole üldse kategooriaid, on see tõenäoliselt pangaväljavõte. Ekspordi andmed hoopis eelarverakendusest, mis jagab kulud kategooriatesse.",
       ],
     },
     malformed: {
@@ -182,7 +201,8 @@ export const et = {
     customLabel: "Kuude arv",
     rate: "Intress",
     rateUnit: "% aastas",
-    rateHint: "Intressivaba järelmaksu puhul sisesta 0.",
+    rateHint:
+      "Kasuta pakkumise aastast intressimäära, mitte krediidi kulukuse määra, mis sisaldab juba tasusid. Intressivaba järelmaksu puhul sisesta 0.",
     fee: "Kuutasu",
     feeHint: "Iga maksega lisanduv püsitasu.",
     spread: "Maksetesse jagatav summa",
@@ -192,7 +212,7 @@ export const et = {
     paymentFee: (fee: string) => `Sisaldab ${fee} kuutasu`,
     paymentLast: (last: string) => `Viimane makse on ${last}`,
     submit: "Kontrolli taskukohasust",
-    back: "Tagasi",
+    back: "Tagasi sinu raha juurde",
     errors: {
       requiredPrice: "Sisesta hind.",
       requiredCount: "Sisesta kuude arv.",
@@ -213,6 +233,7 @@ export const et = {
     title: (price: string, count: number) => `${price}, ${count} makset`,
     termsUpfront: (amount: string) => `${amount} sissemakse`,
     termsRate: (percent: string) => `${percent}% intressi aastas`,
+    termsInterestFree: "Intressivaba",
     termsFee: (amount: string) => `${amount} kuutasu`,
     termsMonths: (from: string, to: string) => `${from} kuni ${to}`,
     verdictFits: "Maksed mahuvad igasse kuusse",
@@ -223,6 +244,11 @@ export const et = {
     verdictNoFitOne: (month: string, short: string) => `${capital(month)} jääb ${short} puudu`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
       `${count} kuul jääb puudu, kõige rohkem ${month} puhul: ${short}`,
+    verdictNoRoom: (margin: string, buffer: string) =>
+      `Sul jääb tavaliselt kuus üle ${margin}, vähem kui ${buffer} puhver`,
+    noRoomBody:
+      "Seega ei mahu praegu ükski järelmaks igasse kuusse, olgu hind või tingimused mis tahes. Puhver on 10% sinu keskmisest sissetulekust ettearvamatute kulude jaoks.",
+    fittingPayment: (payment: string) => `Igasse kuusse mahuks kuumakse kuni ${payment}.`,
     fitsBody: (buffer: string, month: string, left: string) =>
       `Igas kuus jääb pärast makset üle vähemalt ${buffer}. Kõige napim on ${month}, kui üle jääb ${left}.`,
     fitShare: (fit: number, total: number) => `Maksed mahuvad ${fit} kuusse ${total}-st.`,
@@ -245,19 +271,18 @@ export const et = {
     change: "Muuda ostu",
     monthsTitle: "Kuude kaupa",
     monthsIntro: (buffer: string) =>
-      `Kuujääk on sinu keskmine sissetulek miinus selle kuu oodatavad kulud. Kuu mahub, kui pärast makset jääb üle ${buffer} või rohkem. Puudu jääv kuu on napp, kui varasemate kuude sellest suurem jääk selle katab.`,
+      `Kuujääk on sinu keskmine sissetulek miinus selle kuu oodatavad kulud. Mahtuvad kuud säästavad selle, mis jääb üle lisaks ${buffer} puhvrile, hilisemate puudu jäävate kuude jaoks. Iga kuu saab ühe kolmest vastusest:`,
     colMonth: "Kuu",
     colMargin: "Kuujääk",
     colInstalment: "Makse",
     colLeft: "Jääb üle",
     colStatus: "Olek",
-    basedOn: (month: string) => `Kulud: ${month}`,
+    basedOn: (month: string) => `${capital(month)} kulude põhjal`,
     phoneMargin: "Kuujääk",
     phoneLeft: "Üle",
     fromSavings: "Säästudest",
     incomplete:
       "Faili esimesest või viimasest kuust võib tehinguid puududa, nii et tulemus võib paista parem, kui see on.",
-    tryAgain: "Proovi teisi tingimusi",
     backToMoney: "Tagasi sinu raha juurde",
   },
   explanation: {
@@ -294,13 +319,10 @@ export const et = {
     leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
       `${capital(month)}: ${income} − ${spending} − ${instalment} =`,
     criticalNote: "See kuu otsustab tulemuse.",
-    fitsRange: (buffer: string) => `Üle jääb ${buffer} või rohkem`,
-    tightRange: (from: string, to: string) => `Üle jääb ${from} kuni ${to}`,
-    noFitRange: (zero: string) => `Üle jääb vähem kui ${zero}`,
     bufferNote: (buffer: string, percent: string) =>
       `${buffer} puhver on ${percent}% sinu keskmisest sissetulekust ettearvamatute kulude jaoks, nagu remont või arsti arve.`,
     savingsNote: (buffer: string) =>
-      `Kuid ei hinnata eraldi. Iga mahtuv kuu säästab selle, mis jääb üle lisaks ${buffer} puhvrile. Hilisem puudu jääv kuu on napp, kui säästud selle katavad, ja ei mahu, kui ei kata. Kui ainult üks kuu ei mahu ja kõik teised mahuvad, on kogu plaan napp, mitte tagasi lükatud.`,
+      `Kuid ei hinnata eraldi. Iga mahtuv kuu säästab selle, mis jääb üle lisaks ${buffer} puhvrile, ja hilisem puudu jääv kuu saab neid säästusid kasutada. Iga kuu saab ühe kolmest vastusest:`,
     limitsTitle: "Mida see ei tea",
     limitsBody:
       "Muutusi, mida pole veel juhtunud, nagu uus töö, üüri tõus või uus tellimus. Kui sinu sissetulek või kulud on muutumas, pea seda ligikaudseks juhiseks.",

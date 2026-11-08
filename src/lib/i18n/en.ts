@@ -9,35 +9,56 @@ export const en = {
     title: "Moneta Momenta",
     description: "See month by month whether an instalment plan fits your real spending, before you commit.",
   },
+  /** Browser tab titles, each followed by " – " and the app name. The landing has the app name alone. */
+  titles: {
+    summary: "Your money – Step 1 of 3",
+    purchase: "The purchase – Step 2 of 3",
+    result: (status: string) => `Result: ${status} – Step 3 of 3`,
+  },
   header: {
     appName: "Moneta Momenta",
     home: "Moneta Momenta, back to the start",
     languageSwitch: "Eesti keeles",
     sampleBadge: "Sample data",
+    sampleBadgeShort: "Sample",
     startOver: "Start over",
   },
   footer: "Moneta Momenta · An estimate based on your own transactions. Not financial advice or a credit decision.",
   footerPrivacy:
-    "* How your file is handled: this browser tab reads it. Its contents are never sent to a server, logged, or saved in browser storage or the page address, and they're gone when you reload or close the page. The app counts only anonymous steps, such as that a result was shown and its rough price range, never amounts, categories, payees or dates.",
+    "Your transactions never leave this browser. The app counts only anonymous steps, never amounts, categories, payees or dates.",
   scope: "For small loans and instalment purchases of up to 5 years. Not for mortgages or other long-term loans.",
   status: {
     fits: "Fits",
     tight: "Tight",
     "no-fit": "Doesn't fit",
   },
+  /** The one definition of the three answers, shown under the month table and in the explanation. */
+  statusRules: {
+    fits: (buffer: string) => `${buffer} or more left over.`,
+    tight: (zero: string, belowBuffer: string) =>
+      `${zero} to ${belowBuffer} left over, or below ${zero} when savings from earlier months cover the gap.`,
+    tightNoBuffer: (zero: string) => `Below ${zero} left over, but savings from earlier months cover the gap.`,
+    noFit: (zero: string) => `Below ${zero} left over, and savings from earlier months don't cover the gap.`,
+    verdict:
+      "The result is the worst month's answer, with one exception: when a single month doesn't fit and every other month fits, the result is Tight. One month like that is something you can plan for.",
+  },
   landing: {
     title: "Check if an instalment plan fits your budget, month by month.",
     lead: "Moneta Momenta reads your past transactions, works out what you usually have left, and shows how a new instalment lands in each month, including the ones with big yearly bills.",
-    upload: "Upload a transactions file",
+    upload: "Choose a transactions file",
     uploadHint: (columns: string) => `A CSV or TSV file with the columns ${columns}.`,
-    privacy: "NB! It's read in this browser and never leaves your device.*",
-    sampleIntro: "Or try it with sample data, a made-up household's year of transactions:",
-    sampleComfortable: "comfortable budget",
-    sampleOr: "or",
-    sampleTight: "tight budget",
+    source:
+      "It's the kind of export a budgeting app that sorts your spending into categories gives you. A bank statement won't work if it has no categories.",
+    privacy: "Your file stays on this device. This page reads it and sends nothing.",
+    privacyMore: "How your file is handled",
+    privacyDetails:
+      "This browser tab reads your file. Its contents are never sent to a server, logged, or saved in browser storage or the page address, and they're gone when you reload or close the page. The app counts only anonymous steps, such as that a result was shown and its rough price range, never amounts, categories, payees or dates.",
+    sampleIntro: "No file to hand? Try it with sample data, a made-up household's year of transactions.",
+    sampleComfortable: "Comfortable budget sample",
+    sampleTight: "Tight budget sample",
     loading: "Loading the sample…",
     reading: (file: string) => `Reading ${file}…`,
-    uploadGone: "Your file isn't kept when the page reloads or changes language. Upload it again to continue.",
+    uploadGone: "Your file isn't kept when the page reloads or changes language. Choose it again to continue.",
     loadFailed: "The sample data didn't load. Check your connection and try again.",
     howTitle: "How it works",
     steps: {
@@ -50,7 +71,7 @@ export const en = {
     },
   },
   uploadError: {
-    step: "Upload",
+    step: "Step 1 of 3 · Your money",
     readTitle: "We couldn't read this file",
     useTitle: "We can't use this file yet",
     foundTitle: "What we found",
@@ -58,10 +79,10 @@ export const en = {
     found: "Found",
     missing: "Missing",
     fixTitle: "How to fix it",
-    fixUpload: "Upload the new file. Nothing from this attempt was kept.",
-    template: "Download a template CSV",
-    again: "Upload another file",
-    sample: "Try with sample data",
+    fixUpload: "Choose the new file. Nothing from this attempt was kept.",
+    template: "Download a template CSV (under 1 KB)",
+    again: "Choose another file",
+    yourColumns: (columns: string) => `Your file has: ${columns}.`,
     tooLarge: {
       title: "This file is too large",
       body: (file: string, max: string) =>
@@ -80,11 +101,11 @@ export const en = {
     },
     missingColumns: {
       title: "Missing required columns",
-      body: (file: string, missing: string, count: number, required: string) =>
-        `${file} has no ${missing} ${count === 1 ? "column" : "columns"}. The file needs ${required}.`,
+      body: (file: string, missing: string, count: number) =>
+        `${file} has no ${missing} ${count === 1 ? "column" : "columns"}.`,
       fix: [
-        "If the data is there under another name, rename that column header to the name above.",
-        "Otherwise, export again with these columns included.",
+        "If the data is there under another name, rename that column header to the required name.",
+        "If your file has no categories at all, it's probably a bank statement. Export from a budgeting app that sorts your spending into categories instead.",
       ],
     },
     malformed: {
@@ -147,13 +168,14 @@ export const en = {
     incomeTotal: "Average income",
     spendingTitle: "Spending by category group",
     spendingTotal: "Usual spending",
-    marginTitle: "Usual monthly margin",
+    marginTitle: "Usually left over each month",
     marginExplain: (income: string, spending: string) =>
-      `${income} income − ${spending} usual spending. This is the room a new instalment has to fit into.`,
+      `${income} income − ${spending} usual spending. A new instalment has to come out of this.`,
     irregularTitle: (count: number) => (count === 1 ? "One amount stood out" : `${count} amounts stood out`),
     irregularBody: "Each had one month far above its usual amount. They're included in the averages above.",
     irregularSpending: "If a plan reaches the same month of the year, that month counts on what it cost then.",
-    irregularIncome: "One-off income raises the average income. If it won't come again, there's less room than shown.",
+    irregularIncome:
+      "One-off income raises the average income. If it won't come again, you have less left over than shown.",
     irregularItem: (name: string, month: string) => `${name} · ${month}`,
     irregularIncomeItem: (payee: string, month: string) => `${payee} (income) · ${month}`,
     irregularUsually: (amount: string) => `, usually ${amount}`,
@@ -176,7 +198,8 @@ export const en = {
     customLabel: "Number of months",
     rate: "Interest rate",
     rateUnit: "% per year",
-    rateHint: "Enter 0 for an interest-free plan.",
+    rateHint:
+      "Use the yearly interest rate from the offer, not the APR, which already includes fees. Enter 0 if it's interest-free.",
     fee: "Monthly fee",
     feeHint: "Any fixed fee charged with each instalment.",
     spread: "Amount to spread",
@@ -186,7 +209,7 @@ export const en = {
     paymentFee: (fee: string) => `Includes the ${fee} fee`,
     paymentLast: (last: string) => `The last one is ${last}`,
     submit: "Check affordability",
-    back: "Back",
+    back: "Back to your money",
     errors: {
       requiredPrice: "Enter the price.",
       requiredCount: "Enter the number of months.",
@@ -207,6 +230,7 @@ export const en = {
     title: (price: string, count: number) => `${price} over ${count} instalments`,
     termsUpfront: (amount: string) => `${amount} upfront`,
     termsRate: (percent: string) => `${percent}% interest a year`,
+    termsInterestFree: "Interest-free",
     termsFee: (amount: string) => `${amount} monthly fee`,
     termsMonths: (from: string, to: string) => `${from} to ${to}`,
     verdictFits: "The plan fits every month",
@@ -216,17 +240,22 @@ export const en = {
     verdictOneShort: (month: string, short: string) => `Only ${month} comes up short, by ${short}`,
     verdictNoFitOne: (month: string, short: string) => `${month} comes up ${short} short`,
     verdictNoFitMany: (count: number, month: string, short: string) =>
-      `${count} months come up short, ${month} by ${short}`,
+      `${count} months come up short. The most is ${short}, in ${month}`,
+    verdictNoRoom: (margin: string, buffer: string) =>
+      `You usually have ${margin} left a month, less than the ${buffer} buffer`,
+    noRoomBody:
+      "So no instalment fits every month right now, whatever the price or the terms. The buffer is 10% of your average income, kept for costs nobody can predict.",
+    fittingPayment: (payment: string) => `A monthly payment of up to ${payment} would fit every month.`,
     fitsBody: (buffer: string, month: string, left: string) =>
       `Every month leaves at least ${buffer} after the instalment. The closest is ${month}, with ${left} left.`,
     fitShare: (fit: number, total: number) => `The plan fits in ${fit} of ${total} months.`,
     monthSum: (month: string, margin: string, instalment: string, left: string) =>
-      `${month}: ${margin} margin − ${instalment} instalment = ${left} left over.`,
+      `${month}: ${margin} before the instalment − ${instalment} instalment = ${left} left over.`,
     seasonal: (pastMonth: string, spent: string, average: string, planMonth: string) =>
-      `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so ${planMonth} counts on that.`,
+      `In ${pastMonth} you spent ${spent}, more than the usual ${average}, so we expect ${planMonth} to cost that much too.`,
     belowBuffer: (buffer: string) => `A month is tight when less than ${buffer} is left: 10% of your average income.`,
     coveredBody: (saved: string, buffer: string) =>
-      `The months before it leave ${saved} on top of the ${buffer} cushion. Put that aside and it covers the gap.`,
+      `The months before it leave ${saved} on top of the ${buffer} buffer. Put that aside and it covers the gap.`,
     oneShortBody: "Every other month fits, so this is one month to plan for: set money aside before it.",
     payment: "Monthly payment",
     months: "Months",
@@ -239,26 +268,25 @@ export const en = {
     change: "Change the purchase",
     monthsTitle: "Month by month",
     monthsIntro: (buffer: string) =>
-      `Margin is your average income minus what that month is expected to cost. A month fits when ${buffer} or more is left over after the instalment. A month that comes up short is tight when what earlier months left on top of that covers it.`,
+      `Before instalment is your average income minus what that month is expected to cost. Months that fit save what they leave over the ${buffer} buffer, for later months that come up short. Each month gets one of three answers:`,
     colMonth: "Month",
-    colMargin: "Margin",
+    colMargin: "Before instalment",
     colInstalment: "Instalment",
     colLeft: "Left over",
     colStatus: "Status",
-    basedOn: (month: string) => `Spent in ${month}`,
-    phoneMargin: "Margin",
+    basedOn: (month: string) => `Uses ${month} costs`,
+    phoneMargin: "Before",
     phoneLeft: "Left",
     fromSavings: "From savings",
     incomplete:
       "Your file's first or last month may be missing transactions, so this result may look better than it is.",
-    tryAgain: "Try different terms",
     backToMoney: "Back to your money",
   },
   explanation: {
     title: "How we calculated this",
     close: "Close",
     intro: "Every figure comes from your transactions and the purchase you entered. Four steps:",
-    marginTitle: "Your usual margin",
+    marginTitle: "What you usually have left",
     marginFormula: (income: string, spending: string) => `${income} average income − ${spending} usual spending =`,
     marginNote: (count: number, from: string, to: string) =>
       `Monthly averages over ${count} full months, ${from} to ${to}.`,
@@ -287,13 +315,10 @@ export const en = {
     leftoverExample: (month: string, income: string, spending: string, instalment: string) =>
       `${month}: ${income} − ${spending} − ${instalment} =`,
     criticalNote: "That's the month that decides the verdict.",
-    fitsRange: (buffer: string) => `${buffer} or more left`,
-    tightRange: (from: string, to: string) => `${from} to ${to} left`,
-    noFitRange: (zero: string) => `Less than ${zero} left`,
     bufferNote: (buffer: string, percent: string) =>
-      `The ${buffer} cushion is ${percent}% of your average income, for costs nobody can predict, like a repair or a doctor's bill.`,
+      `The ${buffer} buffer is ${percent}% of your average income, kept for costs nobody can predict, like a repair or a doctor's bill.`,
     savingsNote: (buffer: string) =>
-      `Months aren't judged alone. Each month that fits saves what it leaves on top of ${buffer}. A later month that comes up short is tight if those savings cover it, and doesn't fit if they don't. And when just one month doesn't fit while every other month fits, the plan as a whole is tight, not refused.`,
+      `Months aren't judged alone. Each month that fits saves what it leaves over ${buffer}, and a later month that comes up short can draw on those savings. Each month gets one of three answers:`,
     limitsTitle: "What this can't know",
     limitsBody:
       "Changes that haven't happened yet, like a new job, a rent increase or a new subscription. If your income or costs are about to change, treat this as a rough guide.",

@@ -87,12 +87,7 @@ export function Summary({
 
       {summary.margin <= 0 && <Warning title={s.noMarginTitle} body={s.noMarginBody} />}
 
-      <div className="mm-actions">
-        <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
-          {s.continue}
-          <ArrowRightIcon />
-        </button>
-      </div>
+      <ContinueButton label={s.continue} onContinue={onContinue} />
 
       <div className="mm-field">
         <span className="mm-label" id="period">
@@ -162,7 +157,22 @@ export function Summary({
       </section>
 
       <IrregularItems t={t} locale={locale} items={summary.irregular} />
+
+      {/* Again at the end: someone who reads the breakdown shouldn't have to scroll back up. */}
+      <ContinueButton label={s.continue} onContinue={onContinue} />
     </>
+  );
+}
+
+/** "Continue to the purchase": shown above the period control and again after the breakdown. */
+function ContinueButton({ label, onContinue }: { label: string; onContinue: () => void }) {
+  return (
+    <div className="mm-actions">
+      <button type="button" className="mm-btn mm-btn--primary" onClick={onContinue}>
+        {label}
+        <ArrowRightIcon />
+      </button>
+    </div>
   );
 }
 
@@ -214,7 +224,7 @@ function IrregularItems({ t, locale, items }: { t: Messages; locale: Locale; ite
     <div className="mm-callout mm-callout--info">
       <InfoIcon className="mm-ico mm-callout__icon" />
       <div className="mm-callout__content flex-auto">
-        <p className="mm-callout__title">{s.irregularTitle(items.length)}</p>
+        <h2 className="mm-callout__title">{s.irregularTitle(items.length)}</h2>
         <p>
           {s.irregularBody}
           {items.some((item) => item.kind === "spending") && ` ${s.irregularSpending}`}
@@ -252,7 +262,7 @@ function Warning({ title, body }: { title: string; body: string }) {
     <div className="mm-callout mm-callout--warn">
       <StatusIcon status="tight" className="mm-ico mm-callout__icon" />
       <div className="mm-callout__content">
-        <p className="mm-callout__title">{title}</p>
+        <h2 className="mm-callout__title">{title}</h2>
         <p>{body}</p>
       </div>
     </div>

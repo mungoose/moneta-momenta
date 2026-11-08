@@ -212,7 +212,7 @@ function readHeader(records: RawRecord[]): { names: string[]; data: RawRecord[] 
   const names = header.fields.map((f) => f.trim());
   const missing = REQUIRED_COLUMNS.filter((c) => !names.includes(c));
   if (missing.length > 0) {
-    return { code: "missing-columns", missing };
+    return { code: "missing-columns", missing, found: names.filter((name) => name !== "") };
   }
   return data.length === 0 ? { code: "empty" } : { names, data };
 }

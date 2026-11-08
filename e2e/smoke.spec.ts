@@ -9,7 +9,7 @@ const allowErrors = guardConsole();
 // The sample's prefilled purchase (€1,200 over 12 at 0%, 6-month average) fails in one month:
 // July 2027 counts on the July 2026 spending and ends €6.49 short.
 const SAMPLE_VERDICT = /It fits, but July 2027 needs €6\.49 from savings/;
-/** The same purchase at the form's default 9.9% rate: links without a rate mean 0%, the form starts at 9.9%. */
+/** The same purchase at the form's default 9.9% rate: links without a rate mean 0%, the sample's form starts at 9.9%. */
 const PREFILLED_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 test("root redirects to the English landing", async ({ page }) => {
@@ -21,11 +21,11 @@ test("root redirects to the English landing", async ({ page }) => {
 
 test("sample data goes through every step to a verdict", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
 
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
   await expect(page).toHaveURL(/\/en\?sample=comfortable$/);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
 
   await expect(heading(page)).toHaveText("What would you like to buy?");
   await page.getByRole("button", { name: "Check affordability" }).click();
@@ -38,11 +38,11 @@ test("sample data goes through every step to a verdict", async ({ page }) => {
 
 test("the summary lists the period's one-off amounts, and they follow the period", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
   const callout = page.locator(".mm-callout--info");
 
   // 6 months, May–October 2026: the summer trip and a dentist bill, all spending.
-  await expect(callout.locator(".mm-callout__title")).toHaveText("3 amounts stood out");
+  await expect(callout.getByRole("heading", { level: 2 })).toHaveText("3 amounts stood out");
   await expect(callout.getByRole("listitem")).toHaveText([
     /Accommodation · July 2026\s*€520\.00/,
     /Travel · July 2026\s*€300\.00/,
@@ -53,20 +53,20 @@ test("the summary lists the period's one-off amounts, and they follow the period
 
   // 12 months adds December's gifts and April's tax refund, which is income.
   await page.getByRole("button", { name: "12 months" }).click();
-  await expect(callout.locator(".mm-callout__title")).toHaveText("5 amounts stood out");
+  await expect(callout.getByRole("heading", { level: 2 })).toHaveText("5 amounts stood out");
   await expect(callout.getByRole("listitem").nth(1)).toHaveText(/Tax Authority \(income\) · April 2026\s*€340\.00/);
   await expect(callout).toContainText("One-off income raises the average income.");
 
   // The last 3 months have nothing unusual, so there's no callout.
   await page.getByRole("button", { name: "3 months" }).click();
-  await expect(page.getByRole("heading", { level: 2, name: "Usual monthly margin" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 2, name: "Usually left over each month" })).toBeVisible();
   await expect(callout).toHaveCount(0);
 });
 
 test("Back returns to the previous step", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.goBack();
@@ -81,9 +81,58 @@ test("Back returns to the previous step", async ({ page }) => {
   await expect(page).toHaveURL(/\/en$/);
 });
 
+test("the result's two ways back to the form share one label, and the form's way back names the step", async ({
+  page,
+}) => {
+  await page.goto("/en?sample=comfortable&price=1200&n=12");
+  const change = page.getByRole("button", { name: "Change the purchase" });
+  await expect(change).toHaveCount(2);
+  await change.last().click();
+  await expect(heading(page)).toHaveText("What would you like to buy?");
+  await page.getByRole("button", { name: "Back to your money" }).click();
+  await expect(heading(page)).toHaveText("Here's what your money usually looks like");
+});
+
+test("step 1 repeats its action after the breakdown", async ({ page }) => {
+  await page.goto("/en?sample=comfortable");
+  const next = page.getByRole("button", { name: "Continue to the purchase" });
+  await expect(next).toHaveCount(2);
+  await next.last().click();
+  await expect(heading(page)).toHaveText("What would you like to buy?");
+});
+
+test("each step has its own browser tab title", async ({ page }) => {
+  await page.goto("/en");
+  await expect(page).toHaveTitle("Moneta Momenta");
+  await page.goto("/en?sample=comfortable");
+  await expect(page).toHaveTitle("Your money – Step 1 of 3 – Moneta Momenta");
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
+  await expect(page).toHaveTitle("The purchase – Step 2 of 3 – Moneta Momenta");
+  await page.getByRole("button", { name: "Check affordability" }).click();
+  await expect(page).toHaveTitle("Result: Tight – Step 3 of 3 – Moneta Momenta");
+  await page.goto("/et?sample=tight&price=1200&n=12");
+  await expect(page).toHaveTitle("Tulemus: Ei mahu – samm 3/3 – Moneta Momenta");
+});
+
 test("a sample link opens its result directly", async ({ page }) => {
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
+  // With no rate in the link the plan is interest-free, and the terms say so rather than leaving it out.
+  await expect(page.getByText("Interest-free · December 2026 to November 2027")).toBeVisible();
+});
+
+test("a budget with no room above the buffer says no terms can fit", async ({ page }) => {
+  await page.goto("/en?sample=tight&price=1200&n=12");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "You usually have €4.94 left a month, less than the €217.40 buffer" }),
+  ).toBeVisible();
+  await expect(page.getByText(/^So no instalment fits every month right now/)).toBeVisible();
+  await expect(page.getByText(/would fit every month/)).toHaveCount(0);
+});
+
+test("a plan that doesn't fit names the largest payment that would", async ({ page }) => {
+  await page.goto("/en?sample=comfortable&price=3000&n=6");
+  await expect(page.getByText("A monthly payment of up to €194.75 would fit every month.")).toBeVisible();
 });
 
 test("Estonian copy inflects a month inside a sentence", async ({ page }) => {
@@ -112,8 +161,8 @@ test("the language switch keeps the sample link", async ({ page }) => {
 
 test("a missing price shows its error and takes focus", async ({ page }) => {
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
 
   const price = page.getByLabel("Price", { exact: true });
   await price.fill("");

@@ -19,11 +19,11 @@ const unitFixture = (name: string) => path.join(ROOT, "tests/fixtures", name);
 const e2eFixture = (name: string) => path.join(__dirname, "fixtures", name);
 
 /** The same purchase and verdict as the sample flow: the uploaded sample must give the same answer. */
-/** The prefilled purchase (€1,200 × 12 at the default 9.9%) on the sample's figures. */
+/** The sample's offer (€1,200 × 12 at 9.9%) on the sample's figures. */
 const SAMPLE_VERDICT = /It fits, but July 2027 needs €11\.93 from savings/;
 
 const LANDING_TITLE = "Check if an instalment plan fits your budget, month by month.";
-const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Upload it again to continue.";
+const UPLOAD_GONE = "Your file isn't kept when the page reloads or changes language. Choose it again to continue.";
 
 const HEADER = [
   "Account",
@@ -57,7 +57,7 @@ function tsv(name: string, rows: string[]) {
 type Upload = string | { name: string; mimeType: string; buffer: Buffer };
 
 /** Picks a file through the button, the way a user does: the button opens the hidden input's file picker. */
-async function upload(page: Page, file: Upload, button = "Upload a transactions file") {
+async function upload(page: Page, file: Upload, button = "Choose a transactions file") {
   const chooser = page.waitForEvent("filechooser");
   await page.getByRole("button", { name: button }).click();
   await (await chooser).setFiles(file);
@@ -69,10 +69,19 @@ async function openLanding(page: Page, locale = "en") {
   await expect(heading(page)).toBeVisible();
 }
 
-/** Summary → purchase → result with the prefilled purchase. */
-async function checkPrefilledPurchase(page: Page) {
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+/** Types the sample's offer (€1,200, 12 instalments, 9.9%) into an upload's purchase form, which starts empty. */
+async function enterPurchase(page: Page) {
+  await expect(page.getByLabel("Price", { exact: true })).toHaveValue("");
+  await expect(page.getByLabel("Interest rate")).toHaveValue("");
+  await page.getByLabel("Price", { exact: true }).fill("1200");
+  await page.getByLabel("Interest rate").fill("9.9");
+}
+
+/** Summary → purchase → result, with the sample's offer typed in. */
+async function checkPurchase(page: Page) {
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
+  await enterPurchase(page);
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText("€1,200.00 over 12 instalments");
 }
@@ -90,7 +99,7 @@ test("an uploaded file goes through every step to a verdict", async ({ page }) =
   await expect(page).toHaveURL(/\/en$/);
   await expect(page.getByText("Sample data", { exact: true })).toHaveCount(0);
 
-  await checkPrefilledPurchase(page);
+  await checkPurchase(page);
   await expect(page.getByRole("heading", { level: 2, name: SAMPLE_VERDICT })).toBeVisible();
   await expect(page.getByRole("table")).toBeVisible();
   await expect(page).toHaveURL(/\/en$/);
@@ -99,7 +108,7 @@ test("an uploaded file goes through every step to a verdict", async ({ page }) =
 test("Back and Forward move between the steps of an upload", async ({ page }) => {
   await openLanding(page);
   await upload(page, SAMPLE);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.goBack();
@@ -210,11 +219,12 @@ for (const { name, file, h1, title, body, template } of ERRORS) {
 
     await expect(heading(page)).toHaveText(h1);
     await expect(heading(page)).toBeFocused();
+    await expect(page).toHaveTitle(`${h1} – Moneta Momenta`);
     await expect(alert(page)).toContainText(title);
     if (body) {
       await expect(alert(page)).toContainText(body);
     }
-    await expect(page.getByText("Upload the new file. Nothing from this attempt was kept.")).toBeVisible();
+    await expect(page.getByText("Choose the new file. Nothing from this attempt was kept.")).toBeVisible();
     await expect(page.getByRole("link", { name: "Download a template CSV" })).toHaveCount(template ? 1 : 0);
     // The error screen isn't a step: the URL stays the landing's.
     await expect(page).toHaveURL(/\/en$/);
@@ -230,6 +240,7 @@ test("missing columns are listed one by one, and a fixed file then loads", async
   await expect(alert(page)).toContainText(
     "other-bank.csv has no Payee, Category Group, Category, Outflow and Inflow columns.",
   );
+  await expect(page.getByText("Your file has: Date, Description, Amount and Balance.")).toBeVisible();
   const columns = page.locator(".mm-colcheck li");
   await expect(columns).toHaveText([
     /Date\s*Found/,
@@ -244,7 +255,7 @@ test("missing columns are listed one by one, and a fixed file then loads", async
     "/transactions-template.csv",
   );
 
-  await upload(page, SAMPLE, "Upload another file");
+  await upload(page, SAMPLE, "Choose another file");
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 });
 
@@ -253,7 +264,7 @@ test("the error screen offers the sample instead", async ({ page }) => {
   await upload(page, unitFixture("bad-date.tsv"));
   await expect(heading(page)).toHaveText("We couldn't read this file");
 
-  await page.getByRole("button", { name: "Try with sample data" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
   await expect(page).toHaveURL(/\/en\?sample=comfortable$/);
 });
@@ -266,7 +277,7 @@ test("a file that stops early is flagged and still reaches a verdict", async ({ 
   await expect(page.getByText("Your transactions stop on 11 October")).toBeVisible();
   await expect(page.getByText(/If some of the spending in October 2026 is missing/)).toBeVisible();
 
-  await checkPrefilledPurchase(page);
+  await checkPurchase(page);
   await expect(page.getByRole("heading", { level: 2 }).first()).toBeVisible();
   await expect(
     page.getByText(
@@ -286,11 +297,11 @@ test("a file that starts late is flagged once its first month is in the period",
   await expect(page.getByText("Your transactions start on 19 November")).toBeVisible();
 });
 
-test("one short month among months that all fit makes the plan tight, not refused", async ({ page }) => {
+test("one short month among months that all fit makes the plan tight", async ({ page }) => {
   // The sample plus a €300 repair in December 2025: December 2026 counts on
   // that month and comes up short, with nothing saved yet to cover it. The
   // repair is outside the 6-month period, so the averages don't change. The
-  // form's default 9.9% applies.
+  // offer is typed in at 9.9%.
   const sample = readFileSync(SAMPLE, "utf8").trimEnd();
   const repair = row("15/12/2025", "Home", "Repairs", "300.00", "0.00");
   await openLanding(page);
@@ -300,7 +311,8 @@ test("one short month among months that all fit makes the plan tight, not refuse
     buffer: Buffer.from(`${sample}\n${repair}\n`),
   });
 
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
+  await enterPurchase(page);
   await page.getByRole("button", { name: "6", exact: true }).click();
   await page.getByRole("button", { name: "Check affordability" }).click();
 
@@ -354,7 +366,8 @@ test("a plan that can't be counted says so on the result step", async ({ page })
   await upload(page, year("huge-income.tsv", row("02/10/2026", "Inflow", "Ready to Assign", "0,00", HUGE)));
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
+  await page.getByLabel("Price", { exact: true }).fill("1200");
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText("Something went wrong");
   await expect(alert(page)).toHaveText(UNEXPECTED);
@@ -395,9 +408,7 @@ test("the language switch keeps no file data and asks for the file again", async
   await expect(page.locator("html")).toHaveAttribute("lang", "et");
   await expect(heading(page)).toHaveText("Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.");
   await expect(
-    page.getByText(
-      "Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks laadi see uuesti üles.",
-    ),
+    page.getByText("Faili ei säilitata, kui leht uuesti laaditakse või keel vahetub. Jätkamiseks vali see uuesti."),
   ).toBeVisible();
   await expect(page).toHaveURL(/\/et$/);
 });
@@ -405,7 +416,7 @@ test("the language switch keeps no file data and asks for the file again", async
 test("Back into an upload's step after Start over opens the landing", async ({ page }) => {
   await openLanding(page);
   await upload(page, SAMPLE);
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await expect(heading(page)).toHaveText("What would you like to buy?");
 
   await page.getByRole("button", { name: "Start over" }).click();
@@ -419,9 +430,9 @@ test("Back into an upload's step after Start over opens the landing", async ({ p
 
 test("the Estonian upload error lists the columns in Estonian copy", async ({ page }) => {
   await openLanding(page, "et");
-  await upload(page, unitFixture("other-bank.csv"), "Laadi üles tehingute fail");
+  await upload(page, unitFixture("other-bank.csv"), "Vali tehingute fail");
 
   await expect(heading(page)).toHaveText("Me ei saanud seda faili lugeda");
   await expect(alert(page)).toContainText("Nõutud veerud puuduvad");
-  await expect(page.getByRole("button", { name: "Laadi üles teine fail" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Vali teine fail" })).toBeVisible();
 });

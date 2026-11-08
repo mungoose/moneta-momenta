@@ -57,18 +57,35 @@
     overflow: hidden;
   }
 
+  /*
+   * The column is 760px wide, which runs prose to 90–115 characters a line. Capping paragraphs and list items keeps
+   * them under 80, where the eye finds the next line easily. Tables, cards, buttons and lists of amounts (`.mm-num`,
+   * whose figures line up on the right edge) still use the full column.
+   */
+  .mm main :where(p, .mm-list:not(.mm-num) > li) {
+    max-width: 58ch;
+  }
+
+  /* The header badge's short form, shown only in a narrow column. */
+  .mm-top__short {
+    display: none;
+  }
+
   /* Narrow column fixes where the app's content is longer than the design's placeholders. */
   @container mm (max-width: 600px) {
-    /* Brand, badge, "Start over" and the language switch don't fit one 390px row; the summary already says it's sample data. */
-    .mm-top .mm-pill {
+    /* Brand, "Sample data", "Start over" and the language switch don't fit one 390px row; "Sample" does. */
+    .mm-top__long {
       display: none;
+    }
+    .mm-top__short {
+      display: inline;
     }
     /* At 320px (400% zoom on a laptop) even that row doesn't fit: the buttons wrap under the brand instead of scrolling sideways. */
     .mm-top__in {
       flex-wrap: wrap;
       row-gap: 0;
     }
-    /* A seasonal month's detail ("Spent in Jul 2026" + "Margin €93.51 − €100.00") is too long for one line: stack it. */
+    /* A seasonal month's detail ("Uses Jul 2026 costs" + "Margin €93.51 − €100.00") is too long for one line: stack it. */
     .mm-months .c-irr {
       white-space: normal;
     }

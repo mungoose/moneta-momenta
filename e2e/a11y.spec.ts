@@ -42,7 +42,7 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     name: "summary",
     open: async (page) => {
       await page.goto("/en");
-      await page.getByRole("button", { name: "comfortable budget" }).click();
+      await page.getByRole("button", { name: "Comfortable budget sample" }).click();
       await expect(heading(page)).toHaveText("Here's what your money usually looks like");
     },
   },
@@ -58,8 +58,8 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     name: "purchase with field errors",
     open: async (page) => {
       await page.goto("/en");
-      await page.getByRole("button", { name: "comfortable budget" }).click();
-      await page.getByRole("button", { name: "Continue to the purchase" }).click();
+      await page.getByRole("button", { name: "Comfortable budget sample" }).click();
+      await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
       await page.getByLabel("Price").fill("abc");
       await page.getByLabel("Upfront payment").fill("abc");
       await page.getByRole("button", { name: "Check affordability" }).click();
@@ -100,7 +100,7 @@ const SCREENS: { name: string; open: (page: Page) => Promise<void> }[] = [
     open: async (page) => {
       await page.goto("/en");
       const chooser = page.waitForEvent("filechooser");
-      await page.getByRole("button", { name: "Upload a transactions file" }).click();
+      await page.getByRole("button", { name: "Choose a transactions file" }).click();
       await (await chooser).setFiles(OTHER_BANK);
       await expect(heading(page)).toHaveText("We couldn't read this file");
       await expect(page.locator(".mm-colcheck")).toBeVisible();
@@ -131,7 +131,7 @@ test("a 320px window (400% zoom on a laptop) never scrolls sideways", async ({ p
   await expect(page.getByRole("table")).toBeVisible();
   expect(await overflow()).toBe(0);
 
-  await page.getByRole("button", { name: "Muuda ostu" }).click();
+  await page.getByRole("button", { name: "Muuda ostu" }).first().click();
   await expect(page.getByLabel("Hind")).toBeVisible();
   expect(await overflow()).toBe(0);
 });

@@ -49,7 +49,11 @@ describe("loadText", () => {
     ["bad-date.tsv", { code: "bad-date", line: 3, value: "2026-10-30" }],
     [
       "other-bank.csv",
-      { code: "missing-columns", missing: ["Payee", "Category Group", "Category", "Outflow", "Inflow"] },
+      {
+        code: "missing-columns",
+        missing: ["Payee", "Category Group", "Category", "Outflow", "Inflow"],
+        found: ["Date", "Description", "Amount", "Balance"],
+      },
     ],
   ])("passes the parser's error through for %s", (name, error) => {
     expect(loadText(fixture(name), "2026-11")).toEqual({ ok: false, error });

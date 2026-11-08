@@ -41,14 +41,14 @@ function telemetry(page: Page): () => Promise<unknown[]> {
 test("the sample flow sends one event per action, with no figures", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
-  await page.getByRole("button", { name: "comfortable budget" }).click();
+  await page.getByRole("button", { name: "Comfortable budget sample" }).click();
   await expect(heading(page)).toHaveText("Here's what your money usually looks like");
 
   await page.getByRole("button", { name: "12 months" }).click();
   // Picking the period that's already chosen changes nothing, so it sends nothing.
   await page.getByRole("button", { name: "12 months" }).click();
   await page.getByRole("button", { name: "6 months" }).click();
-  await page.getByRole("button", { name: "Continue to the purchase" }).click();
+  await page.getByRole("button", { name: "Continue to the purchase" }).first().click();
   await page.getByRole("button", { name: "Check affordability" }).click();
   await expect(heading(page)).toHaveText(RESULT_TITLE);
 
@@ -71,7 +71,7 @@ test("a sample link that opens a result counts only the checks made after it", a
   await page.goto("/en?sample=comfortable&price=1200&n=12");
   await expect(heading(page)).toHaveText(RESULT_TITLE);
 
-  await page.getByRole("button", { name: "Change the purchase" }).click();
+  await page.getByRole("button", { name: "Change the purchase" }).first().click();
   await page.getByLabel("Interest rate").fill("9.9");
   await page.getByRole("button", { name: "Check affordability" }).click();
   // Interest makes July 2027 need more from savings than the interest-free €6.49.
@@ -101,7 +101,7 @@ test("a failed upload sends the error's code only", async ({ page }) => {
   const sent = telemetry(page);
   await page.goto("/en");
   const chooser = page.waitForEvent("filechooser");
-  await page.getByRole("button", { name: "Upload a transactions file" }).click();
+  await page.getByRole("button", { name: "Choose a transactions file" }).click();
   await (await chooser).setFiles(OTHER_BANK);
   await expect(heading(page)).toHaveText("We couldn't read this file");
 

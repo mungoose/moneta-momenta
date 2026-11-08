@@ -5,6 +5,10 @@ describe("formatMonth", () => {
   it.each([
     ["2027-07", "en", "long", "July 2027"],
     ["2027-07", "en", "short", "Jul 2027"],
+    // Irish English abbreviates September to "Sept"; every other short month has three letters.
+    ["2027-09", "en", "short", "Sep 2027"],
+    ["2027-09", "en", "long", "September 2027"],
+    ["2027-09", "et", "short", "sept 2027"],
     ["2027-07", "et", "long", "juuli 2027"],
     ["2026-01", "en", "long", "January 2026"],
     ["2026-12", "et", "long", "detsember 2026"],

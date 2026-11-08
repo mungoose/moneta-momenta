@@ -150,12 +150,21 @@ describe("parseTransactions: errors", () => {
     expect(failed(fixture("other-bank.csv"))).toEqual({
       code: "missing-columns",
       missing: ["Payee", "Category Group", "Category", "Outflow", "Inflow"],
+      found: ["Date", "Description", "Amount", "Balance"],
     });
+  });
+
+  it("gives the file's own column names trimmed, without blank ones, so the user can compare", () => {
+    expect(failed(" Date ,,Amount\r\n31/10/2026,,1.00")).toMatchObject({ found: ["Date", "Amount"] });
   });
 
   it("matches column names exactly, not case-insensitively", () => {
     const text = "date\tPayee\tCategory Group\tCategory\tOutflow\tInflow\r\n31/10/2026\tA\tG\tC\t1,00\t0,00";
-    expect(failed(text)).toEqual({ code: "missing-columns", missing: ["Date"] });
+    expect(failed(text)).toEqual({
+      code: "missing-columns",
+      missing: ["Date"],
+      found: ["date", "Payee", "Category Group", "Category", "Outflow", "Inflow"],
+    });
   });
 
   it("reports a date in another format with its line", () => {

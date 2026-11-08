@@ -23,7 +23,8 @@ export type ImportError =
   | { code: "too-large" }
   | { code: "not-text" }
   | { code: "empty" }
-  | { code: "missing-columns"; missing: RequiredColumn[] }
+  /** `found`: the file's own column names, so the screen can show them beside the required ones. */
+  | { code: "missing-columns"; missing: RequiredColumn[]; found: string[] }
   /** Unbalanced quotes or a row with a different number of fields than the header. */
   | { code: "malformed"; line: number }
   | { code: "bad-date"; line: number; value: string }

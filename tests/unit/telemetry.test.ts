@@ -159,7 +159,7 @@ describe("instalmentBucket", () => {
 
 describe("importFailed", () => {
   it("records the error's code only", () => {
-    expect(importFailed({ code: "missing-columns", missing: ["Date", "Outflow"] })).toEqual({
+    expect(importFailed({ code: "missing-columns", missing: ["Date", "Outflow"], found: ["Payee"] })).toEqual({
       name: "import_failed",
       reason: "missing-columns",
     });

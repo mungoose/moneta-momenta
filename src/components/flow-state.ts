@@ -102,6 +102,13 @@ const SAMPLE_FORM: PlanForm = {
   fee: "0",
 };
 
+/**
+ * The purchase form for an upload: empty, so the user types their own offer
+ * and an example can't pass for it. The count keeps a preset chosen: a
+ * missing count has no field to show its error in unless "Custom" is open.
+ */
+const EMPTY_FORM: PlanForm = { price: "", upfront: "", count: "12", rate: "", fee: "" };
+
 /** The flow before anything is loaded. */
 export const initialFlow: FlowState = {
   step: "landing",
@@ -134,7 +141,11 @@ function reachable(state: FlowState, step: Step): Step {
   return step;
 }
 
-/** Data arrived: start over on it, taking the period and plan from a sample link when they pass. */
+/**
+ * Data arrived: start over on it, taking the period and plan from a sample
+ * link when they pass. Without a plan, the sample gets its example offer and
+ * an upload an empty form.
+ */
 function onLoaded(action: Extract<FlowAction, { type: "loaded" }>): FlowState {
   const { data, period, plan } = action;
   const next: FlowState = {
@@ -144,7 +155,7 @@ function onLoaded(action: Extract<FlowAction, { type: "loaded" }>): FlowState {
       period !== undefined && periodOptions(data.fullMonthCount).includes(period)
         ? period
         : defaultPeriodLength(data.fullMonthCount),
-    form: plan ?? SAMPLE_FORM,
+    form: plan ?? (data.source.kind === "sample" ? SAMPLE_FORM : EMPTY_FORM),
     customCount: plan !== undefined && !isPreset(plan.count),
     // A link whose plan doesn't pass opens the form with its errors showing.
     showErrors: plan !== undefined,

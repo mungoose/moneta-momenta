@@ -15,6 +15,61 @@ const STATUSES: Status[] = ["fits", "tight", "no-fit"];
  */
 const UPLOAD_ACCEPT = ".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain";
 
+/** Where the template link points; the file lives in `public/`. */
+const TEMPLATE_PATH = "/transactions-template.csv";
+
+/** The template CSV download, with a hit area at least 24px tall. */
+export function TemplateLink({ t }: { t: Messages }) {
+  return (
+    <a className="mm-link inline-flex min-h-6 items-center" href={TEMPLATE_PATH} download>
+      {t.uploadError.template}
+    </a>
+  );
+}
+
+/**
+ * The two sample datasets as buttons, for anyone without a matching file.
+ * The landing and the upload error show them in the same place: right after
+ * the file button.
+ */
+export function SampleButtons({
+  t,
+  disabled,
+  onSample,
+}: {
+  t: Messages;
+  disabled: boolean;
+  onSample: (profile: SampleProfile) => void;
+}) {
+  return (
+    <div className="flex flex-col gap-3">
+      <p className="mm-t-small mm-muted">{t.landing.sampleIntro}</p>
+      <div className="mm-actions">
+        <button
+          type="button"
+          className="mm-btn mm-btn--secondary"
+          disabled={disabled}
+          onClick={() => {
+            onSample("comfortable");
+          }}
+        >
+          {t.landing.sampleComfortable}
+        </button>
+        <button
+          type="button"
+          className="mm-btn mm-btn--secondary"
+          disabled={disabled}
+          onClick={() => {
+            onSample("tight");
+          }}
+        >
+          {t.landing.sampleTight}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * A button that opens the file picker and hands over the picked file. The
  * input itself is hidden; the button is what keyboard and screen reader users reach.
@@ -112,29 +167,24 @@ export function Landing({
             onUpload={onUpload}
           />
         </div>
-        <div className="mm-t-small mm-muted flex flex-col gap-1">
-          <p>{t.landing.uploadHint(formatList(REQUIRED_COLUMNS, locale))}</p>
-          <p className="font-semibold text-(--mm-text)">{t.landing.privacy}</p>
+        <div className="mm-t-small flex flex-col gap-1">
+          <p className="font-semibold">{t.landing.privacy}</p>
+          <details className="mm-muted">
+            <summary className="w-fit cursor-pointer py-0.5 font-medium text-(--mm-accent)">
+              {t.landing.privacyMore}
+            </summary>
+            <p className="mt-1">{t.landing.privacyDetails}</p>
+          </details>
         </div>
-        <p className="mm-t-small mm-muted">
-          {t.landing.sampleIntro}{" "}
-          <SampleLink
-            label={t.landing.sampleComfortable}
-            disabled={busy}
-            onClick={() => {
-              onSample("comfortable");
-            }}
-          />{" "}
-          {t.landing.sampleOr}{" "}
-          <SampleLink
-            label={t.landing.sampleTight}
-            disabled={busy}
-            onClick={() => {
-              onSample("tight");
-            }}
-          />
-          .
-        </p>
+        <div className="mm-t-small mm-muted flex flex-col gap-1">
+          <p>
+            {t.landing.uploadHint(formatList(REQUIRED_COLUMNS, locale))} {t.landing.source}
+          </p>
+          <p>
+            <TemplateLink t={t} />
+          </p>
+        </div>
+        <SampleButtons t={t} disabled={busy} onSample={onSample} />
         <LoadingStatus t={t} loading={loading} />
         {loadFailed && (
           <div className="mm-callout mm-callout--error" role="alert">
@@ -164,15 +214,6 @@ export function Landing({
   );
 }
 
-/** A sample profile offered in running text, styled as a link because it's the secondary way in. */
-function SampleLink({ label, disabled, onClick }: { label: string; disabled: boolean; onClick: () => void }) {
-  return (
-    <button type="button" className="mm-link disabled:opacity-60" disabled={disabled} onClick={onClick}>
-      {label}
-    </button>
-  );
-}
-
 function HowStep({ n, title, body, children }: { n: number; title: string; body: string; children?: ReactNode }) {
   return (
     <li className="mm-calcstep">
@@ -180,7 +221,7 @@ function HowStep({ n, title, body, children }: { n: number; title: string; body:
         {n}
       </span>
       <div className="mm-calcstep__c">
-        <p className="mm-t-h3">{title}</p>
+        <h3 className="mm-t-h3">{title}</h3>
         <p className="mm-t-small mm-muted">{body}</p>
         {children}
       </div>

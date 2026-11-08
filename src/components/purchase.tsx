@@ -110,7 +110,6 @@ export function Purchase({
           {p.title}
         </h1>
         <p className="mm-muted">{p.intro}</p>
-        <p className="mm-hint">{t.scope}</p>
       </section>
 
       <form
