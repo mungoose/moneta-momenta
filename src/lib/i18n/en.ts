@@ -48,7 +48,7 @@ export const en = {
     upload: "Choose a transactions file",
     uploadHint: (columns: string) => `A CSV or TSV file with the columns ${columns}.`,
     source:
-      "It's the kind of export a budgeting app that sorts your spending into categories gives you. A plain bank statement won't work: it has no categories.",
+      "It's the kind of export a budgeting app that sorts your spending into categories gives you. A bank statement won't work if it has no categories.",
     privacy: "Your file stays on this device. This page reads it and sends nothing.",
     privacyMore: "How your file is handled",
     privacyDetails:

@@ -41,7 +41,7 @@ export const et = {
     tightNoBuffer: (zero: string) => `Üle jääb alla ${zero}, aga varasemate kuude säästud katavad puudujäägi.`,
     noFit: (zero: string) => `Üle jääb alla ${zero} ja varasemate kuude säästud puudujääki ei kata.`,
     verdict:
-      "Tulemus on halvima kuu vastus, ühe erandiga: kui ainult üks kuu ei mahu ja kõik teised mahuvad, on tulemus „Napp“. Sellise kuu jaoks saab ette valmistuda.",
+      "Tulemus on halvima kuu põhjal, ühe erandiga: kui ainult üks kuu ei mahu ja kõik teised mahuvad, on tulemus „Napp“. Sellise kuu jaoks saab ette valmistuda.",
   },
   landing: {
     title: "Vaata kuude kaupa, kas järelmaks mahub sinu eelarvesse.",
@@ -49,11 +49,11 @@ export const et = {
     upload: "Vali tehingute fail",
     uploadHint: (columns: string) => `CSV- või TSV-fail veergudega ${columns}.`,
     source:
-      "Selline fail tuleb eelarverakendusest, mis jagab kulud kategooriatesse. Tavaline pangaväljavõte ei sobi, sest selles pole kategooriaid.",
+      "Selline fail tuleb eelarverakendusest, mis jagab kulud kategooriatesse. Tavaline pangaväljavõte ei sobi, kui selles pole kategooriaid.",
     privacy: "Fail jääb sinu seadmesse. See leht loeb seda ega saada midagi välja.",
     privacyMore: "Kuidas sinu faili käsitletakse",
     privacyDetails:
-      "Sinu faili loeb see brauseri vahekaart. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
+      "Sinu faili loeb see brauseri vaheleht. Faili sisu ei saadeta serverisse, ei logita ega salvestata brauseri mällu ega lehe aadressi, ja see kaob, kui lehe uuesti laadid või sulged. Rakendus loendab ainult anonüümseid samme, näiteks et tulemus näidati ja mis hinnavahemikus ost oli, mitte kunagi summasid, kategooriaid, saajaid ega kuupäevi.",
     sampleIntro: "Faili pole käepärast? Proovi näidisandmetega, mis on väljamõeldud pere ühe aasta tehingud.",
     sampleComfortable: "Mugava eelarve näidis",
     sampleTight: "Napi eelarve näidis",
