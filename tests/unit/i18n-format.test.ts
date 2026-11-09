@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { formatList, formatMonth, formatNumber, formatOfMonth, formatOnDay, formatPercent } from "@/lib/i18n/format";
 
 describe("formatMonth", () => {
@@ -71,8 +71,31 @@ describe("formatList", () => {
     [["Date", "Payee"], "en", "Date and Payee"],
     [["Payee", "Category", "Inflow"], "en", "Payee, Category and Inflow"],
     [["Payee", "Category", "Inflow"], "et", "Payee, Category ja Inflow"],
+    [["Date", "Payee"], "et", "Date ja Payee"],
+    [[], "en", ""],
   ] as const)("%j in %s → %s", (items, locale, text) => {
     expect(formatList(items, locale)).toBe(text);
+  });
+
+  describe("with the runtime's own list data", () => {
+    afterEach(() => {
+      vi.unstubAllGlobals();
+      vi.resetModules();
+    });
+
+    it("gives the same text as the server, whatever the browser's Intl says", async () => {
+      // Safari's en-IE list data adds a comma before "and". The server renders the landing's column list, so
+      // any difference breaks React's hydration of the page.
+      class OxfordListFormat {
+        format(items: readonly string[]): string {
+          return `${items.slice(0, -1).join(", ")}, and ${items.at(-1)}`;
+        }
+      }
+      vi.stubGlobal("Intl", Object.assign(Object.create(Intl) as typeof Intl, { ListFormat: OxfordListFormat }));
+      vi.resetModules();
+      const fresh = await import("@/lib/i18n/format");
+      expect(fresh.formatList(["Payee", "Category", "Inflow"], "en")).toBe("Payee, Category and Inflow");
+    });
   });
 });
 

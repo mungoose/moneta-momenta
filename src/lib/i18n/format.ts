@@ -19,9 +19,12 @@ const monthFormatters = Object.fromEntries(
 /** Day and month in English; Estonian builds its inflected form from {@link ET_MONTH_GENITIVE} instead. */
 const enDayFormatter = new Intl.DateTimeFormat(INTL_LOCALE.en, { day: "numeric", month: "long", timeZone: "UTC" });
 
-const listFormatters = Object.fromEntries(
-  LOCALES.map((locale) => [locale, new Intl.ListFormat(INTL_LOCALE[locale], { type: "conjunction" })]),
-) as Record<Locale, Intl.ListFormat>;
+/**
+ * The word that joins a list's last item. Lists are joined here rather than by `Intl.ListFormat` because browsers
+ * disagree: Safari's en-IE data adds a comma before "and". The server renders the landing's column list, so a
+ * browser that formats it differently breaks React's hydration of the page.
+ */
+const LIST_AND: Record<Locale, string> = { en: "and", et: "ja" };
 
 const numberFormatters = Object.fromEntries(
   LOCALES.map((locale) => [locale, new Intl.NumberFormat(INTL_LOCALE[locale], { maximumFractionDigits: 2 })]),
@@ -104,7 +107,12 @@ export function formatOfMonth(month: YearMonth, locale: Locale): string {
  * @example formatList(["Date", "Payee"], "en") // "Date and Payee"
  */
 export function formatList(items: readonly string[], locale: Locale): string {
-  return listFormatters[locale].format(items);
+  const last = items.at(-1);
+  if (last === undefined) {
+    return "";
+  }
+  // Neither locale puts a comma before its "and".
+  return items.length === 1 ? last : `${items.slice(0, -1).join(", ")} ${LIST_AND[locale]} ${last}`;
 }
 
 /**
